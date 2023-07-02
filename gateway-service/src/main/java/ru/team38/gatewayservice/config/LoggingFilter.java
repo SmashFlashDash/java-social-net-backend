@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class LoggingFilter extends OncePerRequestFilter {
         urlToServiceNameMap.put("/api/v1/notifications.*", "user-service");
         urlToServiceNameMap.put("/api/v1/post.*", "communications-service");
         urlToServiceNameMap.put("/api/v1/geo.*","user-service");
+        urlToServiceNameMap.put("/api/v1/dialogs.*", "communications-service");
     }
 
     @Override

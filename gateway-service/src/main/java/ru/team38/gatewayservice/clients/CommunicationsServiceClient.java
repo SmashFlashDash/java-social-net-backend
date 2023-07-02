@@ -4,6 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.team38.common.dto.dialog.PageDialogDto;
+import ru.team38.common.dto.dialog.UnreadCountDto;
 import ru.team38.common.dto.comment.*;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
@@ -28,6 +30,13 @@ public interface CommunicationsServiceClient {
                                            @RequestParam(value = "dateForm", required = false) String dateFrom,
                                            @RequestParam(value = "dateTo", required = false) String dateTo,
                                            @RequestParam(value = "author", required = false) String author);
+    @GetMapping("/api/v1/dialogs")
+    ResponseEntity<PageDialogDto> getDialogs(@RequestParam(value = "page") Integer page,
+                                             @RequestParam(value = "size", required = false, defaultValue = "20")
+                                             Integer size,
+                                             @RequestParam(value = "sort", required = false) List<String> sort);
+    @GetMapping("/api/v1/dialogs/unread")
+    ResponseEntity<UnreadCountDto> getUnreadMessagesCount();
     @GetMapping("/api/v1/post/{id}")
     ResponseEntity<PostDto> getPostById(@PathVariable Long id);
     @PostMapping("/api/v1/post")
