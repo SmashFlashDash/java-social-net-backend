@@ -3,16 +3,10 @@ package ru.team38.gatewayservice.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.AccountDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import ru.team38.common.dto.CaptchaDto;
-import ru.team38.common.dto.LoginForm;
-import ru.team38.common.dto.RegisterDto;
-import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 import ru.team38.gatewayservice.service.UserService;
 
@@ -29,7 +23,7 @@ public class UserController {
     }
 
     @PostMapping("/api/v1/auth/login")
-    public ResponseEntity<String> login(@RequestBody LoginForm loginForm) {
+    public LoginResponse login(@RequestBody LoginForm loginForm) {
         log.info("Executing login request");
         return userService.login(loginForm);
     }

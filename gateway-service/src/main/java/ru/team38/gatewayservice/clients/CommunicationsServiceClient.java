@@ -9,7 +9,7 @@ import ru.team38.common.dto.post.PostDto;
 
 import java.util.List;
 
-@FeignClient(name = "communications-service", url = "${communications-service.url}")
+@FeignClient(name = "communications-service", url = "${spring.services.communications.url}")
 public interface CommunicationsServiceClient {
 
     @GetMapping("/api/v1/post")

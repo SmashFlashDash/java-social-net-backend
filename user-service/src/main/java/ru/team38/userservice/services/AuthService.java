@@ -1,40 +1,27 @@
 package ru.team38.userservice.services;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import ru.team38.common.aspects.LoggingMethod;
-import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.LoginForm;
-import ru.team38.common.dto.RegisterDto;
+import ru.team38.common.dto.*;
 import ru.team38.userservice.data.repositories.AccountRepository;
-import ru.team38.userservice.exceptions.LogoutFailedException;
+import ru.team38.userservice.data.repositories.TokenRepository;
 import ru.team38.userservice.exceptions.status.BadRequestException;
 import ru.team38.userservice.exceptions.status.UnauthorizedException;
 import ru.team38.userservice.security.jwt.JwtService;
 import ru.team38.userservice.security.jwt.TokenBlacklistService;
 
-import javax.security.auth.login.FailedLoginException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 
 @Slf4j
 @Service
@@ -42,22 +29,18 @@ import java.util.ArrayList;
 public class AuthService {
 
     private final JwtService jwtService;
-    private final TokenBlacklistService tokenBlacklistService;
     private final PasswordEncoder encoder;
     private final AccountRepository accountRepository;
     private final UserDetailsService userDetailsService;
-    private final SecurityContextLogoutHandler logoutHandler;
+    private final TokenBlacklistService tokenBlacklistService;
+    private final TokenRepository tokenRepository;
 
-    @Value("#{${jwt.cookie-max-age-min} * 60}")
-    private int cookieMaxAge;
-
-    @LoggingMethod
     @Transactional
-    public void register(RegisterDto registerDto, HttpServletResponse response) {
+    public void register(RegisterDto registerDto) {
         if (!registerDto.getPassword1().equals(registerDto.getPassword2())) {
             throw new BadRequestException("Passwords mismatch");
         }
-        accountRepository.getAccountByEmail(registerDto.getEmail()).ifPresent(record -> {
+        accountRepository.getAccountByEmail(registerDto.getEmail()).ifPresent(rec -> {
             throw new UnauthorizedException("User exists");
         });
         AccountDto newAccount = AccountDto.builder().email(registerDto.getEmail())
@@ -67,78 +50,33 @@ public class AuthService {
                 .messagePermission(true).regDate(ZonedDateTime.now()).birthDate(LocalDate.now())
                 .build();
         accountRepository.save(newAccount);
-        issueToken(newUserDetails(newAccount), response);
     }
 
-    @LoggingMethod
-    public void login(LoginForm loginForm,
-                      HttpServletResponse response) throws UsernameNotFoundException, BadCredentialsException, FailedLoginException {
-        if (isUserLoggedIn()) {
-            throw new FailedLoginException("User already logged in");
-        }
+    public LoginResponse login(LoginForm loginForm) throws UsernameNotFoundException, BadCredentialsException {
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginForm.getEmail());
         boolean isValidPassword = BCrypt.checkpw(loginForm.getPassword(), userDetails.getPassword());
         if (!isValidPassword) {
             throw new BadCredentialsException("Invalid password");
         }
-        issueToken(userDetails, response);
+
+        String accessToken = jwtService.createAccessToken(userDetails);
+        String refreshToken = jwtService.createRefreshToken(userDetails);
+
+        TokensDto accessTokenDto = new TokensDto(null, accountRepository.getIdByEmail(loginForm.getEmail()), "access", accessToken, true);
+        TokensDto refreshTokenDto = new TokensDto(null, accountRepository.getIdByEmail(loginForm.getEmail()), "refresh", refreshToken, true);
+
+        tokenRepository.save(accessTokenDto);
+        tokenRepository.save(refreshTokenDto);
+
+        return new LoginResponse(accessToken, refreshToken);
     }
 
-    @LoggingMethod
-    public void logout(Authentication authentication, HttpServletRequest request,
-                       HttpServletResponse response) throws LogoutFailedException {
-        if (!isUserLoggedIn()) {
-            throw new UnauthorizedException("User is not logged in");
-        }
-        logoutHandler.logout(request, response, authentication);
-        disableToken(request, response);
-        SecurityContextHolder.clearContext();
-        if (isUserLoggedIn()) {
-            throw new LogoutFailedException("Logout failed");
-        }
-    }
-
-    public boolean isUserLoggedIn() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && !(authentication instanceof AnonymousAuthenticationToken);
-    }
-
-    private UserDetails newUserDetails(AccountDto accountDto){
-        return new User(accountDto.getEmail(), accountDto.getPassword(), true,
-                true, true, accountDto.getIsBlocked(), new ArrayList<>());
-    }
-
-    public void issueToken(UserDetails userDetails, HttpServletResponse httpServletResponse) {
-        final String token = jwtService.generateToken(userDetails);
-        Cookie jwtCookie = new Cookie("token", token);
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setSecure(true);
-        jwtCookie.setMaxAge(cookieMaxAge);
-        jwtCookie.setPath("/");
-        httpServletResponse.addCookie(jwtCookie);
-    }
-
-    public void disableToken(HttpServletRequest request, HttpServletResponse response) {
-        String token = null;
-        Cookie cookieToDelete = null;
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("token".equals(cookie.getName())) {
-                    token = cookie.getValue();
-                    cookieToDelete = new Cookie(cookie.getName(), null);
-                    String contextPath = request.getContextPath();
-                    String cookiePath = StringUtils.hasText(contextPath) ? contextPath : "/";
-                    cookieToDelete.setPath(cookiePath);
-                    cookieToDelete.setMaxAge(0);
-                    cookieToDelete.setSecure(request.isSecure());
-                    break;
-                }
-            }
-        }
-        if (token != null) {
+    public void logout(HttpServletRequest request) {
+        String token = request.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7);
             tokenBlacklistService.addTokenToBlacklist(token);
-            response.addCookie(cookieToDelete);
         }
+        SecurityContextHolder.clearContext();
     }
 }
