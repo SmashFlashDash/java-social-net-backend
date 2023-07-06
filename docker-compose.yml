@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: ${postgres_password}
       POSTGRES_DB: ${postgres_db}
     ports:
-      - "5433:5432"
+      - "${postgres_port}:5432"
     volumes:
       - data:/var/lib/postgresql/data
     networks:
@@ -19,7 +19,7 @@ services:
   db-migrations:
     image: liquibase/liquibase
     environment:
-      LIQUIBASE_COMMAND_URL: jdbc:postgresql://${postgres_host}/${postgres_db}
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://${postgres_host}:${postgres_port}/${postgres_db}
       LIQUIBASE_COMMAND_USERNAME: ${postgres_user}
       LIQUIBASE_COMMAND_PASSWORD: ${postgres_password}
     volumes:
@@ -32,15 +32,15 @@ services:
 
   frontend:
     container_name: frontend
-    image: javapro38/social-net-dock:latest
+    image: javapro38/social-net-dock:${front_tag}
     restart: unless-stopped
     ports:
-      - "8088:80"
+      - "${frontend_port}:80"
     networks:
       - socialnet_network
 
   user-service:
-    container_name: user-svc
+    container_name: user-service
     image: javapro38/soc-net-user-svc
     depends_on:
       - postgres
@@ -48,13 +48,11 @@ services:
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
       POSTGRES_DB: ${postgres_db}
-    ports:
-      - "8081:8081"
     networks:
       - socialnet_network
 
   communications-service:
-    container_name: comm-svc
+    container_name: communications-service
     image: javapro38/soc-net-comm-svc
     depends_on:
       - postgres
@@ -62,19 +60,19 @@ services:
       POSTGRES_USER: ${postgres_user}
       POSTGRES_PASSWORD: ${postgres_password}
       POSTGRES_DB: ${postgres_db}
-    ports:
-      - "8082:8082"
     networks:
       - socialnet_network
 
   gateway-service:
-    container_name: gate-svc
+    container_name: gateway-service
     image: javapro38/soc-net-gate-svc
     depends_on:
       - user-service
       - communications-service
-    ports:
-      - "8080:8080"
+    environment:
+      user_service_url: ${user_service_url}
+      communications_service_url: ${communications_service_url}
+      cors_origin: ${cors_origin}
     networks:
       - socialnet_network
 
