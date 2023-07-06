@@ -20,8 +20,8 @@ public class UserService {
         return userServiceClient.register(registerDto);
     }
 
-    public ResponseEntity<String> login(LoginForm loginForm) {
-        return userServiceClient.login(loginForm);
+    public LoginResponse login(LoginForm loginForm) {
+        return userServiceClient.login(loginForm).getBody();
     }
 
     public ResponseEntity<String> logout() {

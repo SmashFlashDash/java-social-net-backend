@@ -12,7 +12,6 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
       - data:/var/lib/postgresql/data
     networks:
       - socialnet_network
@@ -20,7 +19,7 @@ services:
   db-migrations:
     image: liquibase/liquibase
     environment:
-      LIQUIBASE_COMMAND_URL: jdbc:postgresql://postgres:5432/${postgres_db}
+      LIQUIBASE_COMMAND_URL: jdbc:postgresql://${postgres_host}/${postgres_db}
       LIQUIBASE_COMMAND_USERNAME: ${postgres_user}
       LIQUIBASE_COMMAND_PASSWORD: ${postgres_password}
     volumes:

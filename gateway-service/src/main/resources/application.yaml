@@ -1,6 +1,8 @@
-user-service:
-  url: http://user-service:8081
-communications-service:
-  url: http://communications-service:8082
-cors:
-  origin: http://frontend:80
+spring:
+  services:
+    user:
+      url:
+    communications:
+      url:
+  cors:
+    origin:

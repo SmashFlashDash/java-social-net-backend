@@ -21,14 +21,19 @@ public class AccountRepository {
     private final AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
 
     public void save(AccountDto accountDto) {
-        AccountRecord record = dslContext.newRecord(account, mapper.accountDtoToAccountRecord(accountDto));
-        record.store();
+        AccountRecord rec = dslContext.newRecord(account, mapper.accountDtoToAccountRecord(accountDto));
+        rec.store();
     }
 
     public AccountDto updateAccount(AccountDto accountDto) {
         AccountRecord accountRecord = dslContext.newRecord(account, mapper.accountDtoToAccountRecord(accountDto));
         accountRecord.update();
         return mapper.accountRecordToAccountDto(accountRecord);
+    }
+
+    public Long getIdByEmail(String email) {
+        AccountRecord accountRecord = dslContext.selectFrom(account).where(account.EMAIL.eq(email)).fetchOne();
+        return accountRecord != null ? accountRecord.getId() : null;
     }
 
     public Optional<AccountRecord> getAccountByEmail(String email) {

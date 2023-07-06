@@ -1,23 +1,18 @@
 package ru.team38.userservice.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.CaptchaDto;
 import ru.team38.common.dto.LoginForm;
+import ru.team38.common.dto.LoginResponse;
 import ru.team38.common.dto.RegisterDto;
 import ru.team38.userservice.exceptions.CaptchaCreationException;
 import ru.team38.userservice.exceptions.InvalidCaptchaException;
-import ru.team38.userservice.exceptions.LogoutFailedException;
-import ru.team38.userservice.exceptions.status.UnauthorizedException;
 import ru.team38.userservice.services.AuthService;
 import ru.team38.userservice.services.CaptchaService;
-
-import javax.security.auth.login.FailedLoginException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -27,10 +22,9 @@ public class AuthController {
     private final CaptchaService captchaService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto,
-                                           HttpServletResponse response) throws InvalidCaptchaException {
+    public ResponseEntity<String> register(@RequestBody RegisterDto registerDto) throws InvalidCaptchaException {
         if (captchaService.validateCaptcha(registerDto.getCaptchaSecret(), registerDto.getCaptchaCode())) {
-            authService.register(registerDto, response);
+            authService.register(registerDto);
             return ResponseEntity.ok("Регистрация прошла успешно");
         } else {
             throw new InvalidCaptchaException("Invalid or expired captcha");
@@ -38,15 +32,13 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginForm loginForm, HttpServletResponse response) throws FailedLoginException {
-        authService.login(loginForm, response);
-        return ResponseEntity.ok().body("Уcпешная аутентификация");
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginForm loginForm) {
+        return ResponseEntity.ok(authService.login(loginForm));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(Authentication authentication, HttpServletRequest request,
-                                         HttpServletResponse response) throws UnauthorizedException, LogoutFailedException {
-        authService.logout(authentication, request, response);
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        authService.logout(request);
         return ResponseEntity.ok().body("Успешный логаут");
 
     }

@@ -1,19 +1,26 @@
 package ru.team38.userservice.security.jwt;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import ru.team38.common.dto.TokensDto;
+import ru.team38.userservice.data.repositories.TokenRepository;
 
 @Service
+@RequiredArgsConstructor
 public class TokenBlacklistService {
 
-    private final Set<String> blacklistedTokens = ConcurrentHashMap.newKeySet();
+    private final TokenRepository tokenRepository;
 
     public void addTokenToBlacklist(String token) {
-        blacklistedTokens.add(token);
+        TokensDto tokenDto = tokenRepository.findByToken(token);
+        if (tokenDto != null) {
+            tokenDto.setIsValid(false);
+            tokenRepository.update(tokenDto);
+        }
     }
 
     public boolean isTokenBlacklisted(String token) {
-        return blacklistedTokens.contains(token);
+        TokensDto tokenDto = tokenRepository.findByToken(token);
+        return tokenDto != null && !tokenDto.getIsValid();
     }
 }

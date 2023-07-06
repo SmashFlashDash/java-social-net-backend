@@ -1,0 +1,26 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="create-tokens-table" author="Stanislav Romanov">
+        <createTable tableName="tokens" schemaName="socialnet" remarks="Таблица для хранения токенов">
+            <column autoIncrement="true" name="id" type="BIGINT" remarks="Уникальный идентификатор токена">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tokens_pkey"/>
+            </column>
+            <column name="account_id" type="BIGINT" remarks="Уникальный идентификатор аккаунта пользователя">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token_type" type="TEXT" remarks="Тип токена (access или refresh)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="token" type="TEXT" remarks="Закодированный токен">
+                <constraints nullable="false"/>
+            </column>
+            <column name="validity" type="BOOLEAN" remarks="Валиден ли токен">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

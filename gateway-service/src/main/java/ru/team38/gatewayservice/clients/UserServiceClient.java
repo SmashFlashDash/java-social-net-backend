@@ -10,14 +10,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 
-@FeignClient(name = "user-service", url = "${user-service.url}")
+@FeignClient(name = "user-service", url = "${spring.services.user.url}")
 public interface UserServiceClient {
 
     @PostMapping("/api/v1/auth/register")
     ResponseEntity<String> register(@RequestBody RegisterDto registerDto);
 
     @PostMapping("/api/v1/auth/login")
-    ResponseEntity<String> login(@RequestBody LoginForm loginForm);
+    ResponseEntity<LoginResponse> login(@RequestBody LoginForm loginForm);
 
     @PostMapping("/api/v1/auth/logout")
     ResponseEntity<String> logout();
