@@ -1,15 +1,11 @@
 package ru.team38.userservice.data.repositories;
 
 import lombok.RequiredArgsConstructor;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
+import org.jooq.*;
 import org.jooq.Record;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.FriendDto;
-import ru.team38.common.dto.FriendSearchDto;
-import ru.team38.common.dto.FriendShortDto;
-import ru.team38.common.dto.StatusCode;
+import ru.team38.common.dto.*;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.Friends;
 import ru.team38.common.jooq.tables.records.AccountRecord;
@@ -49,23 +45,7 @@ public class FriendRepository {
         return friendDtoMapper.mapToFriendDto(friendsRecord, accountRecord);
     }
 
-    public List<FriendShortDto> getFriendsByParameters(UUID accountId, FriendSearchDto friendSearchDto) {
-        Condition condition = Account.ACCOUNT.ID.ne(accountId);
-        if (friendSearchDto.getFirstName() != null) {
-            condition = condition.and(Account.ACCOUNT.FIRST_NAME.eq(friendSearchDto.getFirstName()));
-        }
-        if (friendSearchDto.getCity() != null) {
-            condition = condition.and(Account.ACCOUNT.CITY.eq(friendSearchDto.getCity()));
-        }
-        if (friendSearchDto.getCountry() != null) {
-            condition = condition.and(Account.ACCOUNT.COUNTRY.eq(friendSearchDto.getCountry()));
-        }
-        if (friendSearchDto.getBirthDateFrom() != null) {
-            condition = condition.and(Account.ACCOUNT.BIRTH_DATE.le(friendSearchDto.getBirthDateFrom()));
-        }
-        if (friendSearchDto.getBirthDateTo() != null) {
-            condition = condition.and(Account.ACCOUNT.BIRTH_DATE.ge(friendSearchDto.getBirthDateTo()));
-        }
+    public List<FriendShortDto> getFriendsByParameters(UUID accountId, Condition condition) {
         return dsl.select()
                 .from(Friends.FRIENDS)
                 .join(Account.ACCOUNT)
@@ -83,5 +63,44 @@ public class FriendRepository {
         FriendShortDto friendShortDto = friendDtoMapper.mapToFriendShortDto(friendsRecord, accountRecord);
         friendShortDto.setId(accountId);
         return friendShortDto;
+    }
+
+    public List<UUID> getFriendsIds(UUID accountId, String friendsIds) {
+        String subQueryFriendsIds = "select \n" +
+                "case when account_from_id = '" + accountId + "' then null else account_from_id end,\n" +
+                "case when requested_account_id = '" + accountId + "' then null else requested_account_id end\n" +
+                "from socialnet.socialnet.friends f \n" +
+                "where account_from_id = '" + accountId + "' or requested_account_id = '" + accountId + "'  \n";
+        String subQueryFriendsFriendsIds = "select \n" +
+                "case when account_from_id in (" + friendsIds + ") then null else account_from_id end,\n" +
+                "case when requested_account_id in (" + friendsIds + ") then null else requested_account_id end\n" +
+                "from socialnet.socialnet.friends f \n" +
+                "where (account_from_id in (" + friendsIds + ") or requested_account_id in (" + friendsIds + "))\n" +
+                "and account_from_id <> '" + accountId + "' \n" +
+                "and requested_account_id <> '" + accountId + "'  \n";
+        String subQuery = (friendsIds == null) ? subQueryFriendsIds : subQueryFriendsFriendsIds;
+        String query = "select value from (\n" +
+                "select account_from_id as value from (" + subQuery + ") f\n" +
+                "union \n" +
+                "select requested_account_id as value from (" + subQuery + ") f\n" +
+                ") as result where value is not null;";
+        return dsl.fetch(query).map(record -> (UUID) record.getValue("value"));
+    }
+
+    public List<UUID> getRecommendationsIds(List<UUID> friendsIds, List<UUID> friendsFriendsIds, Condition condition) {
+        return dsl.select(Account.ACCOUNT.ID)
+                .from(Account.ACCOUNT)
+                .where(Account.ACCOUNT.ID.notIn(friendsIds))
+                .and(Account.ACCOUNT.ID.notIn(friendsFriendsIds))
+                .and(condition)
+                .fetchInto(UUID.class);
+    }
+
+    public List<FriendShortDto> getFinalRecommendations(UUID accountId, List<UUID> finalIds) {
+        return dsl.select()
+                .from(Account.ACCOUNT)
+                .where(Account.ACCOUNT.ID.in(finalIds))
+                .fetch()
+                .map(record -> mapToFriendShortDto(record, accountId));
     }
 }

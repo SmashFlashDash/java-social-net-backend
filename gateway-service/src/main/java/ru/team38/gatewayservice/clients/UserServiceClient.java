@@ -8,6 +8,8 @@ import ru.team38.common.dto.notification.NotificationCountDto;
 
 import java.util.UUID;
 
+import java.util.List;
+
 @FeignClient(name = "user-service", url = "${spring.services.user.url}")
 public interface UserServiceClient {
 
@@ -38,13 +40,27 @@ public interface UserServiceClient {
     @DeleteMapping("/api/v1/account/me")
     ResponseEntity<String> deleteAccount();
 
-
     @GetMapping("/api/v1/account/{id}")
     ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id);
 
-    @GetMapping("/api/v1/friends")
-    ResponseEntity<PageFriendShortDto> getFriendsByParameters(@RequestParam FriendSearchDto friendSearchDto, @RequestParam PageDto pageDto);
-
     @GetMapping("/api/v1/notifications/count")
     ResponseEntity<NotificationCountDto> getNotificationsCount();
+
+    @GetMapping("/api/v1/friends")
+    ResponseEntity<PageFriendShortDto> getFriendsByParameters(
+            @RequestParam("firstName") String firstName,
+            @RequestParam("city") String city,
+            @RequestParam("country") String country,
+            @RequestParam("ageFrom") Integer ageFrom,
+            @RequestParam("ageTo") Integer ageTo
+    );
+
+    @GetMapping("/api/v1/friends/recommendations")
+    ResponseEntity<List<FriendShortDto>> getFriendsRecommendations(
+            @RequestParam("firstName") String firstName,
+            @RequestParam("city") String city,
+            @RequestParam("country") String country,
+            @RequestParam("ageFrom") Integer ageFrom,
+            @RequestParam("ageTo") Integer ageTo
+    );
 }

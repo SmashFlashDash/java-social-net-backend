@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 import ru.team38.gatewayservice.service.UserService;
 
+import java.util.List;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -54,5 +56,11 @@ public class UserController {
     public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
         log.info("Executing getFriends request");
         return userService.getFriendsByParameters(friendSearchDto, pageDto);
+    }
+
+    @GetMapping("/api/v1/friends/recommendations")
+    public List<FriendShortDto> getFriendsRecommendations(FriendSearchDto friendSearchDto) {
+        log.info("Executing getFriendsRecommendations request");
+        return userService.getFriendsRecommendations(friendSearchDto);
     }
 }

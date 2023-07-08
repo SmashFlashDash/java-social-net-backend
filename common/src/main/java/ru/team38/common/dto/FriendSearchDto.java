@@ -5,12 +5,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Stream;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class FriendSearchDto {
-    private Long id;
+    private UUID id;
     private Boolean isDeleted;
     private Integer idFrom;
     private StatusCode statusCode;
@@ -23,4 +26,14 @@ public class FriendSearchDto {
     private Integer ageFrom;
     private Integer ageTo;
     private StatusCode previousStatusCode;
+
+    public boolean allNull() {
+        return Stream.of(
+                firstName,
+                country,
+                city,
+                ageFrom,
+                ageTo
+        ).allMatch(Objects::isNull);
+    }
 }
