@@ -28,6 +28,10 @@ public class UserService {
         return userServiceClient.logout();
     }
 
+    public LoginResponse refresh(RefreshTokenRequest request) {
+        return userServiceClient.refresh(request).getBody();
+    }
+
     public CaptchaDto getCaptcha() {
         ResponseEntity<CaptchaDto> responseEntity = userServiceClient.getCaptcha();
         if (responseEntity.getStatusCode() == HttpStatus.OK) {

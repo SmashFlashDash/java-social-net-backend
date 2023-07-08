@@ -1,14 +1,10 @@
 package ru.team38.userservice.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.CaptchaDto;
-import ru.team38.common.dto.LoginForm;
-import ru.team38.common.dto.LoginResponse;
-import ru.team38.common.dto.RegisterDto;
+import ru.team38.common.dto.*;
 import ru.team38.userservice.exceptions.CaptchaCreationException;
 import ru.team38.userservice.exceptions.InvalidCaptchaException;
 import ru.team38.userservice.services.AuthService;
@@ -32,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginForm loginForm) {
-        return ResponseEntity.ok(authService.login(loginForm));
+    public ResponseEntity<LoginResponse> login(HttpServletRequest request, @RequestBody LoginForm loginForm) {
+        return ResponseEntity.ok(authService.login(request, loginForm));
     }
 
     @PostMapping("/logout")
@@ -41,6 +37,11 @@ public class AuthController {
         authService.logout(request);
         return ResponseEntity.ok().body("Успешный логаут");
 
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return ResponseEntity.ok(authService.refreshAccessToken(refreshTokenRequest.getRefreshToken()));
     }
 
     @GetMapping("/captcha")

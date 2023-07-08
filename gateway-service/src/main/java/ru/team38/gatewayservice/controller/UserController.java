@@ -1,12 +1,10 @@
 package ru.team38.gatewayservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 import ru.team38.gatewayservice.service.UserService;
 
@@ -23,7 +21,7 @@ public class UserController {
     }
 
     @PostMapping("/api/v1/auth/login")
-    public LoginResponse login(@RequestBody LoginForm loginForm) {
+    public LoginResponse login(@RequestBody @Valid LoginForm loginForm) {
         log.info("Executing login request");
         return userService.login(loginForm);
     }
@@ -32,6 +30,12 @@ public class UserController {
     public ResponseEntity<String> logout() {
         log.info("Executing logout request");
         return userService.logout();
+    }
+
+    @PostMapping("/api/v1/auth/refresh")
+    public LoginResponse refresh(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
+        log.info("Executing refresh request");
+        return userService.refresh(refreshTokenRequest);
     }
 
     @GetMapping("/api/v1/auth/captcha")

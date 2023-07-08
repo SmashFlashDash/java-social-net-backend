@@ -2,11 +2,6 @@ package ru.team38.gatewayservice.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 
@@ -21,6 +16,9 @@ public interface UserServiceClient {
 
     @PostMapping("/api/v1/auth/logout")
     ResponseEntity<String> logout();
+
+    @PostMapping("/api/v1/auth/refresh")
+    ResponseEntity<LoginResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest);
 
     @GetMapping("/api/v1/auth/captcha")
     ResponseEntity<CaptchaDto> getCaptcha();

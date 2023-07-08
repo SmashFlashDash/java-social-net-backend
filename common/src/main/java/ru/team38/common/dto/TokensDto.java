@@ -3,6 +3,8 @@ package ru.team38.common.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.time.ZonedDateTime;
+
 @Data
 @AllArgsConstructor
 public class TokensDto {
@@ -11,4 +13,6 @@ public class TokensDto {
     String tokenType;
     String token;
     Boolean isValid;
+    ZonedDateTime expiration;
+    String deviceUuid;
 }

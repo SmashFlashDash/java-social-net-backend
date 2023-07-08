@@ -1,0 +1,17 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="extends-tokens-table" author="Stanislav Romanov">
+        <addColumn tableName="tokens" schemaName="socialnet">
+            <column name="expiration" type="TIMESTAMP" remarks="Дата истечения срока годности токена">
+                <constraints nullable="false"/>
+            </column>
+            <column name="device_uuid" type="TEXT" remarks="Идентификатор, объединяющий refresh токен с соответствующими access токенами">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

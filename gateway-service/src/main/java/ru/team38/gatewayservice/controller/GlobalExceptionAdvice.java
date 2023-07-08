@@ -11,9 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionAdvice {
 
     @ExceptionHandler(FeignException.class)
-    public ResponseEntity<String> responseExceprionHandler(FeignException ex) {
-        ex.printStackTrace();
-        log.error(ex.contentUTF8());
+    public ResponseEntity<String> responseExceptionHandler(FeignException ex) {
+        log.error(ex.contentUTF8(), ex);
         return ResponseEntity.status(ex.status()).body(ex.contentUTF8());
     }
 }

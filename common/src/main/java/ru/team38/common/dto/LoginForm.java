@@ -1,12 +1,15 @@
 package ru.team38.common.dto;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Email;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LoginForm {
-    @NotNull
-    public String email;
-    @NotNull
-    public String password;
+    @Email(message = "Incorrect email format")
+    private String email;
+    private String password;
 }
