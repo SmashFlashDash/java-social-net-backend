@@ -17,7 +17,7 @@ public class PostSearchDto {
     private List <String> sort;
     private Boolean isDeleted;
     private Integer size;
-    private Long accountIds;
+    private UUID accountIds;
     private List<String> tags;
     private String dateFrom;
     private String dateTo;

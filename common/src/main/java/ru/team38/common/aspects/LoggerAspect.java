@@ -39,7 +39,8 @@ public class LoggerAspect {
             logger.info("Success " + methodName);
             return returnValue;
         } catch (Throwable e) {
-            logger.error("Error " + methodName, e);
+            // logger.error("Error " + methodName, e);
+            logger.error("Method: " + methodName + "; Type: " + e.getClass() + "; Message: " + e.getMessage());
             throw e;
         }
     }

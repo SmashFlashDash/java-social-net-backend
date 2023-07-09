@@ -10,6 +10,7 @@ import ru.team38.common.dto.post.PostDto;
 import ru.team38.gatewayservice.service.CommunicationService;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -23,7 +24,7 @@ public class CommunicationController {
                                   @RequestParam(value = "sort", required = false) List<String> sort,
                                   @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
                                   @RequestParam(value = "size", required = false) Integer size,
-                                  @RequestParam(value = "accountIds", required = false) Long accountIds,
+                                  @RequestParam(value = "accountIds", required = false) UUID accountIds,
                                   @RequestParam(value = "tags", required = false) List<String> tags,
                                   @RequestParam(value = "dateForm", required = false) String dateFrom,
                                   @RequestParam(value = "dateTo", required = false) String dateTo,

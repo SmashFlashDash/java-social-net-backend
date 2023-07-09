@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+  <changeSet id="changelog-1.0-account-pk-to-uuid" author="Alexandr Soldatov">
+    <sql>
+      -- pk account
+      TRUNCATE TABLE socialnet.account;
+      ALTER TABLE socialnet.account DROP CONSTRAINT account_pkey CASCADE;
+      ALTER TABLE socialnet.account DROP COLUMN id;
+      ALTER TABLE socialnet.account ADD COLUMN id UUID DEFAULT (gen_random_uuid()) PRIMARY KEY;
+      COMMENT ON COLUMN socialnet.account.id is 'Уникальный идентификатор аккаунта';
+      -- колонки в других таблицах
+      TRUNCATE TABLE socialnet.tokens;
+      ALTER TABLE socialnet.tokens ALTER COLUMN account_id TYPE UUID USING (gen_random_uuid());
+      TRUNCATE TABLE socialnet.friends;
+      ALTER TABLE socialnet.friends ALTER COLUMN account_from_id TYPE UUID USING (gen_random_uuid());
+      ALTER TABLE socialnet.friends ALTER COLUMN requested_account_id TYPE UUID USING (gen_random_uuid());
+      TRUNCATE TABLE socialnet.post;
+      ALTER TABLE socialnet.post ALTER COLUMN author_id TYPE UUID USING (gen_random_uuid());
+    </sql>
+  </changeSet>
+</databaseChangeLog>

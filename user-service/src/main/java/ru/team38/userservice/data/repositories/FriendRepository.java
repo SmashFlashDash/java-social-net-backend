@@ -17,6 +17,7 @@ import ru.team38.common.jooq.tables.records.FriendsRecord;
 import ru.team38.common.mappers.FriendDtoMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -24,17 +25,18 @@ public class FriendRepository {
 
     private final DSLContext dsl;
     private final FriendDtoMapper friendDtoMapper = Mappers.getMapper(FriendDtoMapper.class);
+    private final Account ACCOUNT = Account.ACCOUNT;
 
-    public int countIncomingFriendRequests(Long accountId) {
+    public int countIncomingFriendRequests(UUID accountId) {
         return dsl.fetchCount(Friends.FRIENDS, Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId)
                 .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.REQUEST_FROM.name())));
     }
 
-    public List<FriendDto> getIncomingFriendRequests(Long accountId) {
+    public List<FriendDto> getIncomingFriendRequests(UUID accountId) {
         return dsl.select()
                 .from(Friends.FRIENDS)
                 .join(Account.ACCOUNT)
-                .on(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(Account.ACCOUNT.ID))
+                .on(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID))
                 .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId))
                 .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.REQUEST_FROM.name()))
                 .fetch()
@@ -47,7 +49,7 @@ public class FriendRepository {
         return friendDtoMapper.mapToFriendDto(friendsRecord, accountRecord);
     }
 
-    public List<FriendShortDto> getFriendsByParameters(Long accountId, FriendSearchDto friendSearchDto) {
+    public List<FriendShortDto> getFriendsByParameters(UUID accountId, FriendSearchDto friendSearchDto) {
         Condition condition = Account.ACCOUNT.ID.ne(accountId);
         if (friendSearchDto.getFirstName() != null) {
             condition = condition.and(Account.ACCOUNT.FIRST_NAME.eq(friendSearchDto.getFirstName()));
@@ -67,7 +69,7 @@ public class FriendRepository {
         return dsl.select()
                 .from(Friends.FRIENDS)
                 .join(Account.ACCOUNT)
-                .on(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(Account.ACCOUNT.ID).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(Account.ACCOUNT.ID)))
+                .on(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(ACCOUNT.ID).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID)))
                 .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
                 .and(Friends.FRIENDS.STATUS_CODE.eq("FRIEND"))
                 .and(condition)
@@ -75,9 +77,9 @@ public class FriendRepository {
                 .map(record -> mapToFriendShortDto(record, accountId));
     }
 
-    private FriendShortDto mapToFriendShortDto(Record record, Long accountId) {
+    private FriendShortDto mapToFriendShortDto(Record record, UUID accountId) {
         FriendsRecord friendsRecord = record.into(Friends.FRIENDS);
-        AccountRecord accountRecord = record.into(Account.ACCOUNT);
+        AccountRecord accountRecord = record.into(ACCOUNT);
         FriendShortDto friendShortDto = friendDtoMapper.mapToFriendShortDto(friendsRecord, accountRecord);
         friendShortDto.setId(accountId);
         return friendShortDto;

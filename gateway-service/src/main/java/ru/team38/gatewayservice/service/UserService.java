@@ -7,7 +7,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.team38.common.dto.*;
+import ru.team38.common.dto.notification.NotificationCountDto;
 import ru.team38.gatewayservice.clients.UserServiceClient;
+
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -51,27 +54,31 @@ public class UserService {
         }
     }
 
+    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
+        return userServiceClient.getFriendsByParameters(friendSearchDto, pageDto).getBody();
+    }
+
     public AccountDto getAccount() {
-        ResponseEntity<AccountDto> responseEntity = userServiceClient.getAccount();
-        return responseEntity.getBody();
+        return userServiceClient.getAccount().getBody();
     }
 
     public AccountDto updateAccount(AccountDto account) {
-        ResponseEntity<AccountDto> responseEntity = userServiceClient.updateAccount(account);
-        return responseEntity.getBody();
+        return userServiceClient.updateAccount(account).getBody();
     }
-    public AccountDto getAccountById(long id) {
+    public AccountDto getAccountById(UUID id) {
         try {
-            ResponseEntity<AccountDto> responseEntity = userServiceClient.getAccountById(id);
-            return responseEntity.getBody();
+            return userServiceClient.getAccountById(id).getBody();
         } catch (FeignException e) {
             log.error(e.contentUTF8());
             throw new RuntimeException(e.contentUTF8(), e);
         }
     }
 
-    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
-        ResponseEntity<PageFriendShortDto> responseEntity = userServiceClient.getFriendsByParameters(friendSearchDto, pageDto);
-        return responseEntity.getBody();
+    public NotificationCountDto getNotificationsCount() {
+        return userServiceClient.getNotificationsCount().getBody();
+    }
+
+    public ResponseEntity<String> deleteAccount() {
+        return userServiceClient.deleteAccount();
     }
 }

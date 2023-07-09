@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 import ru.team38.userservice.services.AccountService;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
@@ -32,8 +34,9 @@ public class AccountController {
     public ResponseEntity<AccountResultSearchDto> findAccount(AccountSearchDto accountSearch, PageDto page) {
         return ResponseEntity.ok(accountService.findAccount(accountSearch, page));
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<AccountDto> getAccountById(@PathVariable long id) {
+    public ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id) {
         return ResponseEntity.ok(accountService.getAccountById(id));
     }
 }

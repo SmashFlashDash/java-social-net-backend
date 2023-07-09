@@ -36,7 +36,7 @@ public interface FriendDtoMapper {
     @Mapping(source = "rating", target = "rating")
     FriendsRecord friendDtoToFriendsRecord(FriendDto friendDto);
 
-    @Mapping(target = "id", constant = "0L")
+    @Mapping(target = "id", constant = "00000000-0000-0000-0000-000000000000")
     @Mapping(source = "accountRecord.isDeleted", target = "isDeleted")
     @Mapping(source = "friendsRecord.statusCode", target = "statusCode")
     @Mapping(source = "accountRecord.id", target = "friendId")
