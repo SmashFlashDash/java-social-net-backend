@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Data
 @AllArgsConstructor
@@ -18,8 +19,8 @@ public class FriendDto {
     private String country;
     private LocalDate birthDate;
     private Boolean isOnline;
-    private Long accountFrom;
-    private Long accountTo;
+    private UUID accountFrom;
+    private UUID accountTo;
     private StatusCode previousStatus;
     private Short rating;
 }

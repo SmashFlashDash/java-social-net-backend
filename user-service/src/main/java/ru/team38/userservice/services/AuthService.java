@@ -86,9 +86,8 @@ public class AuthService {
     private void saveToken(String username, String token, String type, String deviceUUID) {
         ZonedDateTime tokenExpiration =
                 ZonedDateTime.ofInstant(jwtService.getClaim(token, Claims::getExpiration).toInstant(), ZoneId.systemDefault());
-        Long accountId = accountRepository.getIdByEmail(username);
-        TokensDto tokenDto =
-                new TokensDto(null, accountId, type, token, true, tokenExpiration, deviceUUID);
+        UUID accountId = accountRepository.getIdByEmail(username);
+        TokensDto tokenDto = new TokensDto(null, accountId, type, token, true, tokenExpiration, deviceUUID);
         tokenRepository.save(tokenDto);
     }
 

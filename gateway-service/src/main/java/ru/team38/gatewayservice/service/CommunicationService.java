@@ -12,6 +12,7 @@ import ru.team38.common.dto.post.PostDto;
 import ru.team38.gatewayservice.clients.CommunicationsServiceClient;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -24,7 +25,7 @@ public class CommunicationService {
                                   List<String> sort,
                                   Boolean isDeleted,
                                   Integer size,
-                                  Long accountIds,
+                                  UUID accountIds,
                                   List<String> tags,
                                   String dateFrom,
                                   String dateTo,

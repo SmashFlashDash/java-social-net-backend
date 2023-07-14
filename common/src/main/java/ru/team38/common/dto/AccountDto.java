@@ -8,13 +8,14 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountDto {
-    private Long id;
+    private UUID id;
     private Boolean isDeleted;
     private String firstName;
     private String lastName;

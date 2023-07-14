@@ -4,6 +4,9 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
+import ru.team38.common.dto.notification.NotificationCountDto;
+
+import java.util.UUID;
 
 @FeignClient(name = "user-service", url = "${spring.services.user.url}")
 public interface UserServiceClient {
@@ -32,9 +35,16 @@ public interface UserServiceClient {
     @PutMapping("/api/v1/account/me")
     ResponseEntity<AccountDto> updateAccount(@RequestBody AccountDto account);
 
+    @DeleteMapping("/api/v1/account/me")
+    ResponseEntity<String> deleteAccount();
+
+
     @GetMapping("/api/v1/account/{id}")
-    ResponseEntity<AccountDto> getAccountById(@PathVariable long id);
+    ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id);
 
     @GetMapping("/api/v1/friends")
     ResponseEntity<PageFriendShortDto> getFriendsByParameters(@RequestParam FriendSearchDto friendSearchDto, @RequestParam PageDto pageDto);
+
+    @GetMapping("/api/v1/notifications/count")
+    ResponseEntity<NotificationCountDto> getNotificationsCount();
 }

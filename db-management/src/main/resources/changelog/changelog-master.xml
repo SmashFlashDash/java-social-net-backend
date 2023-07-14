@@ -10,4 +10,6 @@
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-friend.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-token.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-token-extension.xml"/>
+    <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-account-pk-to-uuid.xml"/>
+    <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-notification.xml"/>
 </databaseChangeLog>

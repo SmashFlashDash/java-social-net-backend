@@ -21,6 +21,7 @@ import ru.team38.userservice.data.repositories.AccountRepository;
 import ru.team38.userservice.exceptions.status.BadRequestException;
 
 import java.lang.reflect.Field;
+import java.util.UUID;
 
 import static org.jooq.impl.DSL.min;
 
@@ -28,8 +29,8 @@ import static org.jooq.impl.DSL.min;
 @Transactional
 @RequiredArgsConstructor
 public class AccountService {
-    private final DSLContext dsl;
-    private final Account account = Account.ACCOUNT;
+    private final DSLContext DSL;
+    private final Account ACCOUNT = Account.ACCOUNT;
     private final AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
     private final AccountRepository accountRepository;
 
@@ -56,17 +57,17 @@ public class AccountService {
 
     @LoggingMethod
     public void deleteAccount() {
-        Long minId = dsl.select(min(account.ID)).from(account).fetchOneInto(Long.class);
-        dsl.deleteFrom(account).where(account.ID.eq(minId)).execute();
+        AccountDto accountDto = getAuthenticatedAccount();
+        accountDto.setIsDeleted(true);
     }
 
     @LoggingMethod
     public AccountResultSearchDto findAccount(AccountSearchDto accountSearch, PageDto page) {
         AccountResultSearchDto accountResultSearch = new AccountResultSearchDto();
 
-        Result<Record> records = dsl.select().from(account)
-                .where(account.FIRST_NAME.eq(accountSearch.getFirstName()),
-                        account.LAST_NAME.eq(accountSearch.getLastName()))
+        Result<Record> records = DSL.select().from(ACCOUNT)
+                .where(ACCOUNT.FIRST_NAME.eq(accountSearch.getFirstName()),
+                        ACCOUNT.LAST_NAME.eq(accountSearch.getLastName()))
                 .limit(page.getSize()).fetch();
 
         records.forEach(acc -> accountResultSearch.setAccount(mapper.accountRecordToAccountDto((AccountRecord) acc)));
@@ -78,9 +79,9 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public AccountDto getAccountById(long id){
-        AccountRecord accountRecord = dsl.selectFrom(account)
-                .where(account.ID.eq(id))
+    public AccountDto getAccountById(UUID id){
+        AccountRecord accountRecord = DSL.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ID.eq(id))
                 .fetchOne();
         return mapper.accountRecordToAccountDto(accountRecord);
     }

@@ -12,6 +12,7 @@ import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,7 +32,7 @@ public class AccountRepository {
         return mapper.accountRecordToAccountDto(accountRecord);
     }
 
-    public Long getIdByEmail(String email) {
+    public UUID getIdByEmail(String email) {
         AccountRecord accountRecord = dslContext.selectFrom(account).where(account.EMAIL.eq(email)).fetchOne();
         return accountRecord != null ? accountRecord.getId() : null;
     }

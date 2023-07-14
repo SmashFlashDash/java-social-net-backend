@@ -1,0 +1,70 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="add-notification-columns-to-account" author="Alexandr Soldatov">
+        <addColumn schemaName="socialnet" tableName="account">
+            <column name="enable_like" type="BOOLEAN" defaultValue="true" remarks="Разрешить события с типом LIKE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_post" type="BOOLEAN" defaultValue="true" remarks="Разрешить события с типом POST">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_post_comment" type="BOOLEAN" defaultValue="true"
+                    remarks="Разрешить события с типом POST_COMMENT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_comment_comment" type="BOOLEAN" defaultValue="true"
+                    remarks="Разрешить события с типом COMMENT_COMMENT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_message" type="BOOLEAN" defaultValue="true"
+                    remarks="Разрешить события с типом MESSAGE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_friend_request" type="BOOLEAN" defaultValue="true"
+                    remarks="Разрешить события с типом FRIEND_REQUEST">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_friend_birthday" type="BOOLEAN" defaultValue="true"
+                    remarks="Разрешить события с типом FRIEND_BIRTHDAY">
+                <constraints nullable="false"/>
+            </column>
+            <column name="enable_send_email_message" type="BOOLEAN" defaultValue="true"
+                    remarks="Разрешить события с типом SEND_EMAIL_MESSAGE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="create-notification-table" author="Alexandr Soldatov">
+        <createTable tableName="notification" schemaName="socialnet" remarks="Таблица уведомлений">
+            <column name="id" type="bigint" autoIncrement="true" remarks="ID события уведомления">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="notification_pkey"/>
+            </column>
+            <column name="author_id" type="UUID" remarks="ID аккаунта автора уведомления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="receiver_id" type="UUID" remarks="ID аккаунта получателя уведомления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="notification_type" type="VARCHAR(100)" remarks="Тип уведомления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="send_time" type="TIMESTAMP WITHOUT TIME ZONE" remarks="Время отправки уведомления">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_readed" type="BOOLEAN" remarks="Прочитано ли уведомление">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex schemaName="socialnet" tableName="notification" indexName="ix_notification_author_id">
+            <column name="author_id"/>
+        </createIndex>
+        <createIndex schemaName="socialnet" tableName="notification" indexName="ix_notification_receiver_id">
+            <column name="receiver_id"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>

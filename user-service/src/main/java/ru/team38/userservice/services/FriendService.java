@@ -16,6 +16,7 @@ import ru.team38.userservice.exceptions.FriendsServiceException;
 import ru.team38.userservice.exceptions.status.UnauthorizedException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -32,7 +33,7 @@ public class FriendService {
             throw new UnauthorizedException("User is not authenticated");
         }
         AccountDto accountDto = accountService.getAuthenticatedAccount();
-        Long userId = accountDto.getId();
+        UUID userId = accountDto.getId();
         try {
             return friendRepository.getIncomingFriendRequests(userId);
         } catch (DatabaseQueryException e) {
@@ -47,7 +48,7 @@ public class FriendService {
         if (!(authentication.getPrincipal() instanceof UserDetails)) {
             throw new UnauthorizedException("User is not authenticated");
         }
-        Long userId = accountService.getAuthenticatedAccount().getId();
+        UUID userId = accountService.getAuthenticatedAccount().getId();
         try {
             return friendRepository.countIncomingFriendRequests(userId);
         } catch (DatabaseQueryException e) {
@@ -62,7 +63,7 @@ public class FriendService {
         if (!(authentication.getPrincipal() instanceof UserDetails)) {
             throw new UnauthorizedException("User is not authenticated");
         }
-        Long userId = accountService.getAuthenticatedAccount().getId();
+        UUID userId = accountService.getAuthenticatedAccount().getId();
         if (friendSearchDto.getAgeFrom() != null) {
             friendSearchDto.setBirthDateFrom(LocalDate.now()
                     .minusYears(friendSearchDto.getAgeFrom()));
