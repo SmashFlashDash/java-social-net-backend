@@ -9,6 +9,10 @@ import ru.team38.common.jooq.tables.Tokens;
 import ru.team38.common.jooq.tables.records.TokensRecord;
 import ru.team38.common.mappers.TokensMapper;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
 @Repository
 @RequiredArgsConstructor
 public class TokenRepository {
@@ -32,5 +36,26 @@ public class TokenRepository {
     public void update(TokensDto tokenDto) {
         TokensRecord tokensRecord = dslContext.newRecord(tokens, mapper.tokensDtoToTokensRecord(tokenDto));
         tokensRecord.update();
+    }
+
+    public void deleteInvalidTokens() {
+        dslContext.deleteFrom(tokens)
+                .where(tokens.VALIDITY.eq(false))
+                .execute();
+    }
+
+    public void deleteExpiredTokens() {
+        dslContext.deleteFrom(tokens)
+                .where(tokens.EXPIRATION.lt(LocalDateTime.now(ZoneOffset.UTC)))
+                .execute();
+    }
+
+    public List<TokensDto> findByDeviceUUID(String deviceUUID) {
+        List<TokensRecord> records = dslContext.selectFrom(tokens)
+                .where(tokens.DEVICE_UUID.eq(deviceUUID))
+                .fetch();
+        return records.stream()
+                .map(mapper::tokensRecordToTokensDto)
+                .toList();
     }
 }

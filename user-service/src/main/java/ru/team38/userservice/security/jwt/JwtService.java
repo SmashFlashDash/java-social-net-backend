@@ -28,11 +28,8 @@ public class JwtService {
     private long refreshTokenExpiration;
     private final TokenBlacklistService tokenBlacklistService;
 
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = getUsername(token);
-        return username.equals(userDetails.getUsername()) &&
-                !isTokenExpired(token) &&
-                !tokenBlacklistService.isTokenBlacklisted(token);
+    public boolean isTokenValid(String token) {
+        return !isTokenExpired(token) && !tokenBlacklistService.isTokenBlacklisted(token);
     }
 
     public String getUsername(String token) {
@@ -54,25 +51,34 @@ public class JwtService {
                 .parseClaimsJws(token).getBody();
     }
 
-    public String createAccessToken(UserDetails userDetails) {
+    public String createAccessToken(UserDetails userDetails, String deviceUUID) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + accessTokenExpiration);
+
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .claim("deviceUUID", deviceUUID)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String createRefreshToken(UserDetails userDetails) {
+    public String createRefreshToken(UserDetails userDetails, String deviceUUID) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("deviceUUID", deviceUUID)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String getDeviceUUID(String token) {
+        return getClaim(token, claims -> claims.get("deviceUUID", String.class));
     }
 
     private Key getSigningKey() {
