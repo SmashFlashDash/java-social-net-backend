@@ -11,8 +11,10 @@ import ru.team38.common.dto.post.*;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.Friends;
 import ru.team38.common.jooq.tables.Post;
+import ru.team38.common.jooq.tables.Tag;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.jooq.tables.records.PostRecord;
+import ru.team38.common.jooq.tables.records.TagRecord;
 import ru.team38.common.mappers.PostMapper;
 
 import java.time.Instant;
@@ -34,6 +36,7 @@ public class PostRepository {
     private final Post post = Post.POST;
     private final Friends friends = Friends.FRIENDS;
     private final Account account = Account.ACCOUNT;
+    private final Tag tag = Tag.TAG;
     private final PostMapper postMapper = Mappers.getMapper(PostMapper.class);
 
     public List<PostDto> getPostDtosByEmail (PostSearchDto postSearchDto, String email){
@@ -97,37 +100,31 @@ public class PostRepository {
             publishTime = timeNow;
             type = TypePost.POSTED.toString();
         }
-        return dsl.insertInto(post,
-                        post.IMAGE_PATH,
-                        post.POST_TEXT,
-                        post.TAGS,
-                        post.TITLE,
-                        post.TYPE,
-                        post.IS_DELETED,
-                        post.TIME,
-                        post.TIME_CHANGED,
-                        post.AUTHOR_ID,
-                        post.IS_BLOCKED,
-                        post.COMMENTS_COUNT,
-                        post.LIKE_AMOUNT,
-                        post.MY_LIKE,
-                        post.PUBLISH_DATE)
-                .values(createPostDto.getImagePath(),
-                        createPostDto.getPostText(),
-                        tags,
-                        createPostDto.getTitle(),
-                        type,
-                        false,
-                        timeNow,
-                        timeNow,
-                        accountId,
-                        false,
-                        0,
-                        0,
-                        false,
-                        publishTime)
-                .returning()
-                .fetchOne();
+        PostRecord postRecord = postMapper.insertValues2PostRecord(
+                accountId,
+                createPostDto.getPostText(),
+                timeNow,
+                type,
+                createPostDto.getTitle(),
+                publishTime,
+                tags,
+                createPostDto.getImagePath(),
+                timeNow);
+
+        dsl.executeInsert(postRecord);
+
+        return postRecord;
+
+    }
+    public List<TagDto> getTags (String tagName){
+        List<TagRecord> tagRecord = dsl.selectFrom(tag)
+                .where(tag.NAME.likeIgnoreCase(tagName + "%"))
+                .fetch();
+        if (!tagRecord.isEmpty()) {
+            return postMapper.tagRecordToTagDto(tagRecord);
+        } else {
+            return null;
+        }
     }
 
     private List<PostRecord> getAllPostRecords(PostSearchDto postSearchDto, UUID accountId) {
@@ -263,6 +260,11 @@ public class PostRepository {
 
     private String[] createTagsField(List<TagDto> tags) {
         if (tags != null && !tags.isEmpty()) {
+            for (TagDto tagDto : tags) {
+                if (!dsl.fetchExists(DSL.selectFrom(tag).where(tag.NAME.eq(tagDto.getName())))) {
+                    addTag(tagDto.getName());
+                }
+            }
             return tags.stream()
                     .map(TagDto::getName)
                     .toArray(String[]::new);
@@ -285,5 +287,11 @@ public class PostRepository {
                 .fetchOne();
         assert accountRecord != null;
         return accountRecord.getId();
+    }
+    private void addTag(String tag){
+        TagRecord tagRecord = new TagRecord();
+        tagRecord.setName(tag);
+        tagRecord.setIsDeleted(false);
+        dsl.executeInsert(tagRecord);
     }
 }

@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TagDto {
-    // private Long id;
-    //private Boolean isDeleted;
+    private Long id;
+    private Boolean isDeleted;
     private String name;
 }

@@ -8,6 +8,7 @@ import ru.team38.common.dto.comment.*;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
+import ru.team38.common.dto.post.TagDto;
 
 import java.util.List;
 import java.util.Map;
@@ -51,4 +52,6 @@ public interface CommunicationsServiceClient {
     ResponseEntity<CommentSearchDto> getSubComments(@PathVariable Long postId,
                                                     @PathVariable UUID commentId,
                                                     Pageable pageable);
+    @GetMapping("/api/v1/tag")
+    ResponseEntity<List<TagDto>> getTag(@RequestParam(value = "name", required = false) String tag);
 }

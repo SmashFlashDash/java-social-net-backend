@@ -8,6 +8,8 @@ import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.PostSearchDto;
+
+import ru.team38.common.dto.post.*;
 import ru.team38.communicationsservice.data.repositories.PostRepository;
 import ru.team38.communicationsservice.exceptions.NotFoundPostExceptions;
 
@@ -80,5 +82,13 @@ public class PostService {
 
     public void deletePost(Long id){
         postRepository.deletePostById(id);
+    }
+    public List<TagDto> getTag(String nameTag){
+        try {
+            return postRepository.getTags(nameTag);
+        } catch (Exception e) {
+            log.error("Error occurred while retrieving get tag: {}", e.getMessage());
+            throw e;
+        }
     }
 }
