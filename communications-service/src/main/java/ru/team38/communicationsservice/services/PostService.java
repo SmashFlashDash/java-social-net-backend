@@ -3,9 +3,7 @@ package ru.team38.communicationsservice.services;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
@@ -19,17 +17,17 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PostService {
+
     private final PostRepository postRepository;
     private final JwtService jwtService;
-    @Autowired
-    private HttpServletRequest request;
-    public ContentPostDto getPost(PostSearchDto postSearchDto) throws NotFoundPostExceptions {
+
+    public ContentPostDto getPost(HttpServletRequest request, PostSearchDto postSearchDto) throws NotFoundPostExceptions {
         try {
             if (postSearchDto.getWithFriends() == null){
                 postSearchDto.setWithFriends(false);
             }
             String emailUser = jwtService.getUsernameFromToken(request);
-            List<PostDto> listPosts = postRepository.getListPost(postSearchDto, emailUser);
+            List<PostDto> listPosts = postRepository.getPostDtosByEmail(postSearchDto, emailUser);
             if (listPosts == null) {
                 throw new NotFoundPostExceptions("Post not found.");
             }
@@ -39,10 +37,11 @@ public class PostService {
             throw e;
         }
     }
-    public PostDto getCreatePost(CreatePostDto createPostDto) throws NotFoundPostExceptions {
+
+    public PostDto createPost(HttpServletRequest request, CreatePostDto createPostDto) throws NotFoundPostExceptions {
         try {
             String emailUser = jwtService.getUsernameFromToken(request);
-            PostDto post = postRepository.getCreatePost(createPostDto, emailUser);
+            PostDto post = postRepository.createPost(createPostDto, emailUser);
             if (post == null) {
                 throw new NotFoundPostExceptions("Post not found.");
             }
@@ -52,9 +51,10 @@ public class PostService {
             throw e;
         }
     }
-    public PostDto getUpdatePost(CreatePostDto createPostDto) throws NotFoundPostExceptions {
+
+    public PostDto updatePost(CreatePostDto createPostDto) throws NotFoundPostExceptions {
         try {
-            PostDto post = postRepository.getUpdatePost(createPostDto);
+            PostDto post = postRepository.updatePost(createPostDto);
             if (post == null) {
                 throw new NotFoundPostExceptions("Post not found.");
             }
@@ -64,9 +64,10 @@ public class PostService {
             throw e;
         }
     }
+
     public PostDto getPostById(Long id) throws NotFoundPostExceptions {
         try {
-            PostDto post = postRepository.getPostById(id);
+            PostDto post = postRepository.getPostDtoById(id);
             if (post == null) {
                 throw new NotFoundPostExceptions("Post not found.");
             }
@@ -76,6 +77,7 @@ public class PostService {
             throw e;
         }
     }
+
     public void deletePost(Long id){
         postRepository.deletePostById(id);
     }
