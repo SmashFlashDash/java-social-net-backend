@@ -1,13 +1,18 @@
 package ru.team38.gatewayservice.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.AccountDto;
+import ru.team38.common.dto.AccountResultSearchDto;
+import ru.team38.common.dto.AccountSearchDto;
+import ru.team38.common.dto.PageDto;
 import ru.team38.gatewayservice.service.UserService;
 
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
@@ -32,5 +37,11 @@ public class AccountController {
     @GetMapping("/{id}")
     public AccountDto getAccountById(@PathVariable UUID id) {
         return userService.getAccountById(id);
+    }
+
+    @GetMapping("/search")
+    public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        log.info("Executing findAccount request");
+        return userService.findAccount(accountSearchDto, pageDto);
     }
 }

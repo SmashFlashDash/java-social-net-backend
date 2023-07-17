@@ -12,14 +12,24 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountResultSearchDto {
+    private long totalElements;
+    private long totalPages;
+    private Sort sort;
     private PageDto pageDto;
-    private CopyOnWriteArraySet<AccountDto> accounts;
+    private long numberOfElements;
+    private PageableObject pageable;
+    private Boolean first;
+    private Boolean last;
+    private long size;
+    private CopyOnWriteArraySet<AccountDto> content;
+    private long number;
+    private Boolean empty;
 
     {
-        accounts = new CopyOnWriteArraySet<>();
+        content = new CopyOnWriteArraySet<>();
     }
-    
+
     public void setAccount(AccountDto account) {
-        accounts.add(account);
+        content.add(account);
     }
 }
