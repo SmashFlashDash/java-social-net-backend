@@ -41,3 +41,7 @@ jwt:
   token-validity-min: 15
   refresh-token-validity: 7 #days
 
+preferences:
+  friendship-recommendations:
+    age-limit-top: 5
+    age-limit-bottom: 5

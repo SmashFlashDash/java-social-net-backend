@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.ReactionDto;
 import ru.team38.common.dto.post.TagDto;
+
 import ru.team38.common.jooq.tables.records.PostRecord;
 
 import java.sql.Timestamp;

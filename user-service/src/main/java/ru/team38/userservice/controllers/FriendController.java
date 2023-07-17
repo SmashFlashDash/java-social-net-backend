@@ -9,6 +9,8 @@ import ru.team38.common.dto.*;
 import ru.team38.userservice.exceptions.FriendsServiceException;
 import ru.team38.userservice.services.FriendService;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/friends")
 @RequiredArgsConstructor
@@ -24,5 +26,10 @@ public class FriendController {
     @GetMapping("")
     public ResponseEntity<PageFriendShortDto> getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
         return ResponseEntity.ok(friendService.getFriendsByParameters(friendSearchDto, pageDto));
+    }
+
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<FriendShortDto>> getFriendsRecommendations(FriendSearchDto friendSearchDto) {
+        return ResponseEntity.ok(friendService.getFriendsRecommendations(friendSearchDto));
     }
 }

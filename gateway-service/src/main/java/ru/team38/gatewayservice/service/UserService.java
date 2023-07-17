@@ -12,6 +12,8 @@ import ru.team38.gatewayservice.clients.UserServiceClient;
 
 import java.util.UUID;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -54,10 +56,6 @@ public class UserService {
         }
     }
 
-    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
-        return userServiceClient.getFriendsByParameters(friendSearchDto, pageDto).getBody();
-    }
-
     public AccountDto getAccount() {
         return userServiceClient.getAccount().getBody();
     }
@@ -65,6 +63,7 @@ public class UserService {
     public AccountDto updateAccount(AccountDto account) {
         return userServiceClient.updateAccount(account).getBody();
     }
+
     public AccountDto getAccountById(UUID id) {
         try {
             return userServiceClient.getAccountById(id).getBody();
@@ -80,5 +79,25 @@ public class UserService {
 
     public ResponseEntity<String> deleteAccount() {
         return userServiceClient.deleteAccount();
+    }
+
+    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
+        ResponseEntity<PageFriendShortDto> responseEntity = userServiceClient.getFriendsByParameters(
+                friendSearchDto.getFirstName(),
+                friendSearchDto.getCity(),
+                friendSearchDto.getCountry(),
+                friendSearchDto.getAgeFrom(),
+                friendSearchDto.getAgeTo());
+        return responseEntity.getBody();
+    }
+
+    public List<FriendShortDto> getFriendsRecommendations(FriendSearchDto friendSearchDto) {
+        ResponseEntity<List<FriendShortDto>> responseEntity = userServiceClient.getFriendsRecommendations(
+                friendSearchDto.getFirstName(),
+                friendSearchDto.getCity(),
+                friendSearchDto.getCountry(),
+                friendSearchDto.getAgeFrom(),
+                friendSearchDto.getAgeTo());
+        return responseEntity.getBody();
     }
 }
