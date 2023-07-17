@@ -5,18 +5,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class AccountSearchDto {
-  private Long id;
+  private UUID id;
   private boolean isDeleted;
   private String ids;
   private String blockedByIds;
   private String author;
   private String firstName;
   private String lastName;
+  private LocalDate maxBirthDate;
+  private LocalDate minBirthDate;
   private String city;
   private String country;
   private boolean isBlocked;

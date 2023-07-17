@@ -40,8 +40,12 @@ public interface UserServiceClient {
     @DeleteMapping("/api/v1/account/me")
     ResponseEntity<String> deleteAccount();
 
+
     @GetMapping("/api/v1/account/{id}")
     ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id);
+
+    @GetMapping("/api/v1/friends")
+    ResponseEntity<PageFriendShortDto> getFriendsByParameters(@RequestParam FriendSearchDto friendSearchDto, @RequestParam PageDto pageDto);
 
     @GetMapping("/api/v1/notifications/count")
     ResponseEntity<NotificationCountDto> getNotificationsCount();
@@ -63,4 +67,10 @@ public interface UserServiceClient {
             @RequestParam("ageFrom") Integer ageFrom,
             @RequestParam("ageTo") Integer ageTo
     );
+
+    @GetMapping("/api/v1/account/search")
+    ResponseEntity<AccountResultSearchDto> findAccount(@RequestParam String firstName,
+                                                       @RequestParam String lastName,
+                                                       @RequestParam Integer ageFrom,
+                                                       @RequestParam Integer ageTo);
 }

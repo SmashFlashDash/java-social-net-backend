@@ -100,4 +100,13 @@ public class UserService {
                 friendSearchDto.getAgeTo());
         return responseEntity.getBody();
     }
+
+    public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        ResponseEntity<AccountResultSearchDto> responseEntity = userServiceClient
+                .findAccount(accountSearchDto.getFirstName(),
+                        accountSearchDto.getLastName(),
+                        accountSearchDto.getAgeFrom(),
+                        accountSearchDto.getAgeTo());
+        return responseEntity.getBody();
+    }
 }

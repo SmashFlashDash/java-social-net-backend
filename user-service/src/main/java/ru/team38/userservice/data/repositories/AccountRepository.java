@@ -1,16 +1,20 @@
 package ru.team38.userservice.data.repositories;
 
 import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
 import ru.team38.common.dto.AccountDto;
+import ru.team38.common.dto.AccountResultSearchDto;
+import ru.team38.common.dto.AccountSearchDto;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -43,5 +47,40 @@ public class AccountRepository {
 
     public Result<Record> getAllAccountsByEmail(String email) {
         return dslContext.select().from(account).where(account.EMAIL.eq(email)).fetch();
+    }
+
+    public AccountResultSearchDto findAccount(UUID userId, AccountSearchDto accountSearchDto) {
+        AccountResultSearchDto accountResultSearchDto = new AccountResultSearchDto();
+        if (accountSearchDto.getFirstName() != null || accountSearchDto.getLastName() != null) {
+            Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto.getMaxBirthDate(),
+                    accountSearchDto.getMinBirthDate(), accountSearchDto.getFirstName(),
+                    accountSearchDto.getLastName()));
+            dslContext.select().from(account)
+                    .where(condition).fetch()
+                    .map(record -> mapper.accountRecordToAccountDto(record.into(account)))
+                    .forEach(accountResultSearchDto::setAccount);
+        }
+        return accountResultSearchDto;
+    }
+
+    private Condition checkConditionToAccountSearch(UUID userId, LocalDate maxBirthDate, LocalDate minBirthDate,
+                                                    String firstName, String lastName) {
+        Condition condition = account.ID.ne(userId);
+        if (maxBirthDate != null) {
+            condition = condition.and(account.BIRTH_DATE.le(maxBirthDate));
+        }
+        if (minBirthDate != null) {
+            condition = condition.and(account.BIRTH_DATE.ge(minBirthDate));
+        }
+        if (firstName != null && lastName != null) {
+            condition = condition.and(account.FIRST_NAME.eq(firstName)).and(account.LAST_NAME.eq(lastName));
+        }
+        if (firstName != null && lastName == null) {
+            condition = condition.and(account.FIRST_NAME.eq(firstName));
+        }
+        if (lastName != null && firstName == null) {
+            condition = condition.and(account.LAST_NAME.eq(lastName));
+        }
+        return condition;
     }
 }

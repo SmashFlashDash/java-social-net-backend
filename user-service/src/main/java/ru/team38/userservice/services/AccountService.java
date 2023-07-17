@@ -2,9 +2,8 @@ package ru.team38.userservice.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.commons.text.WordUtils;
 import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
 import org.mapstruct.factory.Mappers;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -21,9 +20,8 @@ import ru.team38.userservice.data.repositories.AccountRepository;
 import ru.team38.userservice.exceptions.status.BadRequestException;
 
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.UUID;
-
-import static org.jooq.impl.DSL.min;
 
 @Service
 @Transactional
@@ -62,20 +60,19 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public AccountResultSearchDto findAccount(AccountSearchDto accountSearch, PageDto page) {
-        AccountResultSearchDto accountResultSearch = new AccountResultSearchDto();
-
-        Result<Record> records = DSL.select().from(ACCOUNT)
-                .where(ACCOUNT.FIRST_NAME.eq(accountSearch.getFirstName()),
-                        ACCOUNT.LAST_NAME.eq(accountSearch.getLastName()))
-                .limit(page.getSize()).fetch();
-
-        records.forEach(acc -> accountResultSearch.setAccount(mapper.accountRecordToAccountDto((AccountRecord) acc)));
-
-        page.setSize(records.size());
-        accountResultSearch.setPageDto(page);
-
-        return accountResultSearch;
+    public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto page) {
+        UUID userId = getAuthenticatedAccount().getId();
+        accountSearchDto.setFirstName(WordUtils.capitalizeFully(accountSearchDto.getFirstName()));
+        accountSearchDto.setLastName(WordUtils.capitalizeFully(accountSearchDto.getLastName()));
+        if (accountSearchDto.getAgeFrom() != null) {
+            accountSearchDto.setMaxBirthDate(LocalDate.now()
+                    .minusYears(accountSearchDto.getAgeFrom()));
+        }
+        if (accountSearchDto.getAgeTo() != null) {
+            accountSearchDto.setMinBirthDate(LocalDate.now()
+                    .minusYears(accountSearchDto.getAgeTo()));
+        }
+        return accountRepository.findAccount(userId, accountSearchDto);
     }
 
     @LoggingMethod
