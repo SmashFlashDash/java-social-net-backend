@@ -67,10 +67,21 @@ public interface UserServiceClient {
             @RequestParam("ageFrom") Integer ageFrom,
             @RequestParam("ageTo") Integer ageTo
     );
+    @GetMapping("/api/v1/geo/country")
+    ResponseEntity<List<CountryDto>> getCountries();
 
+    @GetMapping("/api/v1/geo/country/{countryId}/city")
+    ResponseEntity<List<CityDto>> getCitiesByCountryId(@PathVariable("countryId") String countryId);
+    
     @GetMapping("/api/v1/account/search")
     ResponseEntity<AccountResultSearchDto> findAccount(@RequestParam String firstName,
                                                        @RequestParam String lastName,
                                                        @RequestParam Integer ageFrom,
                                                        @RequestParam Integer ageTo);
+
+
+
+
+
+
 }

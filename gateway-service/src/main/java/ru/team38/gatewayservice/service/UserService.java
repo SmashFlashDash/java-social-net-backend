@@ -99,6 +99,14 @@ public class UserService {
                 friendSearchDto.getAgeFrom(),
                 friendSearchDto.getAgeTo());
         return responseEntity.getBody();
+    
+    }
+    public ResponseEntity<List<CountryDto>> getCountries() {
+        return userServiceClient.getCountries();
+    }
+
+    public ResponseEntity<List<CityDto>> getCitiesByCountryId(String countryId) {
+        return userServiceClient.getCitiesByCountryId(countryId);
     }
 
     public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {

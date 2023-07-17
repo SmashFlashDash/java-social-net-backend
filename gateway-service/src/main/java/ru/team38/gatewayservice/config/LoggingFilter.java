@@ -25,6 +25,7 @@ public class LoggingFilter extends OncePerRequestFilter {
         urlToServiceNameMap.put("/api/v1/account.*", "user-service");
         urlToServiceNameMap.put("/api/v1/notifications.*", "user-service");
         urlToServiceNameMap.put("/api/v1/post.*", "communications-service");
+        urlToServiceNameMap.put("/api/v1/geo.*","user-service");
     }
 
     @Override
