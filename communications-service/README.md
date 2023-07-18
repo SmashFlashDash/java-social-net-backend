@@ -17,6 +17,12 @@
 
 - В поле ввода введите необходимые переменные в формате:
 ```
--Dspring.datasource.url=jdbc:postgresql://localhost:5433/socialnet  -Dspring.datasource.username=postgres  -Dspring.datasource.password=postgres
+-Dspring.datasource.url=jdbc:postgresql://localhost:5433/socialnet  
+-Dspring.datasource.username=postgres  
+-Dspring.datasource.password=postgres
+-DyandexObjectStorage.endpoint=https://storage.yandexcloud.net/
+-DyandexObjectStorage.accessKey=YCAJEg9dsfQhSCJAMoJ_i4CK2
+-DyandexObjectStorage.secretKey=YCMMT0nO2JO1tAMqmxFK28KZijMN0C1BRzokJQdB
+-DyandexObjectStorage.bucketName=team38bucket
 ```
 3. Запустить сервис из верхней панели.

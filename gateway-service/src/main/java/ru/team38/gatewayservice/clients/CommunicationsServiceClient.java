@@ -2,15 +2,19 @@ package ru.team38.gatewayservice.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.dialog.PageDialogDto;
 import ru.team38.common.dto.dialog.UnreadCountDto;
 import ru.team38.common.dto.comment.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.TagDto;
+import ru.team38.common.dto.storage.FileType;
+import ru.team38.common.dto.storage.FileUriResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -63,4 +67,7 @@ public interface CommunicationsServiceClient {
                                                     Pageable pageable);
     @GetMapping("/api/v1/tag")
     ResponseEntity<List<TagDto>> getTag(@RequestParam(value = "name", required = false) String tag);
+
+    @PostMapping(value = "/api/v1/storage", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    ResponseEntity<FileUriResponse> getUploadedFileUri(@RequestParam FileType type, @RequestPart MultipartFile file);
 }

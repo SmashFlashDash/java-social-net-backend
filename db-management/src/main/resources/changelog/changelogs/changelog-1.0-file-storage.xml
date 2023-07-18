@@ -1,0 +1,19 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="create-file-storage-table" author="Alexandr Soldatov">
+        <createTable tableName="file-storage" schemaName="socialnet" remarks="Таблица ссылок на файлы">
+            <column name="id" type="bigint" autoIncrement="true" remarks="ID файла">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="file_storage_pkey"/>
+            </column>
+            <column name="filename" type="varchar(255)" remarks="Имя файла при загрузке">
+                <constraints nullable="false"/>
+            </column>
+            <column name="path" type="varchar(255)" remarks="Путь к файлу в хранилище">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

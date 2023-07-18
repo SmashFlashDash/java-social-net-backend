@@ -1,5 +1,6 @@
 package ru.team38.communicationsservice;
 
+import com.amazonaws.services.s3.AmazonS3;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -12,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.team38.communicationsservice.services.JwtService;
@@ -22,7 +24,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(properties = {
+		"yandexObjectStorage.endpoint=https://storage.yandexcloud.net/",
+		"yandexObjectStorage.accessKey=YCAJEg9dsfQhSCJAMoJ_i4CK2",
+		"yandexObjectStorage.secretKey=YCMMT0nO2JO1tAMqmxFK28KZijMN0C1BRzokJQdB",
+		"yandexObjectStorage.bucketName=team38bucket"})
 class JwtServiceGetUsernameFromTokenTest {
 
 	{
