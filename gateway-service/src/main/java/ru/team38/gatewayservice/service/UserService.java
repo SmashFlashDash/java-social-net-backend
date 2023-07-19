@@ -56,6 +56,10 @@ public class UserService {
         }
     }
 
+    public AccountDto createAccount(AccountDto accountDto) {
+        return userServiceClient.createAccount(accountDto).getBody();
+    }
+
     public AccountDto getAccount() {
         return userServiceClient.getAccount().getBody();
     }

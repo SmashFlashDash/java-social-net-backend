@@ -14,6 +14,11 @@ import java.util.UUID;
 public class AccountController {
     private final AccountService accountService;
 
+    @PostMapping("/")
+    public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
+        return ResponseEntity.ok(accountService.createAccount(accountDto));
+    }
+
     @GetMapping("/me")
     public ResponseEntity<AccountDto> getAccount() {
         return ResponseEntity.ok(accountService.getAuthenticatedAccount());
