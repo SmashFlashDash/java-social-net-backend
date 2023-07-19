@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.AccountResultSearchDto;
+import ru.team38.common.dto.PageAccountDto;
 import ru.team38.common.dto.AccountSearchDto;
 import ru.team38.common.dto.PageDto;
 import ru.team38.gatewayservice.service.UserService;
@@ -45,7 +45,7 @@ public class AccountController {
     }
 
     @GetMapping("/search")
-    public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
+    public PageAccountDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
         log.info("Executing findAccount request");
         return userService.findAccount(accountSearchDto, pageDto);
     }

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.AccountResultSearchDto;
+import ru.team38.common.dto.PageAccountDto;
 import ru.team38.common.dto.AccountSearchDto;
 import ru.team38.common.dto.PageDto;
 import ru.team38.common.jooq.tables.Account;
@@ -65,10 +65,46 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto page) {
+    public AccountDto getAccountById(UUID id){
+        AccountRecord accountRecord = DSL.selectFrom(ACCOUNT)
+                .where(ACCOUNT.ID.eq(id))
+                .fetchOne();
+        return mapper.accountRecordToAccountDto(accountRecord);
+    }
+
+    @LoggingMethod
+    public PageAccountDto findAccount(AccountSearchDto accountSearchDto, PageDto page) {
         UUID userId = getAuthenticatedAccount().getId();
-        accountSearchDto.setFirstName(WordUtils.capitalizeFully(accountSearchDto.getFirstName()));
-        accountSearchDto.setLastName(WordUtils.capitalizeFully(accountSearchDto.getLastName()));
+        return accountRepository.findAccount(userId, checkDataToFindAccount(accountSearchDto));
+    }
+
+    private AccountSearchDto checkDataToFindAccount(AccountSearchDto accountSearchDto) {
+        if (accountSearchDto.getFirstName() != null) {
+            accountSearchDto.setFirstName(accountSearchDto.getFirstName().trim());
+            String[] firstName = accountSearchDto.getFirstName().split(" ");
+            if (firstName.length > 1 && accountSearchDto.getLastName() == null) {
+                accountSearchDto.setFirstName(firstName[0]);
+                accountSearchDto.setLastName(firstName[firstName.length - 1]);
+            }
+            if (firstName.length > 1) {
+                accountSearchDto.setFirstName(firstName[0]);
+            }
+        }
+        if (accountSearchDto.getLastName() != null) {
+            accountSearchDto.setLastName(accountSearchDto.getLastName().trim());
+            String[] lastName = accountSearchDto.getLastName().split(" ");
+            if (lastName.length > 1 && accountSearchDto.getFirstName() == null) {
+                accountSearchDto.setFirstName(lastName[0]);
+                accountSearchDto.setLastName(lastName[lastName.length - 1]);
+            }
+            if (lastName.length > 1) {
+                accountSearchDto.setFirstName(lastName[0]);
+            }
+        }
+        return checkAgeToFindAccount(accountSearchDto);
+    }
+
+    private AccountSearchDto checkAgeToFindAccount(AccountSearchDto accountSearchDto) {
         if (accountSearchDto.getAgeFrom() != null) {
             accountSearchDto.setMaxBirthDate(LocalDate.now()
                     .minusYears(accountSearchDto.getAgeFrom()));
@@ -77,14 +113,6 @@ public class AccountService {
             accountSearchDto.setMinBirthDate(LocalDate.now()
                     .minusYears(accountSearchDto.getAgeTo()));
         }
-        return accountRepository.findAccount(userId, accountSearchDto);
-    }
-
-    @LoggingMethod
-    public AccountDto getAccountById(UUID id){
-        AccountRecord accountRecord = DSL.selectFrom(ACCOUNT)
-                .where(ACCOUNT.ID.eq(id))
-                .fetchOne();
-        return mapper.accountRecordToAccountDto(accountRecord);
+        return accountSearchDto;
     }
 }

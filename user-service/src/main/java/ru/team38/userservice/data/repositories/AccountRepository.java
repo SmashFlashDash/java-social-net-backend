@@ -8,7 +8,7 @@ import org.jooq.Result;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
 import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.AccountResultSearchDto;
+import ru.team38.common.dto.PageAccountDto;
 import ru.team38.common.dto.AccountSearchDto;
 import ru.team38.common.jooq.Tables;
 import ru.team38.common.jooq.tables.Account;
@@ -58,8 +58,9 @@ public class AccountRepository {
         return dslContext.select().from(account).where(account.EMAIL.eq(email)).fetch();
     }
 
-    public AccountResultSearchDto findAccount(UUID userId, AccountSearchDto accountSearchDto) {
-        AccountResultSearchDto accountResultSearchDto = new AccountResultSearchDto();
+    public PageAccountDto findAccount(UUID userId, AccountSearchDto accountSearchDto) {
+        PageAccountDto pageAccountDto = new PageAccountDto();
+
         if (accountSearchDto.getFirstName() != null || accountSearchDto.getLastName() != null) {
             Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto.getMaxBirthDate(),
                     accountSearchDto.getMinBirthDate(), accountSearchDto.getFirstName(),
@@ -67,14 +68,28 @@ public class AccountRepository {
             dslContext.select().from(account)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(account)))
-                    .forEach(accountResultSearchDto::setAccount);
+                    .forEach(pageAccountDto::setAccount);
         }
-        return accountResultSearchDto;
+
+        if (pageAccountDto.getContent().isEmpty()) {
+            if (accountSearchDto.getFirstName() != null && accountSearchDto.getLastName() != null) {
+                String temp = accountSearchDto.getLastName();
+                accountSearchDto.setLastName(null);
+                findAccount(userId, accountSearchDto);
+                accountSearchDto.setFirstName(null);
+                accountSearchDto.setLastName(temp);
+                findAccount(userId, accountSearchDto);
+            }
+        }
+
+        return pageAccountDto;
     }
 
     private Condition checkConditionToAccountSearch(UUID userId, LocalDate maxBirthDate, LocalDate minBirthDate,
                                                     String firstName, String lastName) {
         Condition condition = account.ID.ne(userId);
+        char ch = '%';
+
         if (maxBirthDate != null) {
             condition = condition.and(account.BIRTH_DATE.le(maxBirthDate));
         }
@@ -82,13 +97,18 @@ public class AccountRepository {
             condition = condition.and(account.BIRTH_DATE.ge(minBirthDate));
         }
         if (firstName != null && lastName != null) {
-            condition = condition.and(account.FIRST_NAME.eq(firstName)).and(account.LAST_NAME.eq(lastName));
+            condition = condition.and(((account.FIRST_NAME.likeIgnoreCase(ch + firstName + ch))
+                    .and(account.LAST_NAME.likeIgnoreCase(ch + lastName + ch)))
+                    .or((account.FIRST_NAME.likeIgnoreCase(ch + lastName + ch))
+                    .and(account.LAST_NAME.likeIgnoreCase(ch + firstName + ch))));
         }
         if (firstName != null && lastName == null) {
-            condition = condition.and(account.FIRST_NAME.eq(firstName));
+            condition = condition.and((account.FIRST_NAME.likeIgnoreCase(ch + firstName + ch))
+                    .or(account.LAST_NAME.likeIgnoreCase(ch + firstName + ch)));
         }
         if (lastName != null && firstName == null) {
-            condition = condition.and(account.LAST_NAME.eq(lastName));
+            condition = condition.and((account.LAST_NAME.likeIgnoreCase(ch + lastName + ch))
+                    .or(account.FIRST_NAME.likeIgnoreCase(ch + lastName + ch)));
         }
         return condition;
     }

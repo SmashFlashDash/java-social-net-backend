@@ -11,18 +11,17 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountResultSearchDto {
-    private long totalElements;
-    private long totalPages;
+public class PageAccountDto {
+    private Integer totalElements;
+    private Integer totalPages;
     private Sort sort;
-    private PageDto pageDto;
-    private long numberOfElements;
+    private Integer numberOfElements;
     private PageableObject pageable;
     private Boolean first;
     private Boolean last;
-    private long size;
+    private Integer size;
     private CopyOnWriteArraySet<AccountDto> content;
-    private long number;
+    private Integer number;
     private Boolean empty;
 
     {
