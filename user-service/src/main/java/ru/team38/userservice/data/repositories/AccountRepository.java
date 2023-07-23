@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import ru.team38.common.dto.AccountDto;
 import ru.team38.common.dto.AccountResultSearchDto;
 import ru.team38.common.dto.AccountSearchDto;
+import ru.team38.common.jooq.Tables;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
@@ -23,17 +24,25 @@ import java.util.UUID;
 public class AccountRepository {
     private final DSLContext dslContext;
     private final Account account = Account.ACCOUNT;
-    private final AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
+    private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
 
     public void save(AccountDto accountDto) {
-        AccountRecord rec = dslContext.newRecord(account, mapper.accountDtoToAccountRecord(accountDto));
+        AccountRecord rec = dslContext.newRecord(account, accountMapper.accountDtoToAccountRecord(accountDto));
         rec.store();
     }
 
+    public AccountDto createAccount(AccountDto accountDto) {
+        AccountRecord accountRecord = dslContext.insertInto(Tables.ACCOUNT)
+                .set(accountMapper.accountDtoToAccountRecord(accountDto))
+                .returning()
+                .fetchOne();
+        return accountMapper.accountRecordToAccountDto(accountRecord);
+    }
+
     public AccountDto updateAccount(AccountDto accountDto) {
-        AccountRecord accountRecord = dslContext.newRecord(account, mapper.accountDtoToAccountRecord(accountDto));
+        AccountRecord accountRecord = dslContext.newRecord(account, accountMapper.accountDtoToAccountRecord(accountDto));
         accountRecord.update();
-        return mapper.accountRecordToAccountDto(accountRecord);
+        return accountMapper.accountRecordToAccountDto(accountRecord);
     }
 
     public UUID getIdByEmail(String email) {
@@ -57,7 +66,7 @@ public class AccountRepository {
                     accountSearchDto.getLastName()));
             dslContext.select().from(account)
                     .where(condition).fetch()
-                    .map(record -> mapper.accountRecordToAccountDto(record.into(account)))
+                    .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(account)))
                     .forEach(accountResultSearchDto::setAccount);
         }
         return accountResultSearchDto;

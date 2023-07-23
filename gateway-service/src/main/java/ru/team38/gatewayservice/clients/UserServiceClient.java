@@ -31,6 +31,9 @@ public interface UserServiceClient {
     @GetMapping("/api/v1/friends/count")
     ResponseEntity<Integer> getIncomingFriendRequestsCount();
 
+    @PostMapping("/api/v1/account")
+    ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto);
+
     @GetMapping("/api/v1/account/me")
     ResponseEntity<AccountDto> getAccount();
 

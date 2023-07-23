@@ -41,6 +41,11 @@ public class AccountService {
     }
 
     @LoggingMethod
+    public AccountDto createAccount(AccountDto accountDto) {
+        return accountRepository.createAccount(accountDto);
+    }
+
+    @LoggingMethod
     @SneakyThrows
     public AccountDto updateAccount(AccountDto accountDto) {
         AccountDto updateDto = getAuthenticatedAccount();
