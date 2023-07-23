@@ -19,7 +19,7 @@ public class FriendController {
     private final FriendService friendService;
 
     @GetMapping("/count")
-    public ResponseEntity<Integer> getIncomingFriendRequestsCount() throws FriendsServiceException {
+    public ResponseEntity<CountDto> getIncomingFriendRequestsCount() throws FriendsServiceException {
         return ResponseEntity.ok(friendService.getIncomingFriendRequestsCount());
     }
 

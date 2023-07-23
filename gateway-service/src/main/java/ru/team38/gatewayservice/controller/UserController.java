@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @GetMapping("/api/v1/friends/count")
-    public Integer getIncomingFriendRequests() {
+    public CountDto getIncomingFriendRequests() {
         log.info("Executing getIncomingFriendRequests request");
         return userService.getIncomingFriendRequestsCount();
     }
@@ -64,6 +64,7 @@ public class UserController {
         log.info("Executing getFriendsRecommendations request");
         return userService.getFriendsRecommendations(friendSearchDto);
     }
+
     @GetMapping("/api/v1/geo/country")
     public ResponseEntity<List<CountryDto>> getCountries() {
         List<CountryDto> countries = userService.getCountries().getBody();

@@ -29,7 +29,7 @@ public interface UserServiceClient {
     ResponseEntity<CaptchaDto> getCaptcha();
 
     @GetMapping("/api/v1/friends/count")
-    ResponseEntity<Integer> getIncomingFriendRequestsCount();
+    ResponseEntity<CountDto> getIncomingFriendRequestsCount();
 
     @PostMapping("/api/v1/account")
     ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto);
@@ -47,14 +47,12 @@ public interface UserServiceClient {
     @GetMapping("/api/v1/account/{id}")
     ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id);
 
-    @GetMapping("/api/v1/friends")
-    ResponseEntity<PageFriendShortDto> getFriendsByParameters(@RequestParam FriendSearchDto friendSearchDto, @RequestParam PageDto pageDto);
-
     @GetMapping("/api/v1/notifications/count")
     ResponseEntity<NotificationCountDto> getNotificationsCount();
 
     @GetMapping("/api/v1/friends")
     ResponseEntity<PageFriendShortDto> getFriendsByParameters(
+            @RequestParam("statusCode") StatusCode statusCode,
             @RequestParam("firstName") String firstName,
             @RequestParam("city") String city,
             @RequestParam("country") String country,
@@ -70,6 +68,7 @@ public interface UserServiceClient {
             @RequestParam("ageFrom") Integer ageFrom,
             @RequestParam("ageTo") Integer ageTo
     );
+
     @GetMapping("/api/v1/geo/country")
     ResponseEntity<List<CountryDto>> getCountries();
 

@@ -14,7 +14,7 @@ public class PageFriendShortDto {
     private Integer totalPages;
     private Integer number;
     private Integer size;
-    private List<FriendShortDto> content;
+    private List<AccountDto> content;
     private Sort sort;
     private Boolean first;
     private Boolean last;

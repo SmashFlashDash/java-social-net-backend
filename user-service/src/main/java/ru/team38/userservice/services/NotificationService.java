@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.Count;
+import ru.team38.common.dto.CountDto;
 import ru.team38.common.dto.notification.NotificationCountDto;
 import ru.team38.userservice.data.repositories.NotificationRepository;
 
@@ -20,6 +20,6 @@ public class NotificationService {
     public NotificationCountDto getNotificationsCount() {
         AccountDto accountDto = accountService.getAuthenticatedAccount();
         Integer count = notificationRepository.getNotificationsCountByUserId(accountDto.getId());
-        return new NotificationCountDto(ZonedDateTime.now(), new Count(count));
+        return new NotificationCountDto(ZonedDateTime.now(), new CountDto(count));
     }
 }
