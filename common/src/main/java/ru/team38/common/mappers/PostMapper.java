@@ -9,22 +9,38 @@ import ru.team38.common.dto.post.ReactionDto;
 import ru.team38.common.dto.post.TagDto;
 
 import ru.team38.common.jooq.tables.records.PostRecord;
+import ru.team38.common.jooq.tables.records.TagRecord;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Mapper
 public interface PostMapper {
+    @Mapping(target = "isDeleted", constant = "false")
+    @Mapping(target = "isBlocked", constant = "false")
+    @Mapping(target = "commentsCount", constant = "0")
+    @Mapping(target = "likeAmount", constant = "0")
+    @Mapping(target = "myLike", constant = "false")
+    PostRecord insertValues2PostRecord(UUID authorId,
+                                   String postText,
+                                   LocalDateTime time,
+                                   String type,
+                                   String title,
+                                   LocalDateTime publishDate,
+                                   String[] tags,
+                                   String imagePath,
+                                   LocalDateTime timeChanged);
 
     @Mapping(target = "time", expression = "java(toZonedDateTime(postRecord.getTime()))")
     @Mapping(target = "timeChanged", expression = "java(toZonedDateTime(postRecord.getTimeChanged()))")
     @Mapping(target = "publishDate", expression = "java(toZonedDateTime(postRecord.getPublishDate()))")
     @Mapping(target = "tags", expression = "java(mapText(postRecord.getTags()))")
     PostDto postRecord2PostDto(PostRecord postRecord);
-
+    List<TagDto> tagRecordToTagDto(List<TagRecord> tagRecord);
     default List<TagDto> mapText(String[] text) {
         List<TagDto> tags = new ArrayList<>();
         if (text != null) {

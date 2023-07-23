@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="create-tag-table" author="Vladislav Lukin">
+        <createTable tableName="tag" schemaName="socialnet" remarks="Таблица для хранения тегов">
+            <column name="id" type="BIGINT" autoIncrement="true" remarks="Уникальный идентификатор записи журнала изменений">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="tags_pkey"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN" remarks="Флаг, указывающий, удалена ли запись журнала изменений">
+            </column>
+            <column name="name" type="TEXT" remarks="Значение тега">
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

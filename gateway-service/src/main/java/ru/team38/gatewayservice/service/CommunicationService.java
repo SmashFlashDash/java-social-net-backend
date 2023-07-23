@@ -5,10 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
+import ru.team38.common.dto.post.TagDto;
 import ru.team38.gatewayservice.clients.CommunicationsServiceClient;
 
 import java.util.List;
@@ -78,5 +81,15 @@ public class CommunicationService {
     }
     public ResponseEntity<String> deletePost(Long id) {
         return communicationsServiceClient.deletePost(id);
+    }
+
+    public List<TagDto> getTag(String tag){
+        try {
+            ResponseEntity<List<TagDto>> responseEntity = communicationsServiceClient.getTag(tag);
+            return responseEntity.getBody();
+        } catch (FeignException e) {
+            log.error(e.contentUTF8());
+            throw new RuntimeException(e.contentUTF8(), e);
+        }
     }
 }
