@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="create-message-table" author="Vladimir Lisunov">
+        <createTable tableName="message" schemaName="socialnet" remarks="Таблица для сущности сообщения">
+            <!-- table columns -->
+            <column name="id" type="uuid" remarks="Уникальный идентификатор сообщения">
+                <constraints nullable="false" unique="true" primaryKey="true" primaryKeyName="message_pkey"/>
+            </column>
+
+            <column name="is_deleted" type="BOOLEAN" remarks="Флаг, указывающий, удалено ли сообщение">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="time" type="TIMESTAMP WITHOUT TIME ZONE" remarks="Дата и время отправки сообщения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="conversation_partner1" type="uuid" remarks="Уникальный идентификатор первого собеседника">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="conversation_partner2" type="uuid" remarks="Уникальный идентификатор второго собеседника">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="message_text" type="TEXT" remarks="Текст сообщения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="read_status" type="TEXT" remarks="Текстовый код - статус прочтения">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="dialog_id" type="uuid" remarks="Уникальный идентификатор диалога">
+                <constraints nullable="false"/>
+            </column>
+
+        </createTable>
+
+        <!-- keys -->
+        <addUniqueConstraint columnNames="id" constraintName="message_id_key" tableName="message" schemaName="socialnet"/>
+
+    </changeSet>
+</databaseChangeLog>

@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.team38.common.dto.dialog.PageDialogDto;
+import ru.team38.common.dto.dialog.UnreadCountDto;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
@@ -14,11 +16,11 @@ import java.util.UUID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/post")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class CommunicationController {
     private final CommunicationService communicationService;
-    @GetMapping()
+    @GetMapping("/post")
     public ContentPostDto getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
                                   @RequestParam(value = "page", required = false) Integer page,
                                   @RequestParam(value = "sort", required = false) List<String> sort,
@@ -32,22 +34,38 @@ public class CommunicationController {
         log.info("Executing getPost request");
         return communicationService.getPost(withFriends, page, sort, isDeleted, size, accountIds, tags, dateFrom, dateTo, author);
     }
-    @GetMapping("/{id}")
+
+    @GetMapping("/dialogs")
+    public PageDialogDto getDialogs(@RequestParam(value = "page") Integer page,
+                                    @RequestParam(value = "size", required = false, defaultValue = "20")
+                                    Integer size,
+                                    @RequestParam(value = "sort", required = false) List<String> sort){
+        log.info("Executing getDialogs request");
+        return communicationService.getDialogs(page, size, sort);
+    }
+
+    @GetMapping("/dialogs/unread")
+    public UnreadCountDto getUnreadMessagesCount(){
+        log.info("Executing getUnreadMessagesCount request");
+        return communicationService.getUnreadMessagesCount();
+    }
+
+    @GetMapping("/post/{id}")
     public PostDto getPostById(@PathVariable Long id) {
         log.info("Executing getPostById request");
         return communicationService.getPostById(id);
     }
-    @PostMapping()
+    @PostMapping("/post")
     public PostDto getCreatePost(@RequestBody CreatePostDto createPostDto){
         log.info("Executing getCreatePost request");
         return communicationService.getCreatePost(createPostDto);
     }
-    @PutMapping()
+    @PutMapping("/post")
     public PostDto getUpdatePost(@RequestBody CreatePostDto createPostDto){
         log.info("Executing getUpdatePost request");
         return communicationService.getUpdatePost(createPostDto);
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/post/{id}")
     public ResponseEntity<String> deletePost(@PathVariable Long id) {
         log.info("Executing deletePost request");
         return communicationService.deletePost(id);
