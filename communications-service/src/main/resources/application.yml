@@ -15,6 +15,13 @@ jwt:
   token-validity-min: 60
   cookie-max-age-min: 60
 
+yandexObjectStorage:
+  endpoint:
+  accessKey:
+  secretKey:
+  bucketName:
+  region: auto
+
 server:
   servlet:
     session:

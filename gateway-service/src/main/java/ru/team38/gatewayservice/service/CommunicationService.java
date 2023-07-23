@@ -10,10 +10,13 @@ import ru.team38.common.dto.dialog.UnreadCountDto;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.TagDto;
+import ru.team38.common.dto.storage.FileType;
+import ru.team38.common.dto.storage.FileUriResponse;
 import ru.team38.gatewayservice.clients.CommunicationsServiceClient;
 
 import java.util.List;
@@ -113,5 +116,9 @@ public class CommunicationService {
             log.error(e.contentUTF8());
             throw new RuntimeException(e.contentUTF8(), e);
         }
+    }
+
+    public FileUriResponse getUploadedFileUri(FileType type, MultipartFile file) {
+        return communicationsServiceClient.getUploadedFileUri(type, file).getBody();
     }
 }

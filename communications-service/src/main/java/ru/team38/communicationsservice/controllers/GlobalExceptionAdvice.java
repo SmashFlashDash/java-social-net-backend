@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import ru.team38.communicationsservice.exceptions.BadRequestException;
 import ru.team38.communicationsservice.exceptions.BadRequestPostExceptions;
 import ru.team38.communicationsservice.exceptions.NotFoundPostExceptions;
 
@@ -18,5 +19,9 @@ public class GlobalExceptionAdvice {
     public ResponseEntity<String> badRequestPostHandler(NotFoundPostExceptions ex) {
         ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Request not correct.");
+    }
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<String> badRequestHandler(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getLocalizedMessage());
     }
 }

@@ -94,8 +94,6 @@ docker pull gitlab/gitlab-runner:latest
 ***
 
 ### Конфигурация базы данных
-
-
 | property             | var       | text                                            |
 |----------------------|-----------|-------------------------------------------------|
 | db.postgres.host     |           | Хост базы данных (по умолчанию: localhost:5433) |
@@ -103,6 +101,18 @@ docker pull gitlab/gitlab-runner:latest
 | db.postgres.username | postgres  | Имя пользователя базы данных                    |
 | db.postgres.password | postgres  | Пароль пользователя базы данных                 |
 ***
+
+
+### Конфигурация aws-s3 (yandex object storage) для хранения файлов
+| property                       | var                                       | text                                                                        |
+|--------------------------------|-------------------------------------------|-----------------------------------------------------------------------------|
+| yandexObjectStorage.endpoint   | https://storage.yandexcloud.net/          | эндпоинт yandex cloud используемый зависимость aws-s3-sdk                   |
+| yandexObjectStorage.accessKey  | YCAJEg9dsfQhSCJAMoJ_i4CK2                 | Идентификатор статического ключа доступа к сервисному аккаунту yandex cloud |
+| yandexObjectStorage.secretKey  | YCMMT0nO2JO1tAMqmxFK28KZijMN0C1BRzokJQdB  | Cтатический ключа доступа к сервисному аккаунту yandex cloud                |
+| yandexObjectStorage.bucketName | team38bucket                              | Имя бакета в object storage                                                 |
+***
+
+
 ### Сборка проекта
 
 Для сборки и подключеня к бд проекта выполните следующие шаги:
