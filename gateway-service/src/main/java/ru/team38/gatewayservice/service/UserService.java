@@ -46,9 +46,9 @@ public class UserService {
         }
     }
 
-    public Integer getIncomingFriendRequestsCount() {
+    public CountDto getIncomingFriendRequestsCount() {
         try {
-            ResponseEntity<Integer> responseEntity = userServiceClient.getIncomingFriendRequestsCount();
+            ResponseEntity<CountDto> responseEntity = userServiceClient.getIncomingFriendRequestsCount();
             return responseEntity.getBody();
         } catch (FeignException e) {
             log.error(e.contentUTF8(), e);
@@ -87,6 +87,7 @@ public class UserService {
 
     public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
         ResponseEntity<PageFriendShortDto> responseEntity = userServiceClient.getFriendsByParameters(
+                friendSearchDto.getStatusCode(),
                 friendSearchDto.getFirstName(),
                 friendSearchDto.getCity(),
                 friendSearchDto.getCountry(),
@@ -103,8 +104,9 @@ public class UserService {
                 friendSearchDto.getAgeFrom(),
                 friendSearchDto.getAgeTo());
         return responseEntity.getBody();
-    
+
     }
+
     public ResponseEntity<List<CountryDto>> getCountries() {
         return userServiceClient.getCountries();
     }

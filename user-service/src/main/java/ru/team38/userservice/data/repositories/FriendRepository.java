@@ -10,6 +10,7 @@ import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.Friends;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.jooq.tables.records.FriendsRecord;
+import ru.team38.common.mappers.AccountMapper;
 import ru.team38.common.mappers.FriendDtoMapper;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class FriendRepository {
     private final DSLContext dsl;
     private final FriendDtoMapper friendDtoMapper = Mappers.getMapper(FriendDtoMapper.class);
     private final Account ACCOUNT = Account.ACCOUNT;
+    private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
 
     public int countIncomingFriendRequests(UUID accountId) {
         return dsl.fetchCount(Friends.FRIENDS, Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId)
@@ -45,16 +47,16 @@ public class FriendRepository {
         return friendDtoMapper.mapToFriendDto(friendsRecord, accountRecord);
     }
 
-    public List<FriendShortDto> getFriendsByParameters(UUID accountId, Condition condition) {
+    public List<AccountDto> getFriendsByParameters(UUID accountId, Condition condition, StatusCode statusCode) {
         return dsl.select()
-                .from(Friends.FRIENDS)
-                .join(Account.ACCOUNT)
+                .from(Account.ACCOUNT)
+                .join(Friends.FRIENDS)
                 .on(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(ACCOUNT.ID).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID)))
                 .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
-                .and(Friends.FRIENDS.STATUS_CODE.eq("FRIEND"))
+                .and(Friends.FRIENDS.STATUS_CODE.eq(statusCode.name()))
                 .and(condition)
                 .fetch()
-                .map(record -> mapToFriendShortDto(record, accountId));
+                .map(record -> accountMapper.accountRecordToAccountDto(record.into(Account.ACCOUNT)));
     }
 
     private FriendShortDto mapToFriendShortDto(Record record, UUID accountId) {
