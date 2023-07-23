@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create-comment-table" author="Stanislav Romanov">
+        <createTable tableName="comment" schemaName="socialnet" remarks="Таблица сущностей комментариев">
+            <column name="id" type="uuid" remarks="Идентификатор комментария">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="is_deleted" type="boolean" defaultValueBoolean="false" remarks="Удален ли комментарий"/>
+            <column name="comment_type" type="text" remarks="Тип комментария (к посту - POST, к комментарию - COMMENT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="timestamp with time zone" remarks="Время создания комментария">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time_changed" type="timestamp with time zone" remarks="Время последней правки комментария">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="uuid" remarks="Идентификатор автора комментария">
+                <constraints nullable="false"/>
+            </column>
+            <column name="parent_id" type="uuid" remarks="Идентификатор родительского комментария"/>
+            <column name="comment_text" type="text" remarks="Тело комментария">
+                <constraints nullable="false"/>
+            </column>
+            <column name="post_id" type="bigint" remarks="Идентификатор поста, с которым связан комментарий">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_blocked" type="boolean" defaultValueBoolean="false" remarks="Скрыт/заблокирован ли комментарий"/>
+            <column name="like_amount" type="integer" defaultValueNumeric="0" remarks="Количество лайков к комментарию"/>
+            <column name="my_like" type="boolean" defaultValueBoolean="false" remarks="Лайкнут ли комментарий пользователем - инициатором вызова соответствующего метода"/>
+            <column name="comments_count" type="integer" defaultValueNumeric="0" remarks="Количество комментариев к настоящему комментарию"/>
+            <column name="image_path" type="text" remarks="Путь к изображению к комментарию"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

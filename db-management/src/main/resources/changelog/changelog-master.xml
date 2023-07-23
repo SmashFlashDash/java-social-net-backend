@@ -12,4 +12,5 @@
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-token-extension.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-account-pk-to-uuid.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-notification.xml"/>
+    <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-comment.xml"/>
 </databaseChangeLog>

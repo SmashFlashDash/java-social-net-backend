@@ -95,8 +95,13 @@ public class AuthService {
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            String deviceUUID = jwtService.getDeviceUUID(token);
-            tokenBlacklistService.addTokensToBlacklistByDeviceUUID(deviceUUID);
+            try {
+                String deviceUUID = jwtService.getDeviceUUID(token);
+                tokenBlacklistService.addTokensToBlacklistByDeviceUUID(deviceUUID);
+            } catch (ExpiredJwtException e) {
+                log.error(e.getMessage());
+                tokenBlacklistService.addTokenToBlacklist(token);
+            }
         }
         SecurityContextHolder.clearContext();
     }
@@ -107,6 +112,7 @@ public class AuthService {
             username = jwtService.getUsername(refreshToken);
         } catch (ExpiredJwtException e) {
             tokenBlacklistService.addTokenToBlacklist(refreshToken);
+            SecurityContextHolder.clearContext();
             throw new InvalidTokenException("Invalid or expired refresh token");
         }
         String deviceUUID = jwtService.getDeviceUUID(refreshToken);

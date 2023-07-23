@@ -26,53 +26,53 @@ import java.util.UUID;
 
 import static org.jooq.impl.DSL.*;
 
-
 @Repository
 @RequiredArgsConstructor
 public class PostRepository {
+
     private final DSLContext dsl;
     private final Post post = Post.POST;
     private final Friends friends = Friends.FRIENDS;
     private final Account account = Account.ACCOUNT;
     private final PostMapper postMapper = Mappers.getMapper(PostMapper.class);
 
-    public List<PostDto> getListPost (PostSearchDto postSearchDto, String email){
-        UUID accountId = emailUser2idUser(email);
+    public List<PostDto> getPostDtosByEmail (PostSearchDto postSearchDto, String email){
+        UUID accountId = getUserIdByEmail(email);
         updateType();
-        if(postSearchDto.getIsDeleted()){
+        if(postSearchDto.getIsDeleted()) {
             return null;
         }
         if(postSearchDto.getAccountIds() != null){
-            return postMapper.postRecordToPostDto(postsByAccount(postSearchDto));
+            return postMapper.postRecords2PostDtos(getPostRecords(postSearchDto));
         }
         if(postSearchDto.getDateTo() != null ){
-            return postMapper.postRecordToPostDto(postsSearch(postSearchDto, accountId));
+            return postMapper.postRecords2PostDtos(searchPostsByUserId(postSearchDto, accountId));
         }
-        return postMapper.postRecordToPostDto(allPosts(postSearchDto, accountId));
+        return postMapper.postRecords2PostDtos(getAllPostRecords(postSearchDto, accountId));
     }
 
-    public PostDto getCreatePost(CreatePostDto createPostDto, String email) {
-        UUID accountId = emailUser2idUser(email);
-        return postMapper.postRecord2RequestPostDto(createPost(createPostDto, accountId));
+    public PostDto createPost(CreatePostDto createPostDto, String email) {
+        UUID accountId = getUserIdByEmail(email);
+        return postMapper.postRecord2PostDto(createPost(createPostDto, accountId));
     }
 
-    public PostDto getUpdatePost(CreatePostDto createPostDto) {
-        return postMapper.postRecord2RequestPostDto(updatePost(createPostDto));
+    public PostDto updatePost(CreatePostDto createPostDto) {
+        return postMapper.postRecord2PostDto(updatePostRecord(createPostDto));
     }
 
-    public PostDto getPostById(Long id){
+    public PostDto getPostDtoById(Long id){
         Record postById = dsl.select()
                 .from(post)
                 .where(post.ID.eq(id))
                 .fetchOne();
-        return postMapper.postRecord2RequestPostDto((PostRecord) postById);
+        return postMapper.postRecord2PostDto((PostRecord) postById);
     }
 
     public void deletePostById(Long id){
         dsl.deleteFrom(post).where(post.ID.eq(id)).execute();
     }
 
-    private PostRecord updatePost(CreatePostDto createPostDto) {
+    private PostRecord updatePostRecord(CreatePostDto createPostDto) {
         String[] tags = createTagsField(createPostDto.getTags());
         return dsl.update(post)
                 .set(post.POST_TEXT, createPostDto.getPostText())
@@ -90,10 +90,10 @@ public class PostRepository {
         LocalDateTime timeNow = LocalDateTime.now();
         LocalDateTime publishTime;
         String type;
-        if(createPostDto.getPublishDate() != null){
-            publishTime = getPublishDate(createPostDto.getPublishDate());
+        if(createPostDto.getPublishDate() != null) {
+            publishTime = getPublicationDate(createPostDto.getPublishDate());
             type = TypePost.QUEUED.toString();
-        }else{
+        } else {
             publishTime = timeNow;
             type = TypePost.POSTED.toString();
         }
@@ -128,12 +128,11 @@ public class PostRepository {
                         publishTime)
                 .returning()
                 .fetchOne();
-
     }
 
-    private List<PostRecord> allPosts(PostSearchDto postSearchDto, UUID accountId) {
+    private List<PostRecord> getAllPostRecords(PostSearchDto postSearchDto, UUID accountId) {
         int pageSize = postSearchDto.getSize();
-        if (postSearchDto.getWithFriends()) {
+        if(postSearchDto.getWithFriends()) {
             return dsl.select()
                     .from(post)
                     .join(friends)
@@ -145,7 +144,7 @@ public class PostRepository {
                     .limit(pageSize)
                     .fetch()
                     .into(PostRecord.class);
-        }else if(postSearchDto.getTags() != null){
+        } else if(postSearchDto.getTags() != null) {
             return dsl.select()
                     .from(post)
                     .where(tagsCondition(postSearchDto.getTags()))
@@ -154,7 +153,7 @@ public class PostRepository {
                     .limit(pageSize)
                     .fetch()
                     .into(PostRecord.class);
-        }else {
+        } else {
             Integer count = postSearchDto.getPage();
             int offset = (count != null) ? count * pageSize : 0;
             return dsl.select()
@@ -167,7 +166,8 @@ public class PostRepository {
                     .into(PostRecord.class);
         }
     }
-    private List<PostRecord> postsByAccount(PostSearchDto postSearchDto) {
+
+    private List<PostRecord> getPostRecords(PostSearchDto postSearchDto) {
         return dsl.select()
                 .from(post)
                 .where(post.AUTHOR_ID.eq(postSearchDto.getAccountIds()))
@@ -177,7 +177,8 @@ public class PostRepository {
                 .fetch()
                 .into(PostRecord.class);
     }
-    private List<PostRecord> postsSearch(PostSearchDto postSearchDto, UUID accountId) {
+
+    private List<PostRecord> searchPostsByUserId(PostSearchDto postSearchDto, UUID accountId) {
         return dsl.select()
                 .from(post)
                 .join(friends)
@@ -193,6 +194,7 @@ public class PostRepository {
                 .fetch()
                 .into(PostRecord.class);
     }
+
     private Condition tagsCondition(List<String> tags) {
         Condition tagsCondition = DSL.trueCondition();
         for (String tag : tags) {
@@ -237,6 +239,7 @@ public class PostRepository {
         }
         return timeCondition;
     }
+
     private SortField<?> sort (PostSearchDto postSearchDto){
         List<String> querySort = new ArrayList<>(postSearchDto.getSort());
         SortField<?> sortField = null;
@@ -250,7 +253,8 @@ public class PostRepository {
         }
         return sortField;
     }
-    private LocalDateTime getPublishDate(String dateTime) {
+
+    private LocalDateTime getPublicationDate(String dateTime) {
         Instant instant = Instant.parse(dateTime);
         ZoneId zoneId = ZoneId.systemDefault();
         ZonedDateTime zonedDateTime = instant.atZone(zoneId);
@@ -266,6 +270,7 @@ public class PostRepository {
             return new String[0];
         }
     }
+
     private void updateType(){
         dsl.update(post)
                 .set(post.TYPE, TypePost.POSTED.toString())
@@ -273,7 +278,8 @@ public class PostRepository {
                 .and(post.TYPE.eq(TypePost.QUEUED.toString()))
                 .execute();
     }
-    private UUID emailUser2idUser(String email){
+
+    private UUID getUserIdByEmail(String email){
         AccountRecord accountRecord = dsl.selectFrom(account)
                 .where(account.EMAIL.eq(email))
                 .fetchOne();
