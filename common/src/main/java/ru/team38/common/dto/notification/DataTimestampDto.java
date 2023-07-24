@@ -11,8 +11,8 @@ import java.time.ZonedDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationCountDto {
+public class DataTimestampDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private ZonedDateTime timestamp;
-    private CountDto data;
+    private Object data;
 }

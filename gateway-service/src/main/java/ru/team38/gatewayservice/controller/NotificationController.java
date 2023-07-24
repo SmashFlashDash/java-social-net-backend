@@ -1,10 +1,10 @@
 package ru.team38.gatewayservice.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import ru.team38.common.dto.notification.NotificationCountDto;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.gatewayservice.service.UserService;
 
 @RestController
@@ -13,8 +13,19 @@ import ru.team38.gatewayservice.service.UserService;
 public class NotificationController {
     private final UserService userService;
 
+    @GetMapping
+    public ResponseEntity<NotificationsPageDto> getNotifications() {
+        return ResponseEntity.ok(userService.getNotificationsPage());
+    }
+
+    @PutMapping("/readed")
+    public ResponseEntity<String> readAllNotifications() {
+        return ResponseEntity.ok(userService.readAllNotifiicatons());
+    }
+
+
     @GetMapping("/count")
-    public NotificationCountDto getNotificationsCount() {
+    public DataTimestampDto getNotificationsCount() {
         return userService.getNotificationsCount();
     }
 }

@@ -7,7 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.team38.common.dto.*;
-import ru.team38.common.dto.notification.NotificationCountDto;
+import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.gatewayservice.clients.UserServiceClient;
 
 import java.util.UUID;
@@ -77,8 +78,16 @@ public class UserService {
         }
     }
 
-    public NotificationCountDto getNotificationsCount() {
+    public DataTimestampDto getNotificationsCount() {
         return userServiceClient.getNotificationsCount().getBody();
+    }
+
+    public NotificationsPageDto getNotificationsPage() {
+        return userServiceClient.getNotificationsPage().getBody();
+    }
+
+    public String readAllNotifiicatons() {
+        return userServiceClient.readAllNotifications().getBody();
     }
 
     public ResponseEntity<String> deleteAccount() {
@@ -126,4 +135,5 @@ public class UserService {
                         accountSearchDto.getAgeTo());
         return responseEntity.getBody();
     }
+
 }
