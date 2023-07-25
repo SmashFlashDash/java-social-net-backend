@@ -11,6 +11,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.imageio.ImageIO;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 @Configuration
 @Slf4j
 public class YandexStorageConfig {
@@ -36,5 +40,15 @@ public class YandexStorageConfig {
             throw new Exception("Bucket \"" + bucketName + "\" not exist");
         }
         return s3client;
+    }
+
+    @Bean
+    public ThreadPoolExecutor imageExecutor() {
+        ImageIO.setUseCache(false);
+        return (ThreadPoolExecutor) Executors.newCachedThreadPool(r -> {
+            Thread t = Executors.defaultThreadFactory().newThread(r);
+            t.setDaemon(true);
+            return t;
+        });
     }
 }

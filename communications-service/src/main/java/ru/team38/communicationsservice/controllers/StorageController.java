@@ -18,6 +18,6 @@ public class StorageController {
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<FileUriResponse> getUploadedFileUri(@RequestParam FileType type, @RequestPart MultipartFile file) throws StatusException {
-        return ResponseEntity.ok(storageService.getUploadedFileUri(type, file));
+        return ResponseEntity.ok(storageService.uploadFile(type, file));
     }
 }

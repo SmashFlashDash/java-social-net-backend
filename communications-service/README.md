@@ -24,5 +24,6 @@
 -DyandexObjectStorage.accessKey=YCAJEg9dsfQhSCJAMoJ_i4CK2
 -DyandexObjectStorage.secretKey=YCMMT0nO2JO1tAMqmxFK28KZijMN0C1BRzokJQdB
 -DyandexObjectStorage.bucketName=team38bucket
+-Dspring.servlet.multipart.max-file-size=5MB
 ```
 3. Запустить сервис из верхней панели.
