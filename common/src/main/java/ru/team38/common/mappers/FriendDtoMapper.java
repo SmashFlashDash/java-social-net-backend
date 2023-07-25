@@ -40,6 +40,7 @@ public interface FriendDtoMapper {
     @Mapping(source = "accountRecord.isDeleted", target = "isDeleted")
     @Mapping(source = "friendsRecord.statusCode", target = "statusCode")
     @Mapping(source = "accountRecord.id", target = "friendId")
+    @Mapping(source = "accountRecord.id", target = "idFriend")
     @Mapping(source = "friendsRecord.previousStatus", target = "previousStatusCode")
     @Mapping(source = "friendsRecord.rating", target = "rating")
     FriendShortDto mapToFriendShortDto(FriendsRecord friendsRecord, AccountRecord accountRecord);

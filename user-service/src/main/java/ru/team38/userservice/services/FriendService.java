@@ -79,9 +79,13 @@ public class FriendService {
         friendSearchDto.setId(userId);
         Condition condition = getCondition(friendSearchDto);
         StatusCode statusCode = friendSearchDto.getStatusCode();
-        List<AccountDto> friendsList;
+        List<Object> friendsList;
         try {
-            friendsList = friendRepository.getFriendsByParameters(userId, condition, statusCode);
+            if (pageDto.getSize() == null) {
+                friendsList = friendRepository.getFriendsByParameters(userId, condition, statusCode);
+            } else {
+                friendsList = friendRepository.getFriendsByParametersTabs(userId, condition, statusCode);
+            }
         } catch (DatabaseQueryException e) {
             log.error("Error executing getFriends request from account ID {}", userId, e);
             throw new FriendsServiceException("Error getting current user's friends", e);
@@ -92,10 +96,10 @@ public class FriendService {
         return getPageFriendShortDto(friendsList, pageDto);
     }
 
-    public PageFriendShortDto getPageFriendShortDto(List<AccountDto> friendsList, PageDto pageDto) {
+    public PageFriendShortDto getPageFriendShortDto(List<Object> friendsList, PageDto pageDto) {
         Sort sort = new Sort(
                 true,
-                true,
+                false,
                 true
         );
         PageableObject pageableObject = new PageableObject(
@@ -103,21 +107,21 @@ public class FriendService {
                 sort,
                 pageDto.getSize(),
                 true,
-                true,
-                pageDto.getPage()
+                false,
+                0
         );
         return new PageFriendShortDto(
                 friendsList.size(),
+                1,
                 0,
-                pageDto.getPage(),
                 pageDto.getSize(),
                 friendsList,
                 sort,
                 true,
                 true,
-                0,
+                friendsList.size(),
                 pageableObject,
-                true
+                false
         );
     }
 

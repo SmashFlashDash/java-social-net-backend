@@ -47,7 +47,7 @@ public class FriendRepository {
         return friendDtoMapper.mapToFriendDto(friendsRecord, accountRecord);
     }
 
-    public List<AccountDto> getFriendsByParameters(UUID accountId, Condition condition, StatusCode statusCode) {
+    public List<Object> getFriendsByParameters(UUID accountId, Condition condition, StatusCode statusCode) {
         return dsl.select()
                 .from(Account.ACCOUNT)
                 .join(Friends.FRIENDS)
@@ -59,11 +59,23 @@ public class FriendRepository {
                 .map(record -> accountMapper.accountRecordToAccountDto(record.into(Account.ACCOUNT)));
     }
 
+    public List<Object> getFriendsByParametersTabs(UUID accountId, Condition condition, StatusCode statusCode) {
+        return dsl.select()
+                .from(Friends.FRIENDS)
+                .join(Account.ACCOUNT)
+                .on(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(ACCOUNT.ID).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID)))
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
+                .and(Friends.FRIENDS.STATUS_CODE.eq(statusCode.name()))
+                .and(condition)
+                .fetch()
+                .map(record -> mapToFriendShortDto(record, accountId));
+    }
+
     private FriendShortDto mapToFriendShortDto(Record record, UUID accountId) {
         FriendsRecord friendsRecord = record.into(Friends.FRIENDS);
         AccountRecord accountRecord = record.into(ACCOUNT);
         FriendShortDto friendShortDto = friendDtoMapper.mapToFriendShortDto(friendsRecord, accountRecord);
-        friendShortDto.setId(accountId);
+        friendShortDto.setId(friendShortDto.getFriendId());
         return friendShortDto;
     }
 

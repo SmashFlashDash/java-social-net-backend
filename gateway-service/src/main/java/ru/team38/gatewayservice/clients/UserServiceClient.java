@@ -57,7 +57,10 @@ public interface UserServiceClient {
             @RequestParam("city") String city,
             @RequestParam("country") String country,
             @RequestParam("ageFrom") Integer ageFrom,
-            @RequestParam("ageTo") Integer ageTo
+            @RequestParam("ageTo") Integer ageTo,
+            @RequestParam("page") Integer page,
+            @RequestParam("size") Integer size,
+            @RequestParam("sort") List<String> sort
     );
 
     @GetMapping("/api/v1/friends/recommendations")
@@ -80,10 +83,4 @@ public interface UserServiceClient {
                                                        @RequestParam String lastName,
                                                        @RequestParam Integer ageFrom,
                                                        @RequestParam Integer ageTo);
-
-
-
-
-
-
 }
