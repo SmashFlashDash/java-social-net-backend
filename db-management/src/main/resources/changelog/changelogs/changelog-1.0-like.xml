@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+    <changeSet id="create-like-table" author="Vladislav Lukin">
+        <createTable tableName="like" schemaName="socialnet" remarks="Таблица для хранения лайков">
+            <column name="id" type="UUID" remarks="Уникальный идентификатор лайка">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="like_pkey"/>
+            </column>
+            <column name="is_deleted" type="BOOLEAN" remarks="Флаг, указывающий, удален ли лайк">
+                <constraints nullable="false"/>
+            </column>
+            <column name="time" type="TIMESTAMP WITHOUT TIME ZONE" remarks="Время записи лайка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="UUID" remarks="ID аккаунта автора лайка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="item_id" type="UUID" remarks="ID поста или комментария лайка">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reaction_type" type="TEXT" remarks="Реакция">
+            </column>
+            <column name="type" type="TEXT" remarks="Тип лайка: POST, COMMENT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

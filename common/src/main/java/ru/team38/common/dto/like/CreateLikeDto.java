@@ -1,4 +1,4 @@
-package ru.team38.common.dto.post;
+package ru.team38.common.dto.like;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ReactionDto {
+public class CreateLikeDto {
     private String reactionType;
-    private Integer count;
+    private LikeType type;
 }

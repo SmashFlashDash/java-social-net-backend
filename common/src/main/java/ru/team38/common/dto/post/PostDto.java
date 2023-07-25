@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.team38.common.dto.like.ReactionDto;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PostDto {
-    private Long id;
+    private UUID id;
     private Boolean isDeleted;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private ZonedDateTime time;
@@ -21,12 +22,12 @@ public class PostDto {
     private ZonedDateTime timeChanged;
     private UUID authorId;
     private String title;
-    private TypePost type;
+    private PostType type;
     private String postText;
     private Boolean isBlocked;
     private Integer commentsCount;
     private List<ReactionDto> reactions;
-    private String myReactions;
+    private String myReaction;
     private List<TagDto> tags;
     private Integer likeAmount;
     private Boolean myLike;

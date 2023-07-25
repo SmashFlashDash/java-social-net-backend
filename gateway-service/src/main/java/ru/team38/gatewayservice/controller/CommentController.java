@@ -18,30 +18,30 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentDto> createComment(@PathVariable Long postId,
+    ResponseEntity<CommentDto> createComment(@PathVariable UUID postId,
                                              @RequestBody Map<String, String> payload) {
         return ResponseEntity.ok(commentService.createComment(postId, payload));
     }
 
     @PutMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentDto> updateComment(@PathVariable Long postId,
+    ResponseEntity<CommentDto> updateComment(@PathVariable UUID postId,
                                              @RequestBody CommentUpdateDto commentUpdateDto) {
         return ResponseEntity.ok(commentService.updateComment(postId, commentUpdateDto));
     }
 
     @DeleteMapping("/api/v1/post/{postId}/comment/{commentId}")
-    ResponseEntity<String> deleteComment(@PathVariable Long postId,
+    ResponseEntity<String> deleteComment(@PathVariable UUID postId,
                                          @PathVariable UUID commentId) {
         return ResponseEntity.ok(commentService.deleteComment(postId, commentId));
     }
 
     @GetMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentSearchDto> getComments(@PathVariable Long postId, Pageable pageable) {
+    ResponseEntity<CommentSearchDto> getComments(@PathVariable UUID postId, Pageable pageable) {
         return ResponseEntity.ok(commentService.getComments(postId, pageable));
     }
 
     @GetMapping("/api/v1/post/{postId}/comment/{commentId}/subcomment")
-    ResponseEntity<CommentSearchDto> getSubComments(@PathVariable Long postId,
+    ResponseEntity<CommentSearchDto> getSubComments(@PathVariable UUID postId,
                                                     @PathVariable UUID commentId,
                                                     Pageable pageable) {
         return ResponseEntity.ok(commentService.getSubComments(postId, commentId, pageable));

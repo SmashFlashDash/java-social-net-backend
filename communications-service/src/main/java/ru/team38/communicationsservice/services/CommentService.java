@@ -26,7 +26,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final JwtService jwtService;
 
-    public CommentDto createComment(HttpServletRequest request, Long postId, Map<String, String> payload) {
+    public CommentDto createComment(HttpServletRequest request, UUID postId, Map<String, String> payload) {
         if (payload.containsKey("parentId")) {
             return createSubComment(request, postId,
                     UUID.fromString(payload.get("parentId")), payload.get("commentText"));
@@ -56,7 +56,7 @@ public class CommentService {
         }
     }
 
-    public CommentDto createSubComment(HttpServletRequest request, Long postId, UUID parentId, String text) {
+    public CommentDto createSubComment(HttpServletRequest request, UUID postId, UUID parentId, String text) {
         String username = jwtService.getUsernameFromToken(request);
         CommentDto commentDto = CommentDto.builder()
                 .id(UUID.randomUUID())
@@ -71,17 +71,17 @@ public class CommentService {
         return commentRepository.createComment(commentDto);
     }
 
-    public void deleteComment(HttpServletRequest request, UUID commentId) {
+    public void deleteComment(HttpServletRequest request, UUID postId, UUID commentId) {
         String usernameFromToken = jwtService.getUsernameFromToken(request);
         String usernameOfCommentCreator = commentRepository.getUsernameByCommentId(commentId);
         if(usernameFromToken.equals(usernameOfCommentCreator)) {
-            commentRepository.deleteComment(commentId);
+            commentRepository.deleteComment(postId, commentId);
         } else {
             throw new BadCommentRequestException("No rights for deleting");
         }
     }
 
-    public CommentSearchDto getComments(Long postId, Pageable pageable) {
+    public CommentSearchDto getComments(UUID postId, Pageable pageable) {
         List<CommentDto> comments = commentRepository.getMainComments(postId, pageable);
         return createCommentSearchDto(comments, pageable);
     }

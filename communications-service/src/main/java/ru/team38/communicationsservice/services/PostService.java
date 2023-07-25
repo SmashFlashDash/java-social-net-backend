@@ -3,84 +3,75 @@ package ru.team38.communicationsservice.services;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.dto.post.ContentPostDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.PostSearchDto;
 
 import ru.team38.common.dto.post.*;
+import ru.team38.communicationsservice.services.utils.ConditionUtil;
 import ru.team38.communicationsservice.data.repositories.PostRepository;
-import ru.team38.communicationsservice.exceptions.NotFoundPostExceptions;
+import ru.team38.communicationsservice.services.utils.DtoAssembler;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class PostService {
-
+    private final ConditionUtil conditionUtil;
+    private final DtoAssembler dtoAssembler;
     private final PostRepository postRepository;
     private final JwtService jwtService;
-
-    public ContentPostDto getPost(HttpServletRequest request, PostSearchDto postSearchDto) throws NotFoundPostExceptions {
+    public ContentPostDto getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable){
         try {
-            if (postSearchDto.getWithFriends() == null){
-                postSearchDto.setWithFriends(false);
-            }
+            ConditionPostDto conditionPostDto = conditionUtil.createConditionPostDto(postSearchDto);
             String emailUser = jwtService.getUsernameFromToken(request);
-            List<PostDto> listPosts = postRepository.getPostDtosByEmail(postSearchDto, emailUser);
-            if (listPosts == null) {
-                throw new NotFoundPostExceptions("Post not found.");
-            }
-            return new ContentPostDto(new ArrayList<>(listPosts));
+            List<PostDto> listPosts = postRepository.getPostDtosByEmail(conditionPostDto, emailUser);
+
+            return dtoAssembler.createContentPostDto(listPosts, pageable);
         } catch (Exception e) {
             log.error("Error occurred while retrieving posts: {}", e.getMessage());
             throw e;
         }
     }
-
-    public PostDto createPost(HttpServletRequest request, CreatePostDto createPostDto) throws NotFoundPostExceptions {
+    @Transactional
+    public PostDto createPost(HttpServletRequest request, CreatePostDto createPostDto){
         try {
+            InsertPostDto insertPostDto = dtoAssembler.createInsertPostDto(createPostDto);
             String emailUser = jwtService.getUsernameFromToken(request);
-            PostDto post = postRepository.createPost(createPostDto, emailUser);
-            if (post == null) {
-                throw new NotFoundPostExceptions("Post not found.");
-            }
-            return post;
+
+            return postRepository.createPost(insertPostDto, emailUser);
         } catch (Exception e) {
             log.error("Error occurred while retrieving create post: {}", e.getMessage());
             throw e;
         }
     }
-
-    public PostDto updatePost(CreatePostDto createPostDto) throws NotFoundPostExceptions {
+    @Transactional
+    public PostDto updatePost(CreatePostDto createPostDto){
         try {
-            PostDto post = postRepository.updatePost(createPostDto);
-            if (post == null) {
-                throw new NotFoundPostExceptions("Post not found.");
-            }
-            return post;
+            InsertPostDto insertPostDto = dtoAssembler.createInsertPostDto(createPostDto);
+            return postRepository.updatePost(insertPostDto, createPostDto.getId());
         } catch (Exception e) {
             log.error("Error occurred while retrieving update post: {}", e.getMessage());
             throw e;
         }
     }
 
-    public PostDto getPostById(Long id) throws NotFoundPostExceptions {
+    public PostDto getPostById(UUID id){
         try {
-            PostDto post = postRepository.getPostDtoById(id);
-            if (post == null) {
-                throw new NotFoundPostExceptions("Post not found.");
-            }
-            return post;
+            return postRepository.getPostDtoById(id);
         } catch (Exception e) {
-            log.error("Error occurred while retrieving update post: {}", e.getMessage());
+            log.error("Error occurred while retrieving post: {}", e.getMessage());
             throw e;
         }
     }
-
-    public void deletePost(Long id){
+    @Transactional
+    public void deletePost(UUID id){
         postRepository.deletePostById(id);
     }
     public List<TagDto> getTag(String nameTag){

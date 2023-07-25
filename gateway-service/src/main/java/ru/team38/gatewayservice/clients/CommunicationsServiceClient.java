@@ -15,6 +15,8 @@ import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.TagDto;
 import ru.team38.common.dto.storage.FileType;
 import ru.team38.common.dto.storage.FileUriResponse;
+import ru.team38.common.dto.like.CreateLikeDto;
+import ru.team38.common.dto.like.LikeDto;
 
 import java.util.List;
 import java.util.Map;
@@ -25,15 +27,14 @@ public interface CommunicationsServiceClient {
 
     @GetMapping("/api/v1/post")
     ResponseEntity<ContentPostDto> getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
-                                           @RequestParam(value = "page", required = false) Integer page,
                                            @RequestParam(value = "sort", required = false) List<String> sort,
                                            @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
-                                           @RequestParam(value = "size", required = false) Integer size,
                                            @RequestParam(value = "accountIds", required = false) UUID accountIds,
                                            @RequestParam(value = "tags", required = false) List<String> tags,
                                            @RequestParam(value = "dateForm", required = false) String dateFrom,
                                            @RequestParam(value = "dateTo", required = false) String dateTo,
-                                           @RequestParam(value = "author", required = false) String author);
+                                           @RequestParam(value = "author", required = false) String author,
+                                           Pageable pageable);
     @GetMapping("/api/v1/dialogs")
     ResponseEntity<PageDialogDto> getDialogs(@RequestParam(value = "page") Integer page,
                                              @RequestParam(value = "size", required = false, defaultValue = "20")
@@ -42,27 +43,27 @@ public interface CommunicationsServiceClient {
     @GetMapping("/api/v1/dialogs/unread")
     ResponseEntity<UnreadCountDto> getUnreadMessagesCount();
     @GetMapping("/api/v1/post/{id}")
-    ResponseEntity<PostDto> getPostById(@PathVariable Long id);
+    ResponseEntity<PostDto> getPostById(@PathVariable UUID id);
     @PostMapping("/api/v1/post")
     ResponseEntity<PostDto> getCreatePost(@RequestBody CreatePostDto createPostDto);
     @PutMapping("/api/v1/post")
     ResponseEntity<PostDto> getUpdatePost(@RequestBody CreatePostDto createPostDto);
     @DeleteMapping("/api/v1/post/{id}")
-    ResponseEntity<String> deletePost(@PathVariable Long id);
+    ResponseEntity<String> deletePost(@PathVariable UUID id);
 
     @PostMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentDto> createComment(@PathVariable Long postId,
+    ResponseEntity<CommentDto> createComment(@PathVariable UUID postId,
                                              @RequestBody Map<String, String> payload);
     @PutMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentDto> updateComment(@PathVariable Long postId,
+    ResponseEntity<CommentDto> updateComment(@PathVariable UUID postId,
                                              @RequestBody CommentUpdateDto commentUpdateDto);
     @DeleteMapping("/api/v1/post/{postId}/comment/{commentId}")
-    ResponseEntity<String> deleteComment(@PathVariable Long postId,
+    ResponseEntity<String> deleteComment(@PathVariable UUID postId,
                                          @PathVariable UUID commentId);
     @GetMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentSearchDto> getComments(@PathVariable Long postId, Pageable pageable);
+    ResponseEntity<CommentSearchDto> getComments(@PathVariable UUID postId, Pageable pageable);
     @GetMapping("/api/v1/post/{postId}/comment/{commentId}/subcomment")
-    ResponseEntity<CommentSearchDto> getSubComments(@PathVariable Long postId,
+    ResponseEntity<CommentSearchDto> getSubComments(@PathVariable UUID postId,
                                                     @PathVariable UUID commentId,
                                                     Pageable pageable);
     @GetMapping("/api/v1/tag")
@@ -70,4 +71,12 @@ public interface CommunicationsServiceClient {
 
     @PostMapping(value = "/api/v1/storage", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     ResponseEntity<FileUriResponse> getUploadedFileUri(@RequestParam FileType type, @RequestPart MultipartFile file);
+    @PostMapping("/api/v1/post/{postId}/like")
+    ResponseEntity<LikeDto> getLikeByPost(@RequestBody CreateLikeDto createLikeDto, @PathVariable UUID postId);
+    @DeleteMapping("/api/v1/post/{postId}/like")
+    ResponseEntity<String> deleteLikeByPost(@PathVariable UUID postId);
+    @PostMapping("/api/v1/post/{postId}/comment/{commentId}/like")
+    ResponseEntity<LikeDto> getLikeByComment(@PathVariable UUID postId, @PathVariable UUID commentId);
+    @DeleteMapping("/api/v1/post/{postId}/comment/{commentId}/like")
+    ResponseEntity<String> deleteLikeByComment(@PathVariable UUID postId, @PathVariable UUID commentId);
 }
