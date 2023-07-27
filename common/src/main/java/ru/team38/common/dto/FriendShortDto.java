@@ -14,6 +14,7 @@ public class FriendShortDto {
     private Boolean isDeleted;
     private StatusCode statusCode;
     private UUID friendId;
+    private UUID idFriend;
     private StatusCode previousStatusCode;
     private Short rating;
 }

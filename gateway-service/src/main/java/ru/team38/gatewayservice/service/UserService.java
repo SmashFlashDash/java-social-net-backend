@@ -92,7 +92,10 @@ public class UserService {
                 friendSearchDto.getCity(),
                 friendSearchDto.getCountry(),
                 friendSearchDto.getAgeFrom(),
-                friendSearchDto.getAgeTo());
+                friendSearchDto.getAgeTo(),
+                pageDto.getPage(),
+                pageDto.getSize(),
+                pageDto.getSort());
         return responseEntity.getBody();
     }
 
