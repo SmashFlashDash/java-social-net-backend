@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="modify-account-table-photo-column" author="Alexandr Soldatov">
+        <dropColumn tableName="account" schemaName="socialnet">
+            <column name="photo_id"/>
+            <column name="photo_name"/>
+        </dropColumn>
+
+        <addColumn tableName="account" schemaName="socialnet">
+            <column name="profile_cover" type="VARCHAR(255)" remarks="Ссылка на фото профайла владельца учетной записи">
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="modify-notifications-table-content-column" author="Alexnadr Soldatov">
+        <addColumn tableName="notification" schemaName="socialnet">
+            <column name="content" type="VARCHAR(255)" remarks="Контент уведомления"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

@@ -4,7 +4,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
-import ru.team38.common.dto.notification.NotificationCountDto;
+import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.dto.notification.DataTimestampDto;
 
 import java.util.UUID;
 
@@ -48,7 +49,13 @@ public interface UserServiceClient {
     ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id);
 
     @GetMapping("/api/v1/notifications/count")
-    ResponseEntity<NotificationCountDto> getNotificationsCount();
+    ResponseEntity<DataTimestampDto> getNotificationsCount();
+
+    @GetMapping("/api/v1/notifications")
+    ResponseEntity<NotificationsPageDto> getNotificationsPage();
+
+    @PutMapping("/api/v1/notifications/readed")
+    ResponseEntity<String> readAllNotifications();
 
     @GetMapping("/api/v1/friends")
     ResponseEntity<PageFriendShortDto> getFriendsByParameters(
@@ -77,10 +84,11 @@ public interface UserServiceClient {
 
     @GetMapping("/api/v1/geo/country/{countryId}/city")
     ResponseEntity<List<CityDto>> getCitiesByCountryId(@PathVariable("countryId") String countryId);
-    
+
     @GetMapping("/api/v1/account/search")
     ResponseEntity<AccountResultSearchDto> findAccount(@RequestParam String firstName,
                                                        @RequestParam String lastName,
                                                        @RequestParam Integer ageFrom,
                                                        @RequestParam Integer ageTo);
+
 }

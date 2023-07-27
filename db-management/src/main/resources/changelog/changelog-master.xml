@@ -16,4 +16,5 @@
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-comment.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-tag.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-file-storage.xml"/>
+    <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-modify-account-notifications.xml"/>
 </databaseChangeLog>

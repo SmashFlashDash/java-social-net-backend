@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.team38.common.dto.StatusCode;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -22,7 +23,6 @@ public class AccountDto {
     private String email;
     private String password;
     private String phone;
-    private String photo;
     private String about;
     private String city;
     private String country;
@@ -35,8 +35,8 @@ public class AccountDto {
     private ZonedDateTime lastOnlineTime;
     private Boolean isOnline;
     private Boolean isBlocked;
-    private Long photoId;
-    private String photoName;
+    private String photo;
+    private String profileCover;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     private ZonedDateTime createdOn;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
