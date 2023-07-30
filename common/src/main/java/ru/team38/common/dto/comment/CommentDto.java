@@ -21,7 +21,7 @@ public class CommentDto {
     private UUID authorId;
     private UUID parentId;
     private String commentText;
-    private Long postId;
+    private UUID postId;
     private Boolean isBlocked;
     private Integer likeAmount;
     private Boolean myLike;

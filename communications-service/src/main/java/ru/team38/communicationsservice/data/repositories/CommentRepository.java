@@ -10,6 +10,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.team38.common.dto.comment.CommentDto;
+import ru.team38.common.dto.comment.CommentType;
 import ru.team38.common.jooq.Tables;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
@@ -19,6 +20,8 @@ import ru.team38.common.mappers.CommentMapper;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static org.jooq.impl.DSL.select;
 
 @Repository
 @RequiredArgsConstructor
@@ -32,6 +35,12 @@ public class CommentRepository {
                 .set(commentMapper.commentDtoToCommentRecord(commentDto))
                 .returning()
                 .fetchOne();
+        if (isPostComment(commentDto.getId())) {
+            dsl.update(Tables.POST)
+                    .set(Tables.POST.COMMENTS_COUNT, Tables.POST.COMMENTS_COUNT.plus(1))
+                    .where(Tables.POST.ID.eq(commentDto.getPostId()))
+                    .execute();
+        }
         return commentMapper.commentRecordToCommentDto(commentRecord);
     }
 
@@ -45,13 +54,20 @@ public class CommentRepository {
         return commentMapper.commentRecordToCommentDto(commentRecord);
     }
 
-    public void deleteComment(UUID commentId) {
-        dsl.deleteFrom(Tables.COMMENT)
+    public void deleteComment(UUID postId, UUID commentId) {
+        if (isPostComment(commentId)){
+            updatePost(postId);
+            deleteLikeBySubComment(commentId);
+            deleteSubComment(commentId);
+        }
+        deleteLikeByComment(commentId);
+        dsl.update(Tables.COMMENT)
+                .set(Tables.COMMENT.IS_DELETED, true)
                 .where(Tables.COMMENT.ID.eq(commentId))
                 .execute();
     }
 
-    public List<CommentDto> getMainComments(Long postId, Pageable pageable) {
+    public List<CommentDto> getMainComments(UUID postId, Pageable pageable) {
         return getComments(Tables.COMMENT.POST_ID.eq(postId).and(Tables.COMMENT.PARENT_ID.isNull()), pageable);
     }
 
@@ -70,6 +86,7 @@ public class CommentRepository {
         return dsl.selectFrom(Tables.COMMENT)
                 .where(condition)
                 .and(Tables.COMMENT.IS_DELETED.eq(false))
+                .and(Tables.COMMENT.IS_BLOCKED.eq(false))
                 .orderBy(sortFields)
                 .limit(pageable.getPageSize() + 1)
                 .offset(pageable.getOffset())
@@ -92,5 +109,37 @@ public class CommentRepository {
                 .where(Tables.COMMENT.ID.eq(id))
                 .fetchOneInto(AccountRecord.class);
         return rec == null ? null : rec.get(Tables.ACCOUNT.EMAIL);
+    }
+    private Boolean isPostComment(UUID commentId){
+        return dsl.fetchExists(DSL.selectFrom(Tables.COMMENT)
+                .where(Tables.COMMENT.ID.eq(commentId))
+                .and(Tables.COMMENT.COMMENT_TYPE.eq(CommentType.POST.toString())));
+    }
+
+    private void updatePost(UUID postId) {
+        dsl.update(Tables.POST)
+                .set(Tables.POST.COMMENTS_COUNT, Tables.POST.COMMENTS_COUNT.minus(1))
+                .where(Tables.POST.ID.eq(postId))
+                .execute();
+    }
+    private void deleteLikeBySubComment(UUID commentId) {
+        dsl.update(Tables.LIKE)
+                .set(Tables.LIKE.IS_DELETED, true)
+                .where(Tables.LIKE.ITEM_ID.in(
+                        select(Tables.COMMENT.ID)
+                                .from(Tables.COMMENT)
+                                .where(Tables.COMMENT.PARENT_ID.eq(commentId))
+                ))
+                .execute();
+    }
+    private void deleteSubComment(UUID commentId){
+        dsl.update(Tables.COMMENT)
+                .set(Tables.COMMENT.IS_DELETED, true)
+                .where(Tables.COMMENT.PARENT_ID.eq(commentId)).execute();
+    }
+    private void deleteLikeByComment(UUID commentId){
+        dsl.update(Tables.LIKE)
+                .set(Tables.LIKE.IS_DELETED, true)
+                .where(Tables.LIKE.ITEM_ID.eq(commentId)).execute();
     }
 }

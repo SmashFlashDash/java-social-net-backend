@@ -15,23 +15,23 @@ public class CommentService {
 
     private final CommunicationsServiceClient communicationsServiceClient;
 
-    public CommentDto createComment(Long postId, Map<String, String> payload) {
+    public CommentDto createComment(UUID postId, Map<String, String> payload) {
         return communicationsServiceClient.createComment(postId, payload).getBody();
     }
 
-    public CommentDto updateComment(Long postId, CommentUpdateDto commentUpdateDto) {
+    public CommentDto updateComment(UUID postId, CommentUpdateDto commentUpdateDto) {
         return communicationsServiceClient.updateComment(postId, commentUpdateDto).getBody();
     }
 
-    public String deleteComment(Long postId, UUID commentId) {
+    public String deleteComment(UUID postId, UUID commentId) {
         return communicationsServiceClient.deleteComment(postId, commentId).getBody();
     }
 
-    public CommentSearchDto getComments(Long postId, Pageable pageable) {
+    public CommentSearchDto getComments(UUID postId, Pageable pageable) {
         return communicationsServiceClient.getComments(postId, pageable).getBody();
     }
 
-    public CommentSearchDto getSubComments(Long postId, UUID commentId, Pageable pageable) {
+    public CommentSearchDto getSubComments(UUID postId, UUID commentId, Pageable pageable) {
         return communicationsServiceClient.getSubComments(postId, commentId, pageable).getBody();
     }
 }

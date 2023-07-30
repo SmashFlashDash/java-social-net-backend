@@ -6,16 +6,16 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.team38.common.dto.storage.FileType;
 import ru.team38.common.dto.storage.FileUriResponse;
-import ru.team38.gatewayservice.service.CommunicationService;
+import ru.team38.gatewayservice.service.PostService;
 
 @RequestMapping("/api/v1/storage")
 @RestController
 @RequiredArgsConstructor
 public class StorageController {
-    private final CommunicationService communicationService;
+    private final PostService postService;
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public FileUriResponse getUploadedFileUri(@RequestParam FileType type, @RequestPart MultipartFile file) {
-        return communicationService.getUploadedFileUri(type, file);
+        return postService.getUploadedFileUri(type, file);
     }
 }

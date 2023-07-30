@@ -1,20 +1,23 @@
 package ru.team38.common.dto.post;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreatePostDto {
-    private UUID id;
+@Builder
+public class InsertPostDto {
     private String imagePath;
     private String postText;
-    private String publishDate;
-    private List<TagDto> tags;
     private String title;
+    private LocalDateTime time;
+    private String type;
+    private LocalDateTime publishDate;
+    private String[] tags;
+    private LocalDateTime timeChanged;
 }
