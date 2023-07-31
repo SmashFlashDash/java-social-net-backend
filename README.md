@@ -39,3 +39,105 @@
 5 Выполнить docker-compose на сервере
 
 6 Проверить доступность фронта и работоспособность сервисов
+
+
+## Развертывание на удаленном сервере:
+
+1. **Подключиться к удаленному серверу:**
+    
+    Используйте следующую команду, чтобы установить безопасное соединение:
+    ```
+    ssh -i <путь к файлу приватного ключа> server_username@server_host
+    ```
+    где \socialnet - путь к вашему приватному ssh ключу
+
+2. **Создайте новый каталог для вашего проекта с помощью команды mkdir:**
+    ```
+    mkdir project
+    ```
+
+3. **Установите Docker:**
+
+   - **Обновите существующий список пакетов:**
+    ```
+    sudo apt update
+    ```
+   - **Установите предварительные пакеты:**
+    ```
+    sudo apt install apt-transport-https ca-certificates curl software-properties-common
+    ```
+   (Они позволят apt использовать пакеты через HTTPS)
+   - **Добавьте официальный GPG-ключ Docker:**
+    ```
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/docker.gpg
+    ```
+   - **Добавьте репозиторий Docker в источники APT:**
+    ```
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    ```
+   - **Обновите базу данных пакетов:**
+
+   (Это включит пакеты Docker из недавно добавленного репозитория:)
+    ```
+    sudo apt update
+    ```
+   - **Убедитесь, что вы устанавливаете Docker из репозитория Docker, а не репозитория Ubuntu по умолчанию:**
+    ```
+    apt-cache policy docker-ce
+    ```
+    Вывод должен выглядеть следующим образом:
+    ```
+    docker-ce:
+        Installed: (none)
+        Candidate: 5:20.10.6~3-0~ubuntu-focal
+        Version table:
+            5:20.10.6~3-0~ubuntu-focal 500
+                500 https://download.docker.com/linux/ubuntu focal/stable amd64 Packages
+    ```
+   - **Установите Docker:**
+    ```
+    sudo apt install docker-ce
+    ```
+   - **Убедитесь, что Docker работает:**
+    ```
+    sudo systemctl status docker
+    ```
+
+4. **Установите Docker Compose:**
+    - **Скачать Docker Compose:**
+      
+      ```
+      sudo curl -L "https://github.com/docker/compose/releases/<путь к выбранному двоичному файлу для соответствующей архитектуры сервера>" -o /usr/bin/docker-compose
+      ```
+    - **Сделать Docker Compose исполняемым:**
+      ```
+      sudo chmod +x /usr/bin/docker-compose
+      ```
+    - **Проверьте установку Docker Compose:**
+      
+      Если версия отображается, установка прошла успешно:
+      ```
+      docker-compose --version
+      ```
+
+5. **Перенос файлов проекта:** (с терминала на локальной машине)
+    - **Копировать каталоги:**
+      Используйте команду `scp`, чтобы рекурсивно скопировать необходимые каталоги (например, миграции или тестовые скрипты) в каталог проекта на удаленном сервере:
+      ```
+      scp -r -i <путь к файлу приватного ключа> ./db-management/src/main/resources/changelog server_username@server_host:~<путь к папке проекта из корневого каталога>
+      ```
+    - **Копировать отдельные файлы:**
+      Точно так же скопируйте отдельные файлы, такие как `.env` или `docker-compose.yml`:
+      ```
+      scp -i <путь к файлу приватного ключа> ./docker-compose.yml server_username@server_host:~<путь к папке проекта из корневого каталога>
+      ```
+
+6. **Запустить сервисы:**
+   Используйте Docker Compose для запуска сервисов в автономном режиме:
+    ```
+    docker-compose up -d
+    ```
+    Если возникли проблемы с разрешениями, добавьте пользователя в группу докера и перезайдите на удаленный сервер:
+    ```
+    sudo usermod -aG docker ${USER}
+    ```
