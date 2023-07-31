@@ -2,7 +2,6 @@ package ru.team38.userservice.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.commons.text.WordUtils;
 import org.jooq.DSLContext;
 import org.mapstruct.factory.Mappers;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.PageAccountDto;
 import ru.team38.common.dto.AccountSearchDto;
+import ru.team38.common.dto.PageAccountDto;
 import ru.team38.common.dto.PageDto;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
@@ -42,7 +41,7 @@ public class AccountService {
 
     @LoggingMethod
     public AccountDto createAccount(AccountDto accountDto) {
-        return accountRepository.createAccount(accountDto);
+        return accountRepository.save(accountDto);
     }
 
     @LoggingMethod
@@ -65,7 +64,7 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public AccountDto getAccountById(UUID id){
+    public AccountDto getAccountById(UUID id) {
         AccountRecord accountRecord = DSL.selectFrom(ACCOUNT)
                 .where(ACCOUNT.ID.eq(id))
                 .fetchOne();

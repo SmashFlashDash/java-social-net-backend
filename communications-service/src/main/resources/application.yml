@@ -25,6 +25,9 @@ yandexObjectStorage:
   bucketName:
   region: auto
 
+jobs:
+  addNotificationBirthday.cron: '-'
+
 server:
   servlet:
     session:

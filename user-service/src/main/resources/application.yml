@@ -62,3 +62,6 @@ preferences:
   friendship-recommendations:
     age-limit-top: 5
     age-limit-bottom: 5
+
+jobs:
+  addNotificationBirthday.cron: '0 0 0 * * *'

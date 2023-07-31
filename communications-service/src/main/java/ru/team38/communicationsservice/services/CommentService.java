@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingClass;
 import ru.team38.common.dto.comment.*;
+import ru.team38.common.dto.notification.NotificationTypeEnum;
+import ru.team38.common.services.NotificationAddService;
 import ru.team38.communicationsservice.data.repositories.CommentRepository;
 import ru.team38.communicationsservice.exceptions.BadCommentRequestException;
 
@@ -22,26 +24,28 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @LoggingClass
 public class CommentService {
-
     private final CommentRepository commentRepository;
     private final JwtService jwtService;
+    private final NotificationAddService notificationService;
 
     public CommentDto createComment(HttpServletRequest request, UUID postId, Map<String, String> payload) {
         if (payload.containsKey("parentId")) {
             return createSubComment(request, postId,
                     UUID.fromString(payload.get("parentId")), payload.get("commentText"));
         }
-        String username = jwtService.getUsernameFromToken(request);
+        String authorName = jwtService.getUsernameFromToken(request);
         CommentDto commentDto = CommentDto.builder()
                 .id(UUID.randomUUID())
                 .commentType(CommentType.POST)
                 .time(ZonedDateTime.now())
                 .timeChanged(ZonedDateTime.now())
-                .authorId(commentRepository.getIdByUsername(username))
+                .authorId(commentRepository.getIdByUsername(authorName))
                 .commentText(payload.get("commentText"))
                 .postId(postId)
                 .build();
-        return commentRepository.createComment(commentDto);
+        commentDto = commentRepository.createComment(commentDto);
+        notificationService.addNotification(commentDto.getAuthorId(), commentDto, NotificationTypeEnum.POST_COMMENT);
+        return commentDto;
     }
 
     public CommentDto updateComment(HttpServletRequest request, CommentUpdateDto commentUpdateDto) {
@@ -57,18 +61,20 @@ public class CommentService {
     }
 
     public CommentDto createSubComment(HttpServletRequest request, UUID postId, UUID parentId, String text) {
-        String username = jwtService.getUsernameFromToken(request);
+        String authorName = jwtService.getUsernameFromToken(request);
         CommentDto commentDto = CommentDto.builder()
                 .id(UUID.randomUUID())
                 .commentType(CommentType.COMMENT)
                 .time(ZonedDateTime.now())
                 .timeChanged(ZonedDateTime.now())
-                .authorId(commentRepository.getIdByUsername(username))
+                .authorId(commentRepository.getIdByUsername(authorName))
                 .commentText(text)
                 .postId(postId)
                 .parentId(parentId)
                 .build();
-        return commentRepository.createComment(commentDto);
+        commentDto = commentRepository.createComment(commentDto);
+        notificationService.addNotification(commentDto.getAuthorId(), commentDto, NotificationTypeEnum.COMMENT_COMMENT);
+        return commentDto;
     }
 
     public void deleteComment(HttpServletRequest request, UUID postId, UUID commentId) {

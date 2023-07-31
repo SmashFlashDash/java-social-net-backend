@@ -113,6 +113,8 @@
                     </jdbc>
                     <generator>
                         <database>
+                            <includeSequences>true</includeSequences>
+                            <includeSystemSequences>true</includeSystemSequences>
                             <name>org.jooq.meta.postgres.PostgresDatabase</name>
                             <inputSchema>${db.postgres.name}</inputSchema>
                             <includes>.*</includes>
