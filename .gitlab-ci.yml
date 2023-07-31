@@ -61,5 +61,15 @@ deploy:
 
     - echo "Logging out of Docker Hub"
     - docker logout
+
+    - 'which ssh-agent || ( apk update && apk add openssh-client )'
+    - eval $(ssh-agent -s)
+    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - scp docker-compose.yml $SSH_USER@$SSH_HOST:/home/socialnet/project
+    - scp -r ./db-management/src/main/resources/changelog $SSH_USER@$SSH_HOST:/home/socialnet/project
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'cd /home/socialnet/project && docker-compose pull'
+    - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'cd /home/socialnet/project && docker-compose up -d'
   only:
    - master

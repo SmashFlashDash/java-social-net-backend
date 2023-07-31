@@ -8,7 +8,7 @@ ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} communications-service.jar
 
 # Указываем команду для запуска приложения
-ENTRYPOINT ["java","-Dspring.datasource.url=jdbc:postgresql://postgres:5432/${postgres_db}","-Dspring.datasource.username=${postgres_user}","-Dspring.datasource.password=${postgres_password}","-jar","communications-service.jar"]
+ENTRYPOINT ["java","-Dspring.datasource.url=jdbc:postgresql://${postgres_host}:${postgres_internal_port}/${postgres_db}","-Dspring.datasource.username=${postgres_user}","-Dspring.datasource.password=${postgres_password}","-DyandexObjectStorage.endpoint=${yandex_endpoint}","-DyandexObjectStorage.accessKey=${yandex_accesskey}","-DyandexObjectStorage.secretKey=${yandex_secretkey}","-DyandexObjectStorage.bucketName=${yandex_bucketname}","-jar","communications-service.jar"]
 
 # Сообщаем Docker, что контейнер прослушивает трафик на указанном порту
 EXPOSE 8082
