@@ -36,7 +36,7 @@ public class AccountController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<AccountResultSearchDto> findAccount(AccountSearchDto accountSearch, PageDto page) {
+    public ResponseEntity<PageAccountDto> findAccount(AccountSearchDto accountSearch, PageDto page) {
         return ResponseEntity.ok(accountService.findAccount(accountSearch, page));
     }
 

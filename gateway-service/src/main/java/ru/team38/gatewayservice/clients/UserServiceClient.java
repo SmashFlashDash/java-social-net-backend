@@ -86,9 +86,9 @@ public interface UserServiceClient {
     ResponseEntity<List<CityDto>> getCitiesByCountryId(@PathVariable("countryId") String countryId);
 
     @GetMapping("/api/v1/account/search")
-    ResponseEntity<AccountResultSearchDto> findAccount(@RequestParam String firstName,
-                                                       @RequestParam String lastName,
-                                                       @RequestParam Integer ageFrom,
-                                                       @RequestParam Integer ageTo);
+    ResponseEntity<PageAccountDto> findAccount(@RequestParam String firstName,
+                                               @RequestParam String lastName,
+                                               @RequestParam Integer ageFrom,
+                                               @RequestParam Integer ageTo);
 
 }

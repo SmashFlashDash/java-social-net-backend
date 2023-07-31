@@ -127,8 +127,8 @@ public class UserService {
         return userServiceClient.getCitiesByCountryId(countryId);
     }
 
-    public AccountResultSearchDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
-        ResponseEntity<AccountResultSearchDto> responseEntity = userServiceClient
+    public PageAccountDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        ResponseEntity<PageAccountDto> responseEntity = userServiceClient
                 .findAccount(accountSearchDto.getFirstName(),
                         accountSearchDto.getLastName(),
                         accountSearchDto.getAgeFrom(),
