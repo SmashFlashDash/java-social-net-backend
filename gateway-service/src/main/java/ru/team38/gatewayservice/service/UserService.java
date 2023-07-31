@@ -7,13 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.team38.common.dto.*;
-import ru.team38.common.dto.notification.NotificationsPageDto;
 import ru.team38.common.dto.notification.DataTimestampDto;
+import ru.team38.common.dto.notification.NotificationSettingDto;
+import ru.team38.common.dto.notification.NotificationUpdateDto;
+import ru.team38.common.dto.notification.NotificationsPageDto;
 import ru.team38.gatewayservice.clients.UserServiceClient;
 
-import java.util.UUID;
-
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -86,8 +87,20 @@ public class UserService {
         return userServiceClient.getNotificationsPage().getBody();
     }
 
-    public String readAllNotifiicatons() {
+    public String readAllNotifications() {
         return userServiceClient.readAllNotifications().getBody();
+    }
+
+    public NotificationSettingDto getNotificationSetting() {
+        return userServiceClient.getNotificationSetting().getBody();
+    }
+
+    public NotificationSettingDto updateNotificationSetting(NotificationUpdateDto notificationUpdateDto) {
+        return userServiceClient.updateNotificationSetting(notificationUpdateDto).getBody();
+    }
+
+    public NotificationSettingDto setNotificationSetting(UUID id) {
+        return userServiceClient.setNotificationSetting(id).getBody();
     }
 
     public ResponseEntity<String> deleteAccount() {
@@ -135,5 +148,4 @@ public class UserService {
                         accountSearchDto.getAgeTo());
         return responseEntity.getBody();
     }
-
 }
