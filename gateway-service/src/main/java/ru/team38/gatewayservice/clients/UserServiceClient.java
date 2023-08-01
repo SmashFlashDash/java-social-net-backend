@@ -4,12 +4,13 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
-import ru.team38.common.dto.notification.NotificationsPageDto;
 import ru.team38.common.dto.notification.DataTimestampDto;
-
-import java.util.UUID;
+import ru.team38.common.dto.notification.NotificationSettingDto;
+import ru.team38.common.dto.notification.NotificationUpdateDto;
+import ru.team38.common.dto.notification.NotificationsPageDto;
 
 import java.util.List;
+import java.util.UUID;
 
 @FeignClient(name = "user-service", url = "${spring.services.user.url}")
 public interface UserServiceClient {
@@ -56,6 +57,15 @@ public interface UserServiceClient {
 
     @PutMapping("/api/v1/notifications/readed")
     ResponseEntity<String> readAllNotifications();
+
+    @GetMapping("/api/v1/notifications/settings")
+    ResponseEntity<NotificationSettingDto> getNotificationSetting();
+
+    @PutMapping("/api/v1/notifications/settings")
+    ResponseEntity<NotificationSettingDto> updateNotificationSetting(@RequestBody NotificationUpdateDto notificationUpdateDto);
+
+    @PostMapping("/api/v1/notifications/settings/{id}")
+    ResponseEntity<NotificationSettingDto> setNotificationSetting(@PathVariable UUID id);
 
     @GetMapping("/api/v1/friends")
     ResponseEntity<PageFriendShortDto> getFriendsByParameters(
