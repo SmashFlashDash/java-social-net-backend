@@ -7,6 +7,9 @@ captcha:
   clearCacheRate: 45 #min
 
 spring:
+  task:
+    scheduling:
+      timezone=Europe/Moscow
   datasource:
     url:
     username:

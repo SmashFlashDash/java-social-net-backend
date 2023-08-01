@@ -2,6 +2,7 @@ package ru.team38.userservice.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.AccountDto;
@@ -12,6 +13,8 @@ import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
 import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.jooq.tables.records.AccountRecord;
+import ru.team38.common.jooq.tables.records.FriendsRecord;
 import ru.team38.userservice.data.repositories.AccountRepository;
 import ru.team38.userservice.data.repositories.NotificationRepository;
 import ru.team38.userservice.security.jwt.JwtService;
@@ -89,5 +92,22 @@ public class NotificationService {
     private String getUsernameFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         return jwtService.getUsername(bearerToken.substring(7));
+    }
+    @Scheduled(cron = "0 0 0 * * *")
+    public void addNotificationBirthday(){
+        List<AccountRecord> accountRecords = notificationRepository.findAccountsByCurrentDate();
+        if (accountRecords != null) {
+            for (AccountRecord accountRecord : accountRecords) {
+                UUID authorId = accountRecord.getId();
+                String birthdayMessage = "🎉🎂 Не забудьте поздравить и пожелать счастья! 🎈🌟";
+                List<FriendsRecord> friendsRecords = notificationRepository.findFriendsByAuthorId(authorId);
+                if (friendsRecords != null) {
+                    for (FriendsRecord friendsRecord : friendsRecords) {
+                        UUID receiverId = friendsRecord.getAccountFromId();
+                        notificationRepository.addNotificationBirthday(authorId, receiverId, birthdayMessage);
+                    }
+                }
+            }
+        }
     }
 }
