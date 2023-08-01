@@ -8,7 +8,7 @@ ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} user-service.jar
 
 # Указываем команду для запуска приложения
-ENTRYPOINT ["java","-Dspring.datasource.url=jdbc:postgresql://postgres:5432/${postgres_db}","-Dspring.datasource.username=${postgres_user}","-Dspring.datasource.password=${postgres_password}","-jar", "user-service.jar"]
+ENTRYPOINT ["java","-Dspring.datasource.url=jdbc:postgresql://${postgres_host}:${postgres_internal_port}/${postgres_db}","-Dspring.datasource.username=${postgres_user}","-Dspring.datasource.password=${postgres_password}","-jar", "user-service.jar"]
 
 # Сообщаем Docker, что контейнер прослушивает трафик на указанном порту
 EXPOSE 8081
