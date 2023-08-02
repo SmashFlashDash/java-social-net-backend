@@ -43,6 +43,7 @@ public class JooqConfig {
     }
 
     private class ExceptionTranslator extends DefaultExecuteListener {
+        @Override
         public void exception(ExecuteContext context) {
             SQLDialect dialect = context.configuration().dialect();
             SQLExceptionTranslator translator

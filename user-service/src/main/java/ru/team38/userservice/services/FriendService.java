@@ -1,5 +1,6 @@
 package ru.team38.userservice.services;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.Condition;
@@ -8,19 +9,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.FriendDto;
+import org.springframework.transaction.annotation.Transactional;
+import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.*;
 import ru.team38.userservice.data.repositories.FriendRepository;
 import ru.team38.userservice.exceptions.DatabaseQueryException;
 import ru.team38.userservice.exceptions.FriendsServiceException;
 import ru.team38.userservice.exceptions.status.UnauthorizedException;
+import ru.team38.userservice.security.jwt.JwtService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static ru.team38.common.jooq.Tables.ACCOUNT;
 
@@ -31,6 +32,7 @@ public class FriendService {
 
     private final FriendRepository friendRepository;
     private final AccountService accountService;
+    private final JwtService jwtService;
 
     @Value("${preferences.friendship-recommendations.age-limit-bottom:5}")
     private int ageLimitBottom;
@@ -132,49 +134,24 @@ public class FriendService {
             throw new UnauthorizedException("User is not authenticated");
         }
         UUID userId = accountService.getAuthenticatedAccount().getId();
-        List<UUID> finalIds = new ArrayList<>();
-        List<UUID> friendsIds = getFriendsIds(userId);
-        List<UUID> friendsFriendsIds = new ArrayList<>();
-        if (friendsIds.size() != 0) {
-            friendsFriendsIds = getFriendsFriendsIds(userId, friendsIds);
-            finalIds.addAll(friendsFriendsIds);
-        }
+        List<UUID> friendsIds = friendRepository.getFriendsIds(userId);
+        List<UUID> friendsFriendsIds = getFriendsFriendsIds(userId, friendsIds);
+        List<UUID> finalIds = new ArrayList<>(friendsFriendsIds);
         finalIds.addAll(getRecommendationsIds(friendSearchDto, friendsIds, friendsFriendsIds));
         List<FriendShortDto> finalRecommendations = new ArrayList<>();
-        if (finalIds.size() != 0) {
-            try {
-                finalRecommendations = friendRepository.getFinalRecommendations(userId, finalIds);
-            } catch (DatabaseQueryException e) {
-                log.error("Error executing getFinalRecommendations request from account ID {}", userId, e);
-                throw new FriendsServiceException("Error getting list of accounts for friendship recommendations", e);
-            }
+        if (!finalIds.isEmpty()) {
+            finalRecommendations = friendRepository.getFinalRecommendations(finalIds);
         }
         return finalRecommendations;
     }
 
-    public List<UUID> getFriendsIds(UUID userId) {
-        List<UUID> friendsIds;
-        try {
-            friendsIds = friendRepository.getFriendsIds(userId, null);
-        } catch (DatabaseQueryException e) {
-            log.error("Error executing getFriendsIds request from account ID {}", userId, e);
-            throw new FriendsServiceException("Error getting current user's friends' IDs", e);
-        }
-        return friendsIds;
-    }
-
     public List<UUID> getFriendsFriendsIds(UUID userId, List<UUID> friendsIds) {
         List<UUID> friendsFriendsIds;
-        String friendsIdsString = friendsIds.stream()
-                .map(String::valueOf)
-                .map(s -> "'" + s + "'")
-                .collect(Collectors.joining(", "));
-            try {
-                friendsFriendsIds = friendRepository.getFriendsIds(userId, friendsIdsString);
-            } catch (DatabaseQueryException e) {
-                log.error("Error executing getFriendsIds request from account ID {}", userId, e);
-                throw new FriendsServiceException("Error getting current user's friends' IDs", e);
-            }
+        if (!friendsIds.isEmpty()) {
+            friendsFriendsIds = friendRepository.getFriendsFriendsIds(userId, friendsIds);
+        } else {
+            friendsFriendsIds = new ArrayList<>();
+        }
         return friendsFriendsIds;
     }
 
@@ -227,5 +204,24 @@ public class FriendService {
             friendSearchDto.setBirthDateFrom(LocalDate.now().minusYears(friendSearchDto.getAgeTo()));
         }
         return friendSearchDto;
+    }
+
+    @LoggingMethod
+    @Transactional
+    public FriendShortDto blockAccount(HttpServletRequest request, UUID accountToBlockId) {
+        String initiatorUsername = getInitiatorUsername(request);
+        return friendRepository.blockAccount(initiatorUsername, accountToBlockId);
+    }
+
+    @LoggingMethod
+    @Transactional
+    public FriendShortDto unblockAccount(HttpServletRequest request, UUID accountToUnblockId) {
+        String initiatorUsername = getInitiatorUsername(request);
+        return friendRepository.unblockAccount(initiatorUsername, accountToUnblockId);
+    }
+
+    private String getInitiatorUsername(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+        return jwtService.getUsername(bearerToken.substring(7));
     }
 }
