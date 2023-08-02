@@ -42,6 +42,7 @@ services:
   user-service:
     container_name: user-service
     image: javapro38/soc-net-user-svc
+    restart: unless-stopped
     depends_on:
       - postgres
     environment:
@@ -56,6 +57,7 @@ services:
   communications-service:
     container_name: communications-service
     image: javapro38/soc-net-comm-svc
+    restart: unless-stopped
     depends_on:
       - postgres
     environment:
@@ -74,6 +76,7 @@ services:
   gateway-service:
     container_name: gateway-service
     image: javapro38/soc-net-gate-svc
+    restart: unless-stopped
     depends_on:
       - user-service
       - communications-service
