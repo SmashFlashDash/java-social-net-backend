@@ -4,7 +4,7 @@ application:
   version: v1.0
 captcha:
   length: 3
-  clearCacheRate: 5 #min
+  clearCacheRate: 45 #min
 
 spring:
   datasource:

@@ -26,7 +26,7 @@ public class LikeController {
     @DeleteMapping("/{postId}/like")
     public ResponseEntity<String> deleteLikeByPost(HttpServletRequest request, @PathVariable UUID postId) {
         likeService.deleteLike(request, postId);
-        return ResponseEntity.ok("Пост удален");
+        return ResponseEntity.ok("Like удален");
     }
 
     @PostMapping("/{postId}/comment/{commentId}/like")
@@ -41,6 +41,6 @@ public class LikeController {
                                                       @PathVariable UUID postId,
                                                       @PathVariable UUID commentId) {
         likeService.deleteLike(request, commentId);
-        return ResponseEntity.ok("Пост удален");
+        return ResponseEntity.ok("Like удален");
     }
 }
