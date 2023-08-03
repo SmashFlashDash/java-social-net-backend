@@ -66,6 +66,7 @@ services:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_HOST: ${postgres_host}
       POSTGRES_INTERNAL_PORT: ${postgres_internal_port}
+      max_upload_file_size: ${max_upload_file_size}
       yandex_endpoint: ${yandex_endpoint}
       yandex_accesskey: ${yandex_accesskey}
       yandex_secretkey: ${yandex_secretkey}
@@ -84,6 +85,7 @@ services:
       user_service_url: ${user_service_url}
       communications_service_url: ${communications_service_url}
       cors_origin: ${cors_origin}
+      max_upload_file_size: ${max_upload_file_size}
     networks:
       - socialnet_network
 

@@ -1,6 +1,5 @@
 package ru.team38.communicationsservice;
 
-import com.amazonaws.services.s3.AmazonS3;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
@@ -13,7 +12,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.team38.communicationsservice.services.JwtService;
@@ -35,6 +33,7 @@ class JwtServiceGetUsernameFromTokenTest {
 		System.setProperty("spring.datasource.url", "jdbc:postgresql://${db.postgres.host}/${db.postgres.name}");
 		System.setProperty("spring.datasource.username", "${db.postgres.username}");
 		System.setProperty("spring.datasource.password", "${db.postgres.password}");
+		System.setProperty("spring.servlet.multipart.max-file-size", "5MB");
 	}
 
 		@Mock

@@ -10,6 +10,9 @@ spring:
     password:
   liquibase:
     enabled: false
+  servlet:
+    multipart:
+      max-file-size:
 jwt:
   secret: 3255526a4b323074654133697a626c6e67634b3333586c7a64425a79666e4676
   token-validity-min: 60

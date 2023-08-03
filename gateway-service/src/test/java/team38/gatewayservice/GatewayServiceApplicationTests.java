@@ -11,6 +11,7 @@ class GatewayServiceApplicationTests {
 		System.setProperty("spring.services.user.url", "http://localhost:8081");
 		System.setProperty("spring.services.communications.url", "http://localhost:8082");
 		System.setProperty("spring.cors.origin", "http://localhost:8088");
+		System.setProperty("spring.servlet.multipart.max-file-size", "5MB");
 	}
 
 	@Test

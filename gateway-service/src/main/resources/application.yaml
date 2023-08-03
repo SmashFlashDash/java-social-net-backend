@@ -6,3 +6,6 @@ spring:
       url:
   cors:
     origin:
+  servlet:
+    multipart:
+      max-file-size:
