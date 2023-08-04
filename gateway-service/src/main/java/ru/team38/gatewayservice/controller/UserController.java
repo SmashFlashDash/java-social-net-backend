@@ -10,6 +10,7 @@ import ru.team38.common.dto.*;
 import ru.team38.gatewayservice.service.UserService;
 
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -63,6 +64,16 @@ public class UserController {
     public List<FriendShortDto> getFriendsRecommendations(FriendSearchDto friendSearchDto) {
         log.info("Executing getFriendsRecommendations request");
         return userService.getFriendsRecommendations(friendSearchDto);
+    }
+
+    @PutMapping("/api/v1/friends/block/{id}")
+    public ResponseEntity<FriendShortDto> blockAccount(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.blockAccount(id));
+    }
+
+    @PutMapping("/api/v1/friends/unblock/{id}")
+    public ResponseEntity<FriendShortDto> unblockAccount(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.unblockAccount(id));
     }
 
     @GetMapping("/api/v1/geo/country")

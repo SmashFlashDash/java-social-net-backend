@@ -148,4 +148,12 @@ public class UserService {
                         accountSearchDto.getAgeTo());
         return responseEntity.getBody();
     }
+
+    public FriendShortDto blockAccount(UUID id) {
+        return userServiceClient.blockAccount(id).getBody();
+    }
+
+    public FriendShortDto unblockAccount(UUID id) {
+        return userServiceClient.unblockAccount(id).getBody();
+    }
 }

@@ -1,15 +1,15 @@
 package ru.team38.userservice.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
 import ru.team38.userservice.exceptions.FriendsServiceException;
 import ru.team38.userservice.services.FriendService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/friends")
@@ -31,5 +31,15 @@ public class FriendController {
     @GetMapping("/recommendations")
     public ResponseEntity<List<FriendShortDto>> getFriendsRecommendations(FriendSearchDto friendSearchDto) {
         return ResponseEntity.ok(friendService.getFriendsRecommendations(friendSearchDto));
+    }
+
+    @PutMapping("/block/{id}")
+    public ResponseEntity<FriendShortDto> blockAccount(HttpServletRequest request, @PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.blockAccount(request, id));
+    }
+
+    @PutMapping("/unblock/{id}")
+    public ResponseEntity<FriendShortDto> unblockAccount(HttpServletRequest request, @PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.unblockAccount(request, id));
     }
 }

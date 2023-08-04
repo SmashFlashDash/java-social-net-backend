@@ -101,4 +101,9 @@ public interface UserServiceClient {
                                                @RequestParam Integer ageFrom,
                                                @RequestParam Integer ageTo);
 
+    @PutMapping("/api/v1/friends/block/{id}")
+    ResponseEntity<FriendShortDto> blockAccount(@PathVariable UUID id);
+
+    @PutMapping("/api/v1/friends/unblock/{id}")
+    ResponseEntity<FriendShortDto> unblockAccount(@PathVariable UUID id);
 }
