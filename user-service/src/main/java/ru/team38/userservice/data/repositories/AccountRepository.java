@@ -18,6 +18,7 @@ import ru.team38.common.mappers.NotificationSettingMapper;
 import ru.team38.userservice.exceptions.AccountNotFoundException;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -64,33 +65,61 @@ public class AccountRepository {
         PageAccountDto pageAccountDto = new PageAccountDto();
 
         if (accountSearchDto.getFirstName() != null || accountSearchDto.getLastName() != null) {
-            Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto.getMaxBirthDate(),
-                    accountSearchDto.getMinBirthDate(), accountSearchDto.getFirstName(),
-                    accountSearchDto.getLastName()));
+            Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto));
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
                     .forEach(pageAccountDto::setAccount);
         }
 
-        if (pageAccountDto.getContent().isEmpty()
-                && (accountSearchDto.getFirstName() != null
-                && accountSearchDto.getLastName() != null)) {
-
-                String temp = accountSearchDto.getLastName();
-                accountSearchDto.setLastName(null);
-                findAccount(userId, accountSearchDto);
-                accountSearchDto.setFirstName(null);
-                accountSearchDto.setLastName(temp);
-                findAccount(userId, accountSearchDto);
+        if (!pageAccountDto.getContent().isEmpty()) {
+            return pageAccountDto;
         }
+
+        if (accountSearchDto.getFirstName() != null && accountSearchDto.getLastName() != null) {
+            String temp = accountSearchDto.getLastName();
+            accountSearchDto.setLastName(null);
+            findAccount(userId, accountSearchDto);
+            accountSearchDto.setFirstName(null);
+            accountSearchDto.setLastName(temp);
+            findAccount(userId, accountSearchDto);
+        } else {
+            if (accountSearchDto.getIds() != null && !accountSearchDto.getIds().isEmpty()) {
+                accountSearchDto.setAuthor(null);
+            }
+            Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto));
+            dslContext.select().from(ACCOUNT)
+                    .where(condition).fetch()
+                    .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
+                    .forEach(pageAccountDto::setAccount);
+            pageAccountDto.setTotalElements(pageAccountDto.getContent().size());
+        }
+
         return pageAccountDto;
     }
 
-    private Condition checkConditionToAccountSearch(UUID userId, LocalDate maxBirthDate, LocalDate minBirthDate,
-                                                    String firstName, String lastName) {
+    private Condition checkConditionToAccountSearch(UUID userId, AccountSearchDto accountSearchDto) {
+        LocalDate maxBirthDate = accountSearchDto.getMaxBirthDate();
+        LocalDate minBirthDate = accountSearchDto.getMinBirthDate();
+        String firstName = accountSearchDto.getFirstName();
+        String lastName = accountSearchDto.getLastName();
+        String author = accountSearchDto.getAuthor();
+        List<String> ids = accountSearchDto.getIds();
+        boolean isDeleted = accountSearchDto.isDeleted();
+
         Condition condition = ACCOUNT.ID.ne(userId);
         char ch = '%';
+
+        if (ids != null && !ids.isEmpty()) {
+            condition = condition.and(ACCOUNT.ID.in(ids));
+        }
+
+        condition = condition.and(ACCOUNT.IS_DELETED.eq(isDeleted));
+
+        if (author != null) {
+            condition = condition.and((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + author + ch))
+                    .or(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + author + ch)));
+        }
 
         if (maxBirthDate != null) {
             condition = condition.and(ACCOUNT.BIRTH_DATE.le(maxBirthDate));
@@ -102,7 +131,7 @@ public class AccountRepository {
             condition = condition.and(((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + firstName + ch))
                     .and(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + lastName + ch)))
                     .or((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + lastName + ch))
-                    .and(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + firstName + ch))));
+                            .and(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + firstName + ch))));
         }
         if (firstName != null && lastName == null) {
             condition = condition.and((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + firstName + ch))
