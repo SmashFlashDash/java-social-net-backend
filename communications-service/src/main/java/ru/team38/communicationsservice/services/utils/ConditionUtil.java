@@ -39,7 +39,15 @@ public class ConditionUtil {
         if(postSearchDto.getDateTo() != null){
             condition = condition.and(timeCondition(postSearchDto.getDateTo(), postSearchDto.getDateFrom()));
         }
+        if (postSearchDto.getText() != null){
+            condition = condition.and(textCondition(postSearchDto.getText()));
+        }
         return condition;
+    }
+    private Condition textCondition(String text){
+        String lowerText = text.toLowerCase();
+        return DSL.lower(Tables.POST.TITLE).contains(lowerText)
+                .or(DSL.lower(Tables.POST.POST_TEXT).contains(lowerText));
     }
     private Condition tagsCondition(List<String> tags) {
         Condition tagsCondition = DSL.trueCondition();

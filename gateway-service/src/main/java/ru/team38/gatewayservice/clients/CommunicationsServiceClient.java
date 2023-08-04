@@ -34,6 +34,7 @@ public interface CommunicationsServiceClient {
                                            @RequestParam(value = "dateForm", required = false) String dateFrom,
                                            @RequestParam(value = "dateTo", required = false) String dateTo,
                                            @RequestParam(value = "author", required = false) String author,
+                                           @RequestParam(value = "text", required = false) String text,
                                            Pageable pageable);
     @GetMapping("/api/v1/dialogs")
     ResponseEntity<PageDialogDto> getDialogs(@RequestParam(value = "page") Integer page,
