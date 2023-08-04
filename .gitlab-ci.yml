@@ -1,5 +1,6 @@
 stages:
   - build
+  - build_dev_master
   - remote_connection_check
   - deploy
 
@@ -23,6 +24,34 @@ build:
     - echo "job $CI_JOB_ID was successful"
     - echo "build number $CI_PIPELINE_ID"
 
+build_dev_master:
+  image: maven:3.8.5-openjdk-17-slim
+  services:
+    - name: postgres:15
+  variables:
+    MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+    MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version"
+    POSTGRES_USER: $postgres_user
+    POSTGRES_PASSWORD: $postgres_password
+    POSTGRES_DB: $postgres_db
+    POSTGRES_HOST_AUTH_METHOD: trust
+  cache:
+    paths:
+      - .m2/repository
+  stage: build_dev_master
+  script:
+    - mvn $MAVEN_CLI_OPTS clean install
+    - echo "job $CI_JOB_ID was successful"
+    - echo "build number $CI_PIPELINE_ID"
+  artifacts:
+    paths:
+      - user-service/target/
+      - communications-service/target/
+      - gateway-service/target/
+  only:
+    - develop
+    - master
+
 remote_connection_check:
   stage: remote_connection_check
   dependencies: []
@@ -34,8 +63,8 @@ remote_connection_check:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'ls /home/socialnet/project'
   only:
-    - master
     - develop
+    - master
 
 deploy:
   stage: deploy
@@ -45,8 +74,6 @@ deploy:
 
     - echo "Logging into Docker Hub"
     - echo $docker_hub_password | docker login -u $docker_hub_username --password-stdin > /dev/null 2>&1
-
-    - mvn $MAVEN_CLI_OPTS clean install
 
     - docker build -t javapro38/soc-net-user-svc ./user-service
     - docker push javapro38/soc-net-user-svc
@@ -70,5 +97,5 @@ deploy:
     - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'cd /home/socialnet/project && docker-compose pull'
     - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'cd /home/socialnet/project && docker-compose up -d'
   only:
-    - master
     - develop
+    - master
