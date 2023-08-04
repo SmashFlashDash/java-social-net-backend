@@ -51,6 +51,9 @@ services:
       POSTGRES_DB: ${postgres_db}
       POSTGRES_HOST: ${postgres_host}
       POSTGRES_INTERNAL_PORT: ${postgres_internal_port}
+      application_base_url: ${application_base_url}
+      app_mail_username: ${app_mail_username}
+      app_mail_password: ${app_mail_password}
     networks:
       - socialnet_network
 
@@ -71,6 +74,7 @@ services:
       yandex_accesskey: ${yandex_accesskey}
       yandex_secretkey: ${yandex_secretkey}
       yandex_bucketname: ${yandex_bucketname}
+
     networks:
       - socialnet_network
 

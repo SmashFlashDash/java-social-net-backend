@@ -5,6 +5,8 @@ import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -27,6 +29,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -39,6 +42,9 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
     private final TokenRepository tokenRepository;
+    private final EmailService emailService;
+    @Value("${application.base-url}")
+    private String baseUrl;
 
     @Transactional
     public void register(RegisterDto registerDto) {
@@ -121,4 +127,45 @@ public class AuthService {
         saveToken(username, newAccessToken, "access", deviceUUID);
         return new LoginResponse(newAccessToken, refreshToken);
     }
+
+    @Async
+    @Transactional
+    public CompletableFuture<Void> recoverPassword(HttpServletRequest request,
+                                                   PasswordRecoveryDto passwordRecoveryDto) {
+        String email = passwordRecoveryDto.getEmail();
+        String resetToken = UUID.randomUUID().toString();
+        ZonedDateTime tokenExpiration = ZonedDateTime.now().plusMinutes(15);
+        UUID accountId = accountRepository.getIdByEmail(email);
+        TokensDto tokenDto = new TokensDto(null, accountId, "reset", resetToken,
+                true, tokenExpiration, generateDeviceUUID(request));
+        tokenRepository.save(tokenDto);
+
+        String resetUrl = baseUrl + "/change-password/" + resetToken;
+        emailService.sendPasswordResetEmail(email, resetUrl);
+
+        return CompletableFuture.completedFuture(null);
+    }
+
+    public void checkAccountExisting(PasswordRecoveryDto passwordRecoveryDto) {
+        if (accountRepository.getAccountByEmail(passwordRecoveryDto.getEmail()).isEmpty()) {
+            throw new UsernameNotFoundException("Account doesn't exist");
+        }
+    }
+
+    @Transactional
+    public void setNewPassword(String linkId, NewPasswordDto newPasswordDto) {
+        String password = newPasswordDto.getPassword();
+        String resetToken = linkId.substring(linkId.lastIndexOf("/") + 1);
+        TokensDto tokensDto = tokenRepository.findByToken(resetToken);
+        if (tokensDto.getExpiration().isBefore(ZonedDateTime.now()) || !tokensDto.getIsValid()) {
+            throw new BadRequestException("Reset token is expired or invalid");
+        }
+        UUID accountId = tokensDto.getAccountId();
+        AccountDto accountDto = accountRepository.getAccountDtoById(accountId)
+                .orElseThrow(() -> new InvalidTokenException("Invalid or expired link"));
+        accountDto.setPassword(encoder.encode(password));
+        tokenBlacklistService.addTokenToBlacklist(resetToken);
+        accountRepository.updateAccount(accountDto);
+    }
+
 }

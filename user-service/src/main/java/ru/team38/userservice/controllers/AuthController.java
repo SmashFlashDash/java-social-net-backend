@@ -48,4 +48,19 @@ public class AuthController {
     public ResponseEntity<CaptchaDto> getCaptcha() throws CaptchaCreationException {
         return ResponseEntity.ok().body(captchaService.createCaptcha());
     }
+
+    @PostMapping("/password/recovery")
+    public ResponseEntity<String> recoverPassword(HttpServletRequest request,
+                                                       @RequestBody PasswordRecoveryDto passwordRecoveryDto) {
+        authService.checkAccountExisting(passwordRecoveryDto);
+        authService.recoverPassword(request, passwordRecoveryDto);
+        return ResponseEntity.ok("Ссылка для изменения пароля направлена на указанную почту");
+    }
+
+    @PostMapping("/password/recovery/{linkId}")
+    public ResponseEntity<String> setNewPassword(@PathVariable String linkId,
+                                                      @RequestBody NewPasswordDto newPasswordDto) {
+        authService.setNewPassword(linkId, newPasswordDto);
+        return ResponseEntity.ok("Пароль успешно изменен");
+    }
 }

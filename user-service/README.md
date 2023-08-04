@@ -23,7 +23,7 @@
 | preferences.friendship-recommendations.age-limit-top              |5                                                  | Верхняя граница возраста для рекоммендаций дружбы по умолчанию<br/> (от возраста пользователя) |
 | preferences.friendship-recommendations.age-limit-bottom           |5                                                  | Нижняя граница возраста для рекоммендаций дружбы по умолчанию<br/> (от возраста пользователя)  |
  
-Для того чтобы запустить сервис необходимо:
+Для того, чтобы запустить сервис локально, необходимо:
 1. Подключить базу данных (см. [localdev/README.md](../.localdev/README.md) или [db-management/README.md](../db-management/README.md))
 2. Настроить конфигурацию:
 - Откройте меню "Run" в верхней панели навигации IntelliJ IDEA.
@@ -38,6 +38,6 @@
 
 - В поле ввода введите необходимые переменные в формате:
 ```
--Dspring.datasource.url=jdbc:postgresql://localhost:5433/socialnet  -Dspring.datasource.username=postgres  -Dspring.datasource.password=postgres
+-Dspring.datasource.url=jdbc:postgresql://localhost:5433/socialnet -Dspring.datasource.username=postgres -Dspring.datasource.password=postgres -Dspring.mail.username=code_lounge@mail.ru -Dspring.mail.password=rBLLBxQs6U1DqHdxtpC5 -Dapplication.base-url=http://localhost:8088
 ```
 3. Запустить сервис.
