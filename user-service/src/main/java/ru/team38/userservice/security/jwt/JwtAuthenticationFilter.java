@@ -1,6 +1,7 @@
 package ru.team38.userservice.security.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,6 @@ import java.io.IOException;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
@@ -39,6 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 email = jwtService.getUsername(token);
             } catch (ExpiredJwtException e) {
                 tokenBlacklistService.addTokenToBlacklist(token);
+            } catch (MalformedJwtException e) {
+                log.error("Token wrong format: " + token);
             }
             if (email != null) {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(email);
