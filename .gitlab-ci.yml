@@ -22,11 +22,6 @@ build:
     - mvn $MAVEN_CLI_OPTS clean install
     - echo "job $CI_JOB_ID was successful"
     - echo "build number $CI_PIPELINE_ID"
-  artifacts:
-    paths:
-      - user-service/target/
-      - communications-service/target/
-      - gateway-service/target/
 
 remote_connection_check:
   stage: remote_connection_check
@@ -40,6 +35,7 @@ remote_connection_check:
     - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'ls /home/socialnet/project'
   only:
     - master
+    - develop
 
 deploy:
   stage: deploy
@@ -49,6 +45,8 @@ deploy:
 
     - echo "Logging into Docker Hub"
     - echo $docker_hub_password | docker login -u $docker_hub_username --password-stdin > /dev/null 2>&1
+
+    - mvn $MAVEN_CLI_OPTS clean install
 
     - docker build -t javapro38/soc-net-user-svc ./user-service
     - docker push javapro38/soc-net-user-svc
@@ -72,4 +70,5 @@ deploy:
     - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'cd /home/socialnet/project && docker-compose pull'
     - ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST 'cd /home/socialnet/project && docker-compose up -d'
   only:
-   - master
+    - master
+    - develop
