@@ -145,7 +145,11 @@ public class UserService {
                 .findAccount(accountSearchDto.getFirstName(),
                         accountSearchDto.getLastName(),
                         accountSearchDto.getAgeFrom(),
-                        accountSearchDto.getAgeTo());
+                        accountSearchDto.getAgeTo(),
+                        accountSearchDto.getAuthor(),
+                        accountSearchDto.getIds(),
+                        accountSearchDto.isDeleted()
+                );
         return responseEntity.getBody();
     }
 

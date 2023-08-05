@@ -99,7 +99,10 @@ public interface UserServiceClient {
     ResponseEntity<PageAccountDto> findAccount(@RequestParam String firstName,
                                                @RequestParam String lastName,
                                                @RequestParam Integer ageFrom,
-                                               @RequestParam Integer ageTo);
+                                               @RequestParam Integer ageTo,
+                                               @RequestParam String author,
+                                               @RequestParam List<String> ids,
+                                               @RequestParam Boolean isDeleted);
 
     @PutMapping("/api/v1/friends/block/{id}")
     ResponseEntity<FriendShortDto> blockAccount(@PathVariable UUID id);

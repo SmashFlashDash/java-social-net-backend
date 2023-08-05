@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -15,7 +16,7 @@ import java.util.UUID;
 public class AccountSearchDto {
   private UUID id;
   private boolean isDeleted;
-  private String ids;
+  private List<String> ids;
   private String blockedByIds;
   private String author;
   private String firstName;
