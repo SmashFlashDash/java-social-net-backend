@@ -59,8 +59,9 @@ public class AccountService {
 
     @LoggingMethod
     public void deleteAccount() {
-        AccountDto accountDto = getAuthenticatedAccount();
-        accountDto.setIsDeleted(true);
+        AccountDto account = getAuthenticatedAccount();
+        account.setIsDeleted(true);
+        accountRepository.updateAccount(account);
     }
 
     @LoggingMethod
