@@ -3,10 +3,10 @@ package ru.team38.gatewayservice.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
 import ru.team38.common.dto.notification.NotificationsPageDto;
-import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.gatewayservice.service.UserService;
 
 import java.util.UUID;
@@ -15,7 +15,6 @@ import java.util.UUID;
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
-
     private final UserService userService;
 
     @GetMapping

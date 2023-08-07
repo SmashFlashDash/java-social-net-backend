@@ -30,17 +30,10 @@ public class AccountRepository {
     private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
     private final NotificationSettingMapper notificationSettingMapper = Mappers.getMapper(NotificationSettingMapper.class);
 
-    public void save(AccountDto accountDto) {
+    public AccountDto save(AccountDto accountDto) {
         AccountRecord rec = dslContext.newRecord(ACCOUNT, accountMapper.accountDtoToAccountRecord(accountDto));
         rec.store();
-    }
-
-    public AccountDto createAccount(AccountDto accountDto) {
-        AccountRecord accountRecord = dslContext.insertInto(Tables.ACCOUNT)
-                .set(accountMapper.accountDtoToAccountRecord(accountDto))
-                .returning()
-                .fetchOne();
-        return accountMapper.accountRecordToAccountDto(accountRecord);
+        return accountMapper.accountRecordToAccountDto(rec);
     }
 
     public AccountDto updateAccount(AccountDto accountDto) {

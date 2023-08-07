@@ -46,6 +46,7 @@ public class NotificationService {
         return makePageDto(notifications, count, size);
     }
 
+    @LoggingMethod
     public void readAllNotifications(Integer size) {
         AccountDto accountDto = accountService.getAuthenticatedAccount();
         notificationRepository.updateNotificationsReadByAccountId(accountDto.getId(), size);
@@ -92,22 +93,5 @@ public class NotificationService {
     private String getUsernameFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         return jwtService.getUsername(bearerToken.substring(7));
-    }
-    @Scheduled(cron = "0 0 0 * * *")
-    public void addNotificationBirthday(){
-        List<AccountRecord> accountRecords = notificationRepository.findAccountsByCurrentDate();
-        if (accountRecords != null) {
-            for (AccountRecord accountRecord : accountRecords) {
-                UUID authorId = accountRecord.getId();
-                String birthdayMessage = "🎉🎂 Не забудьте поздравить и пожелать счастья! 🎈🌟";
-                List<FriendsRecord> friendsRecords = notificationRepository.findFriendsByAuthorId(authorId);
-                if (friendsRecords != null) {
-                    for (FriendsRecord friendsRecord : friendsRecords) {
-                        UUID receiverId = friendsRecord.getAccountFromId();
-                        notificationRepository.addNotificationBirthday(authorId, receiverId, birthdayMessage);
-                    }
-                }
-            }
-        }
     }
 }

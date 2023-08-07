@@ -6,14 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.team38.common.dto.post.ContentPostDto;
-import ru.team38.common.dto.post.CreatePostDto;
-import ru.team38.common.dto.post.PostDto;
-import ru.team38.common.dto.post.PostSearchDto;
-
+import ru.team38.common.aspects.LoggingMethod;
+import ru.team38.common.dto.notification.NotificationTypeEnum;
 import ru.team38.common.dto.post.*;
-import ru.team38.communicationsservice.services.utils.ConditionUtil;
+import ru.team38.common.services.NotificationAddService;
 import ru.team38.communicationsservice.data.repositories.PostRepository;
+import ru.team38.communicationsservice.services.utils.ConditionUtil;
 import ru.team38.communicationsservice.services.utils.DtoAssembler;
 
 import java.util.List;
@@ -27,32 +25,29 @@ public class PostService {
     private final DtoAssembler dtoAssembler;
     private final PostRepository postRepository;
     private final JwtService jwtService;
-    public ContentPostDto getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable){
-        try {
-            ConditionPostDto conditionPostDto = conditionUtil.createConditionPostDto(postSearchDto);
-            String emailUser = jwtService.getUsernameFromToken(request);
-            List<PostDto> listPosts = postRepository.getPostDtosByEmail(conditionPostDto, emailUser);
+    private final NotificationAddService notificationService;
 
-            return dtoAssembler.createContentPostDto(listPosts, pageable);
-        } catch (Exception e) {
-            log.error("Error occurred while retrieving posts: {}", e.getMessage());
-            throw e;
-        }
+    @LoggingMethod
+    public ContentPostDto getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable) {
+        ConditionPostDto conditionPostDto = conditionUtil.createConditionPostDto(postSearchDto);
+        String emailUser = jwtService.getUsernameFromToken(request);
+        List<PostDto> listPosts = postRepository.getPostDtosByEmail(conditionPostDto, emailUser);
+        return dtoAssembler.createContentPostDto(listPosts, pageable);
     }
-    @Transactional
-    public PostDto createPost(HttpServletRequest request, CreatePostDto createPostDto){
-        try {
-            InsertPostDto insertPostDto = dtoAssembler.createInsertPostDto(createPostDto);
-            String emailUser = jwtService.getUsernameFromToken(request);
 
-            return postRepository.createPost(insertPostDto, emailUser);
-        } catch (Exception e) {
-            log.error("Error occurred while retrieving create post: {}", e.getMessage());
-            throw e;
-        }
-    }
+    @LoggingMethod
     @Transactional
-    public PostDto updatePost(CreatePostDto createPostDto){
+    public PostDto createPost(HttpServletRequest request, CreatePostDto createPostDto) {
+        InsertPostDto insertPostDto = dtoAssembler.createInsertPostDto(createPostDto);
+        String emailUser = jwtService.getUsernameFromToken(request);
+        PostDto post = postRepository.createPost(insertPostDto, emailUser);
+        notificationService.addNotification(post.getAuthorId(), post, NotificationTypeEnum.POST);
+        return post;
+    }
+
+    @LoggingMethod
+    @Transactional
+    public PostDto updatePost(CreatePostDto createPostDto) {
         try {
             InsertPostDto insertPostDto = dtoAssembler.createInsertPostDto(createPostDto);
             return postRepository.updatePost(insertPostDto, createPostDto.getId());
@@ -62,24 +57,19 @@ public class PostService {
         }
     }
 
-    public PostDto getPostById(UUID id){
-        try {
-            return postRepository.getPostDtoById(id);
-        } catch (Exception e) {
-            log.error("Error occurred while retrieving post: {}", e.getMessage());
-            throw e;
-        }
+    @LoggingMethod
+    public PostDto getPostById(UUID id) {
+        return postRepository.getPostDtoById(id);
     }
+
+    @LoggingMethod
     @Transactional
-    public void deletePost(UUID id){
+    public void deletePost(UUID id) {
         postRepository.deletePostById(id);
     }
-    public List<TagDto> getTag(String nameTag){
-        try {
-            return postRepository.getTags(nameTag);
-        } catch (Exception e) {
-            log.error("Error occurred while retrieving get tag: {}", e.getMessage());
-            throw e;
-        }
+
+    @LoggingMethod
+    public List<TagDto> getTag(String nameTag) {
+        return postRepository.getTags(nameTag);
     }
 }
