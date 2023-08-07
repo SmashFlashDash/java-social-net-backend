@@ -26,9 +26,10 @@ public class PostController {
                                   @RequestParam(value = "dateForm", required = false) String dateFrom,
                                   @RequestParam(value = "dateTo", required = false) String dateTo,
                                   @RequestParam(value = "author", required = false) String author,
+                                  @RequestParam(value = "text", required = false) String text,
                                   Pageable pageable) {
         log.info("Executing getPost request");
-        return postService.getPost(withFriends, sort, isDeleted, accountIds, tags, dateFrom, dateTo, author, pageable);
+        return postService.getPost(withFriends, sort, isDeleted, accountIds, tags, dateFrom, dateTo, author, text, pageable);
     }
 
     @GetMapping("/{id}")

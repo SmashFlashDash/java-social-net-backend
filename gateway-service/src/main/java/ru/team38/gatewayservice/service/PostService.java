@@ -33,6 +33,7 @@ public class PostService {
                                   String dateFrom,
                                   String dateTo,
                                   String author,
+                                  String text,
                                   Pageable pageable) {
         try {
             ResponseEntity<ContentPostDto> responseEntity = communicationsServiceClient.getPost(
@@ -44,6 +45,7 @@ public class PostService {
                     dateFrom,
                     dateTo,
                     author,
+                    text,
                     pageable);
             return responseEntity.getBody();
         } catch (FeignException e) {

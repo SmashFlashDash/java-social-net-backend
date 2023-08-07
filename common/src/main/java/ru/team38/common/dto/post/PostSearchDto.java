@@ -19,4 +19,5 @@ public class PostSearchDto {
     private String dateFrom;
     private String dateTo;
     private String author;
+    private String text;
 }
