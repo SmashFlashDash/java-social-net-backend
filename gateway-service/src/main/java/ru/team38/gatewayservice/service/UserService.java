@@ -160,4 +160,12 @@ public class UserService {
     public FriendShortDto unblockAccount(UUID id) {
         return userServiceClient.unblockAccount(id).getBody();
     }
+
+    public ResponseEntity<String> recoverPassword(PasswordRecoveryDto passwordRecoveryDto) {
+        return userServiceClient.recoverPassword(passwordRecoveryDto);
+    }
+
+    public ResponseEntity<String> setNewPassword(String linkId, NewPasswordDto newPasswordDto) {
+        return userServiceClient.setNewPassword(linkId, newPasswordDto);
+    }
 }

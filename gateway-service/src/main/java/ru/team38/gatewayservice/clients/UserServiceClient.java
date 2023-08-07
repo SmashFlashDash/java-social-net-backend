@@ -109,4 +109,11 @@ public interface UserServiceClient {
 
     @PutMapping("/api/v1/friends/unblock/{id}")
     ResponseEntity<FriendShortDto> unblockAccount(@PathVariable UUID id);
+
+    @PostMapping("/api/v1/auth/password/recovery")
+    ResponseEntity<String> recoverPassword(@RequestBody PasswordRecoveryDto passwordRecoveryDto);
+
+    @PostMapping("/api/v1/auth/password/recovery/{linkId}")
+    ResponseEntity<String> setNewPassword(@PathVariable String linkId,
+                                               @RequestBody NewPasswordDto newPasswordDto);
 }

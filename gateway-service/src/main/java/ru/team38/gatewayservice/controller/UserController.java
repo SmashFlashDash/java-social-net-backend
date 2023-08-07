@@ -48,6 +48,17 @@ public class UserController {
         return userService.getCaptcha();
     }
 
+    @PostMapping("/api/v1/auth/password/recovery/")
+    public ResponseEntity<String> recoverPassword(@RequestBody PasswordRecoveryDto passwordRecoveryDto) {
+        return userService.recoverPassword(passwordRecoveryDto);
+    }
+
+    @PostMapping("/api/v1/auth/password/recovery/{linkId}")
+    public ResponseEntity<String> setNewPassword(@PathVariable String linkId,
+                                                      @RequestBody NewPasswordDto newPasswordDto) {
+        return userService.setNewPassword(linkId, newPasswordDto);
+    }
+
     @GetMapping("/api/v1/friends/count")
     public CountDto getIncomingFriendRequests() {
         log.info("Executing getIncomingFriendRequests request");

@@ -61,6 +61,19 @@ public class AccountRepository {
                 .fetchOptional();
     }
 
+    public Optional<AccountDto> getAccountDtoByEmail(String email) {
+        return getAccountByEmail(email)
+                .map(accountMapper::accountRecordToAccountDto);
+    }
+
+    public Optional<AccountDto> getAccountDtoById(UUID id) {
+        return dslContext
+                .selectFrom(ACCOUNT)
+                .where(ACCOUNT.ID.eq(id))
+                .fetchOptional()
+                .map(accountMapper::accountRecordToAccountDto);
+    }
+
     public PageAccountDto findAccount(UUID userId, AccountSearchDto accountSearchDto) {
         PageAccountDto pageAccountDto = new PageAccountDto();
 
