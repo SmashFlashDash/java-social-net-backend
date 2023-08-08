@@ -1,0 +1,2532 @@
+openapi: 3.0.1
+info:
+  title: Socialnet API
+  description: Code Lounge
+  version: '1.6'
+servers:
+  - url: http://localhost:8080
+    description: Generated server url
+paths:
+  /load:
+    put:
+      tags:
+        - user-controller
+      summary: Загрузка геоданных
+      operationId: loadGeoData
+      responses:
+        '200':
+          description: Геоданные успешно загружены
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/post:
+    get:
+      tags:
+        - post-controller
+      summary: Получение списка постов
+      operationId: getPost
+      parameters:
+        - name: withFriends
+          in: query
+          description: Флаг "с друзьями"
+          required: false
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          description: Сортировка
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: isDeleted
+          in: query
+          description: Удаленные посты включены
+          required: false
+          schema:
+            type: boolean
+        - name: accountIds
+          in: query
+          description: ID аккаунта
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: tags
+          in: query
+          description: Теги
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: dateForm
+          in: query
+          description: Дата от
+          required: false
+          schema:
+            type: string
+        - name: dateTo
+          in: query
+          description: Дата до
+          required: false
+          schema:
+            type: string
+        - name: author
+          in: query
+          description: Автор
+          required: false
+          schema:
+            type: string
+        - name: text
+          in: query
+          description: Текст
+          required: false
+          schema:
+            type: string
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Посты успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoPostDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - post-controller
+      summary: Обновление поста
+      operationId: getUpdatePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDto'
+        required: true
+      responses:
+        '200':
+          description: Пост успешно обновлен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PostDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - post-controller
+      summary: Создание поста
+      operationId: getCreatePost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostDto'
+        required: true
+      responses:
+        '200':
+          description: Пост успешно создан
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PostDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/post/{postId}/comment:
+    get:
+      tags:
+        - comment-controller
+      summary: Получение комментариев по посту
+      operationId: getComments
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Комментарии успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoCommentDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - comment-controller
+      summary: Обновление комментария
+      operationId: updateComment
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentUpdateDto'
+        required: true
+      responses:
+        '200':
+          description: Комментарий успешно обновлен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    post:
+      tags:
+        - comment-controller
+      summary: Создание комментария
+      operationId: createComment
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+              description: Текст комментария
+        required: true
+      responses:
+        '200':
+          description: Комментарий успешно создан
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CommentDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/notifications/settings:
+    get:
+      tags:
+        - notification-controller
+      summary: Получение настроек уведомлений
+      operationId: getNotificationSetting
+      responses:
+        '200':
+          description: Настройки уведомлений успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/NotificationSettingDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - notification-controller
+      summary: Обновление настроек уведомлений
+      operationId: updateNotificationSetting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationUpdateDto'
+        required: true
+      responses:
+        '200':
+          description: Настройки уведомлений успешно обновлены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/NotificationSettingDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/notifications/readed:
+    put:
+      tags:
+        - notification-controller
+      summary: Отметить все уведомления как прочитанные
+      operationId: readAllNotifications
+      responses:
+        '200':
+          description: Уведомления отмечены как прочитанные
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/{id}/approve:
+    put:
+      tags:
+        - user-controller
+      summary: Одобрение запроса в друзья
+      operationId: approveFriendRequest
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта для одобрения запроса в друзья
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Запрос в друзья успешно одобрен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FriendShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/unblock/{id}:
+    put:
+      tags:
+        - user-controller
+      summary: Разблокировка аккаунта
+      operationId: unblockAccount
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта для разблокировки
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Аккаунт успешно разблокирован
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FriendShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/block/{id}:
+    put:
+      tags:
+        - user-controller
+      summary: Блокировка аккаунта
+      operationId: blockAccount
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта для блокировки
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Аккаунт успешно заблокирован
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FriendShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/account/me:
+    get:
+      tags:
+        - account-controller
+      summary: Получение аккаунта
+      operationId: getAccount
+      responses:
+        '200':
+          description: Аккаунт успешно получен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    put:
+      tags:
+        - account-controller
+      summary: Обновление аккаунта
+      operationId: updateAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDto'
+        required: true
+      responses:
+        '200':
+          description: Аккаунт успешно обновлен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    delete:
+      tags:
+        - account-controller
+      summary: Удаление аккаунта
+      operationId: deleteAccount
+      responses:
+        '200':
+          description: Аккаунт успешно удален
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/storage:
+    post:
+      tags:
+        - storage-controller
+      summary: Загрузка файла
+      operationId: getUploadedFileUri
+      parameters:
+        - name: type
+          in: query
+          description: Тип файла
+          required: true
+          schema:
+            type: string
+            enum:
+              - IMAGE
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              required:
+                - file
+              type: object
+              properties:
+                file:
+                  type: string
+                  description: Файл
+                  format: binary
+      responses:
+        '200':
+          description: Файл успешно загружен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FileUriResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/post/{postId}/like:
+    post:
+      tags:
+        - like-controller
+      summary: Получение лайка по посту
+      operationId: getLike
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLikeDto'
+        required: true
+      responses:
+        '200':
+          description: Лайк успешно получен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LikeDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    delete:
+      tags:
+        - like-controller
+      summary: Удаление лайка по посту
+      operationId: deleteLike
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Лайк успешно удален
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/post/{postId}/comment/{commentId}/like:
+    post:
+      tags:
+        - like-controller
+      summary: Получение лайка по комментарию
+      operationId: getLikeByComment
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: commentId
+          in: path
+          description: ID комментария
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Лайк успешно получен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LikeDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    delete:
+      tags:
+        - like-controller
+      summary: Удаление лайка по комментарию
+      operationId: deleteLikeByComment
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: commentId
+          in: path
+          description: ID комментария
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Лайк успешно удален
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/notifications/settings/{id}:
+    post:
+      tags:
+        - notification-controller
+      summary: Установка настроек уведомлений
+      operationId: setNotificationSetting
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Настройки уведомлений успешно установлены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/NotificationSettingDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/{id}/request:
+    post:
+      tags:
+        - user-controller
+      summary: Отправка запроса в друзья
+      operationId: makeFriendRequest
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта для запроса в друзья
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Запрос в друзья успешно отправлен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FriendShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/subscribe/{id}:
+    post:
+      tags:
+        - user-controller
+      summary: Подписка на аккаунт
+      operationId: getSubscription
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта для подписки
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Подписка успешно оформлена
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/FriendShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/auth/register:
+    post:
+      tags:
+        - user-controller
+      summary: Регистрация пользователя
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterDto'
+        required: true
+      responses:
+        '200':
+          description: Пользователь успешно зарегистрирован
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - user-controller
+      summary: Обновление токена
+      operationId: refresh
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: Токен успешно обновлен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Bad request
+  /api/v1/auth/password/recovery/{linkId}:
+    post:
+      tags:
+        - user-controller
+      summary: Установка нового пароля
+      operationId: setNewPassword
+      parameters:
+        - name: linkId
+          in: path
+          description: Токен для восстановления пароля
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewPasswordDto'
+        required: true
+      responses:
+        '200':
+          description: Новый пароль успешно установлен
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/auth/password/recovery/:
+    post:
+      tags:
+        - user-controller
+      summary: Восстановление пароля
+      operationId: recoverPassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailDto'
+        required: true
+      responses:
+        '200':
+          description: Запрос на восстановление пароля успешно отправлен
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - user-controller
+      summary: Выход из системы
+      operationId: logout
+      responses:
+        '200':
+          description: Успешный выход
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/auth/login:
+    post:
+      tags:
+        - user-controller
+      summary: Вход в систему
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginForm'
+        required: true
+      responses:
+        '200':
+          description: Успешный вход
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '400':
+          description: Bad request
+  /api/v1/auth/change-password-link:
+    post:
+      tags:
+        - user-controller
+      summary: Изменение пароля
+      operationId: changePassword
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordDto'
+        required: true
+      responses:
+        '200':
+          description: Запрос на изменение пароля успешно отправлен
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/auth/change-email-link:
+    post:
+      tags:
+        - user-controller
+      summary: Изменение Email
+      operationId: changeEmail
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailDto'
+        required: true
+      responses:
+        '200':
+          description: Запрос на изменение Email успешно отправлен
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+  /api/v1/account/:
+    post:
+      tags:
+        - account-controller
+      summary: Создание аккаунта
+      operationId: createAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDto'
+        required: true
+      responses:
+        '200':
+          description: Аккаунт успешно создан
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/tag:
+    get:
+      tags:
+        - tag-controller
+      summary: Получение тега
+      operationId: getTag
+      parameters:
+        - name: name
+          in: query
+          description: Имя тега
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Тег(и) успешно получен(ы)
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TagDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/post/{postId}/comment/{commentId}/subcomment:
+    get:
+      tags:
+        - comment-controller
+      summary: Получение субкомментариев по комментарию
+      operationId: getSubComments
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: commentId
+          in: path
+          description: ID комментария
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Субкомментарии успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoCommentDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/post/{id}:
+    get:
+      tags:
+        - post-controller
+      summary: Получение поста по ID
+      operationId: getPostById
+      parameters:
+        - name: id
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пост успешно получен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PostDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+    delete:
+      tags:
+        - post-controller
+      summary: Удаление поста
+      operationId: deletePost
+      parameters:
+        - name: id
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Пост успешно удален
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/notifications:
+    get:
+      tags:
+        - notification-controller
+      summary: Получение уведомлений
+      operationId: getNotifications
+      responses:
+        '200':
+          description: Уведомления успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoDataTimestampDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/notifications/count:
+    get:
+      tags:
+        - notification-controller
+      summary: Получение количества уведомлений
+      operationId: getNotificationsCount
+      responses:
+        '200':
+          description: Количество уведомлений успешно получено
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DataTimestampDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/geo/country:
+    get:
+      tags:
+        - user-controller
+      summary: Получение списка стран
+      operationId: getCountries
+      responses:
+        '200':
+          description: Список стран успешно получен
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CountryDto'
+        '400':
+          description: Bad request
+  /api/v1/geo/country/{countryId}/city:
+    get:
+      tags:
+        - user-controller
+      summary: Получение списка городов по ID страны
+      operationId: getCitiesByCountryId
+      parameters:
+        - name: countryId
+          in: path
+          description: ID страны для получения списка городов
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Список городов успешно получен
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityDto'
+        '400':
+          description: Bad request
+  /api/v1/friends:
+    get:
+      tags:
+        - user-controller
+      summary: Получение друзей по параметрам
+      operationId: getFriendsByParameters
+      parameters:
+        - name: friendSearchDto
+          in: query
+          description: Параметры поиска друзей
+          required: true
+          schema:
+            $ref: '#/components/schemas/FriendSearchDto'
+        - name: pageDto
+          in: query
+          description: Данные страницы поисковой выдачи
+          required: true
+          schema:
+            $ref: '#/components/schemas/PageDto'
+      responses:
+        '200':
+          description: Друзья успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoObject'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/recommendations:
+    get:
+      tags:
+        - user-controller
+      summary: Получение рекомендаций друзей
+      operationId: getFriendsRecommendations
+      parameters:
+        - name: friendSearchDto
+          in: query
+          description: Параметры поиска друзей
+          required: true
+          schema:
+            $ref: '#/components/schemas/FriendSearchDto'
+      responses:
+        '200':
+          description: Рекомендации друзей успешно получены
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/FriendShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/count:
+    get:
+      tags:
+        - user-controller
+      summary: Получение количества входящих запросов в друзья
+      operationId: getIncomingFriendRequests
+      responses:
+        '200':
+          description: Успешное получение количества запросов
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/dialogs:
+    get:
+      tags:
+        - dialog-controller
+      summary: Получение списка диалогов
+      operationId: getDialogs
+      parameters:
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Список диалогов успешно получен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageDialogDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/dialogs/unread:
+    get:
+      tags:
+        - dialog-controller
+      summary: Получение количества непрочитанных сообщений
+      operationId: getUnreadMessagesCount
+      responses:
+        '200':
+          description: Количество непрочитанных сообщений успешно получено
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/dialogs/recipientId/{id}:
+    get:
+      tags:
+        - dialog-controller
+      summary: Получение диалога по ID получателя
+      operationId: getDialogByRecipientId
+      parameters:
+        - name: id
+          in: path
+          description: ID получателя
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Диалог успешно получен
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/DialogDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/dialogs/messages:
+    get:
+      tags:
+        - dialog-controller
+      summary: Получение сообщений
+      operationId: getMessages
+      parameters:
+        - name: recipientId
+          in: query
+          description: ID получателя
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: pageable
+          in: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/Pageable'
+      responses:
+        '200':
+          description: Сообщения успешно получены
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageMessageShortDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/auth/captcha:
+    get:
+      tags:
+        - user-controller
+      summary: Получение капчи
+      operationId: getCaptcha
+      responses:
+        '200':
+          description: Капча успешно получена
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/CaptchaDto'
+        '400':
+          description: Bad request
+  /api/v1/account/{id}:
+    get:
+      tags:
+        - account-controller
+      summary: Получение аккаунта по ID
+      operationId: getAccountById
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Аккаунт успешно получен по ID
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/account/search:
+    get:
+      tags:
+        - account-controller
+      summary: Поиск аккаунта
+      operationId: findAccount
+      parameters:
+        - name: accountSearchDto
+          in: query
+          description: Критерии поиска
+          required: true
+          schema:
+            $ref: '#/components/schemas/AccountSearchDto'
+        - name: pageDto
+          in: query
+          description: Информация о странице
+          required: true
+          schema:
+            $ref: '#/components/schemas/PageDto'
+      responses:
+        '200':
+          description: Аккаунт(ы) успешно найден(ы)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoAccountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/account/search/statusCode:
+    get:
+      tags:
+        - account-controller
+      summary: Поиск аккаунтов по статус-коду отношений
+      operationId: findAccountByStatusCode
+      parameters:
+        - name: accountSearchDto
+          in: query
+          description: Критерии поиска
+          required: true
+          schema:
+            $ref: '#/components/schemas/AccountSearchDto'
+        - name: pageDto
+          in: query
+          description: Информация о странице
+          required: true
+          schema:
+            $ref: '#/components/schemas/PageDto'
+      responses:
+        '200':
+          description: Аккаунт(ы) успешно найден(ы)
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PageResponseDtoAccountDto'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/post/{postId}/comment/{commentId}:
+    delete:
+      tags:
+        - comment-controller
+      summary: Удаление комментария
+      operationId: deleteComment
+      parameters:
+        - name: postId
+          in: path
+          description: ID поста
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: commentId
+          in: path
+          description: ID комментария
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Комментарий успешно удален
+          content:
+            '*/*':
+              schema:
+                type: string
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+  /api/v1/friends/{id}:
+    delete:
+      tags:
+        - user-controller
+      summary: Удаление отношений
+      operationId: deleteRelationship
+      parameters:
+        - name: id
+          in: path
+          description: ID аккаунта для удаления отношений
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Отношения успешно удалены
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+components:
+  schemas:
+    CreatePostDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор поста
+          format: uuid
+        imagePath:
+          type: string
+          description: Путь к изображению
+        postText:
+          type: string
+          description: Текст поста
+        publishDate:
+          type: string
+          description: Дата публикации
+        tags:
+          type: array
+          description: Теги
+          items:
+            $ref: '#/components/schemas/TagDto'
+        title:
+          type: string
+          description: Заголовок
+      description: Данные для создания поста
+    TagDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID тега
+          format: int64
+        isDeleted:
+          type: boolean
+          description: Флаг удаления
+        name:
+          type: string
+          description: Имя тега
+      description: Объект тега
+    PostDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Идентификатор поста
+          format: uuid
+        isDeleted:
+          type: boolean
+          description: Флаг удаления поста
+        time:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Время создания поста
+        timeChanged:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Время изменения поста
+        authorId:
+          type: string
+          description: Идентификатор автора поста
+          format: uuid
+        title:
+          type: string
+          description: Заголовок поста
+        type:
+          type: string
+          description: Тип поста
+          enum:
+            - POSTED
+            - QUEUED
+        postText:
+          type: string
+          description: Текст поста
+        isBlocked:
+          type: boolean
+          description: Флаг блокировки поста
+        commentsCount:
+          type: integer
+          description: Количество комментариев
+          format: int32
+        reactions:
+          type: array
+          description: Реакции на пост
+          items:
+            $ref: '#/components/schemas/ReactionDto'
+        myReaction:
+          type: string
+          description: Моя реакция на пост
+        tags:
+          type: array
+          description: Теги поста
+          items:
+            $ref: '#/components/schemas/TagDto'
+        likeAmount:
+          type: integer
+          description: Количество лайков
+          format: int32
+        myLike:
+          type: boolean
+          description: Мой лайк
+        imagePath:
+          type: string
+          description: Путь к изображению
+        publishDate:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Дата публикации поста
+      description: Данные поста
+    ReactionDto:
+      type: object
+      properties:
+        reactionType:
+          type: string
+          description: Тип реакции
+        count:
+          type: integer
+          description: Количество
+          format: int32
+      description: Данные реакции
+    CommentUpdateDto:
+      type: object
+      properties:
+        commentText:
+          type: string
+          description: Текст комментария
+        id:
+          type: string
+          description: ID комментария
+          format: uuid
+      description: Данные для обновления комментария
+    CommentDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID комментария
+          format: uuid
+        isDeleted:
+          type: boolean
+          description: Удален ли комментарий
+        commentType:
+          type: string
+          description: Тип публикации
+          example: POST
+          enum:
+            - COMMENT
+            - POST
+        time:
+          type: string
+          description: Время комментария
+          format: date-time
+        timeChanged:
+          type: string
+          description: Время изменения комментария
+          format: date-time
+        authorId:
+          type: string
+          description: ID автора
+          format: uuid
+        parentId:
+          type: string
+          description: ID родительского комментария
+          format: uuid
+        commentText:
+          type: string
+          description: Текст комментария
+        postId:
+          type: string
+          description: ID поста
+          format: uuid
+        isBlocked:
+          type: boolean
+          description: Заблокирован ли комментарий
+        likeAmount:
+          type: integer
+          description: Количество лайков
+          format: int32
+        myLike:
+          type: boolean
+          description: Флаг авторства лайка
+        commentsCount:
+          type: integer
+          description: Количество комментариев
+          format: int32
+        imagePath:
+          type: string
+          description: Путь к изображению
+      description: Данные комментария
+    NotificationUpdateDto:
+      type: object
+      properties:
+        notificationType:
+          type: string
+          description: Тип уведомления
+          enum:
+            - LIKE
+            - POST
+            - POST_COMMENT
+            - COMMENT_COMMENT
+            - MESSAGE
+            - FRIEND_REQUEST
+            - FRIEND_BIRTHDAY
+            - SEND_EMAIL_MESSAGE
+        enable:
+          type: boolean
+          description: Включено ли
+      description: Данные для обновления настроек уведомлений
+    NotificationSettingDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID настройки
+          format: uuid
+        enablePost:
+          type: boolean
+          description: Уведомления о публикациях
+        enablePostComment:
+          type: boolean
+          description: Уведомления о комментариях к публикациям
+        enableCommentComment:
+          type: boolean
+          description: Уведомления о комментариях к комментариям
+        enableMessage:
+          type: boolean
+          description: Уведомления о сообщениях
+        enableFriendRequest:
+          type: boolean
+          description: Уведомления о запросах в друзья
+        enableFriendBirthday:
+          type: boolean
+          description: Уведомления о днях рождения друзей
+        enableSendEmailMessage:
+          type: boolean
+          description: Отправка уведомлений по электронной почте
+        isDeleted:
+          type: boolean
+          description: Удалена ли
+      description: Настройки уведомлений
+    FriendShortDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID
+          format: uuid
+        isDeleted:
+          type: boolean
+          description: Флаг удаления
+        statusCode:
+          type: string
+          description: Код статуса
+          enum:
+            - FRIEND
+            - REQUEST_TO
+            - REQUEST_FROM
+            - BLOCKED
+            - DECLINED
+            - SUBSCRIBED
+            - NONE
+            - WATCHING
+            - REJECTING
+            - RECOMMENDATION
+        friendId:
+          type: string
+          description: ID субъекта
+          format: uuid
+        idFriend:
+          type: string
+          description: ID объекта
+          format: uuid
+        previousStatusCode:
+          type: string
+          description: Код статуса
+          enum:
+            - FRIEND
+            - REQUEST_TO
+            - REQUEST_FROM
+            - BLOCKED
+            - DECLINED
+            - SUBSCRIBED
+            - NONE
+            - WATCHING
+            - REJECTING
+            - RECOMMENDATION
+        rating:
+          type: integer
+          description: Рейтинг
+          format: int32
+      description: Краткая информация об отношениях
+    AccountDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Уникальный идентификатор аккаунта
+          format: uuid
+        isDeleted:
+          type: boolean
+          description: Статус удаления аккаунта
+        firstName:
+          type: string
+          description: Имя пользователя
+        lastName:
+          type: string
+          description: Фамилия пользователя
+        email:
+          type: string
+          description: Электронная почта пользователя
+        password:
+          type: string
+          description: Пароль пользователя
+          writeOnly: true
+        phone:
+          type: string
+          description: Телефон пользователя
+        about:
+          type: string
+          description: Описание пользователя
+        city:
+          type: string
+          description: Город пользователя
+        country:
+          type: string
+          description: Страна пользователя
+        statusCode:
+          type: string
+          description: Код статуса
+          enum:
+            - FRIEND
+            - REQUEST_TO
+            - REQUEST_FROM
+            - BLOCKED
+            - DECLINED
+            - SUBSCRIBED
+            - NONE
+            - WATCHING
+            - REJECTING
+            - RECOMMENDATION
+        regDate:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Дата регистрации аккаунта
+          format: date-time
+        birthDate:
+          type: string
+          description: Дата рождения пользователя
+          format: date
+        messagePermission:
+          type: boolean
+          description: Разрешение на отправку сообщений
+        lastOnlineTime:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Последнее время онлайн
+          format: date-time
+        isOnline:
+          type: boolean
+          description: Статус онлайн
+        isBlocked:
+          type: boolean
+          description: Статус блокировки аккаунта
+        photo:
+          type: string
+          description: Фотография профиля
+        profileCover:
+          type: string
+          description: Обложка профиля
+        createdOn:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Дата создания аккаунта
+          format: date-time
+        updatedOn:
+          pattern: yyyy-MM-dd'T'HH:mm:ss.SSS'Z'
+          type: string
+          description: Дата обновления аккаунта
+          format: date-time
+      description: Данные аккаунта
+    FileUriResponse:
+      type: object
+      properties:
+        fileName:
+          type: string
+          description: Имя файла
+      description: Ответ с именем файла
+    CreateLikeDto:
+      type: object
+      properties:
+        reactionType:
+          type: string
+          description: Тип реакции
+        type:
+          type: string
+          description: Тип публикации
+          enum:
+            - COMMENT
+            - POST
+      description: Данные для создания лайка
+    LikeDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID лайка
+          format: uuid
+        authorId:
+          type: string
+          description: ID автора
+          format: uuid
+        isDeleted:
+          type: boolean
+          description: Удален ли лайк
+        itemId:
+          type: string
+          description: ID объекта лайка
+          format: uuid
+        reactionType:
+          type: string
+          description: Тип реакции
+        time:
+          type: string
+          description: Время создания
+          format: date-time
+        type:
+          type: string
+          description: Тип публикации
+          enum:
+            - COMMENT
+            - POST
+      description: Данные лайка
+    RegisterDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Электронная почта
+        password1:
+          type: string
+          description: Пароль
+        password2:
+          type: string
+          description: Подтверждение пароля
+        firstName:
+          type: string
+          description: Имя
+        lastName:
+          type: string
+          description: Фамилия
+        captchaCode:
+          type: string
+          description: Код капчи
+        captchaSecret:
+          type: string
+          description: Секрет капчи
+      description: Данные для регистрации
+    RefreshTokenRequest:
+      required:
+        - refreshToken
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          description: Токен обновления
+      description: Запрос на обновление access токена
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Токен доступа
+        refreshToken:
+          type: string
+          description: Токен обновления
+      description: Форма ответа с jwt
+    NewPasswordDto:
+      type: object
+      properties:
+        password:
+          type: string
+          description: Новый пароль
+      description: Данные для установки нового пароля
+    EmailDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email
+          example: recover@example.com
+      description: DTO с Email
+    LoginForm:
+      type: object
+      properties:
+        email:
+          type: string
+          description: Email пользователя
+          example: user@example.com
+        password:
+          type: string
+          description: Пароль пользователя
+      description: Форма для входа
+    ChangePasswordDto:
+      type: object
+      properties:
+        passwordOld:
+          type: string
+          description: Старый пароль
+        passwordNew:
+          type: string
+          description: Новый пароль
+      description: DTO для смены пароля
+    Pageable:
+      type: object
+      properties:
+        page:
+          minimum: 0
+          type: integer
+          format: int32
+        size:
+          minimum: 1
+          type: integer
+          format: int32
+        sort:
+          type: array
+          items:
+            type: string
+    PageResponseDtoPostDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int32
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+        number:
+          type: integer
+          description: Номер страницы
+          format: int32
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+        first:
+          type: boolean
+          description: Первая страница
+        last:
+          type: boolean
+          description: Последняя страница
+        numberOfElements:
+          type: integer
+          description: Количество элементов на странице
+          format: int32
+        empty:
+          type: boolean
+          description: Пустая страница
+        sort:
+          $ref: '#/components/schemas/SortDto'
+        pageable:
+          $ref: '#/components/schemas/PageableDto'
+        content:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: Содержимое страницы
+          items:
+            $ref: '#/components/schemas/PostDto'
+      description: Ответ с данными страницы
+    PageableDto:
+      type: object
+      properties:
+        sort:
+          $ref: '#/components/schemas/SortDto'
+        pageNumber:
+          type: integer
+          description: Номер страницы
+          format: int32
+        pageSize:
+          type: integer
+          description: Размер страницы
+          format: int32
+        offset:
+          type: integer
+          description: Смещение
+          format: int32
+        unpaged:
+          type: boolean
+          description: Без разбивки на страницы
+        paged:
+          type: boolean
+          description: Разбито на страницы
+      description: Данные для постраничного вывода
+    SortDto:
+      type: object
+      properties:
+        unsorted:
+          type: boolean
+          description: Не отсортировано
+        sorted:
+          type: boolean
+          description: Отсортировано
+        empty:
+          type: boolean
+          description: Пусто
+      description: Данные сортировки
+    PageResponseDtoCommentDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int32
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+        number:
+          type: integer
+          description: Номер страницы
+          format: int32
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+        first:
+          type: boolean
+          description: Первая страница
+        last:
+          type: boolean
+          description: Последняя страница
+        numberOfElements:
+          type: integer
+          description: Количество элементов на странице
+          format: int32
+        empty:
+          type: boolean
+          description: Пустая страница
+        sort:
+          $ref: '#/components/schemas/SortDto'
+        pageable:
+          $ref: '#/components/schemas/PageableDto'
+        content:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: Содержимое страницы
+          items:
+            $ref: '#/components/schemas/CommentDto'
+      description: Ответ с данными страницы
+    DataTimestampDto:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          description: Временна́я метка
+          format: date-time
+        data:
+          type: object
+          description: Данные
+      description: Данные для уведомления с timestamp
+    PageResponseDtoDataTimestampDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int32
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+        number:
+          type: integer
+          description: Номер страницы
+          format: int32
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+        first:
+          type: boolean
+          description: Первая страница
+        last:
+          type: boolean
+          description: Последняя страница
+        numberOfElements:
+          type: integer
+          description: Количество элементов на странице
+          format: int32
+        empty:
+          type: boolean
+          description: Пустая страница
+        sort:
+          $ref: '#/components/schemas/SortDto'
+        pageable:
+          $ref: '#/components/schemas/PageableDto'
+        content:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: Содержимое страницы
+          items:
+            $ref: '#/components/schemas/DataTimestampDto'
+      description: Ответ с данными страницы
+    CountryDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID страны
+          format: int64
+        title:
+          type: string
+          description: Название страны
+        cities:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          items:
+            type: string
+            description: Список городов
+        deleted:
+          type: boolean
+      description: Данные страны
+    CityDto:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID города
+          format: int64
+        title:
+          type: string
+          description: Название города
+        countryId:
+          type: integer
+          description: ID страны
+          format: int64
+        deleted:
+          type: boolean
+      description: Данные города
+    FriendSearchDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID аккаунта
+          format: uuid
+        isDeleted:
+          type: boolean
+          description: Флаг удаления
+        idFrom:
+          type: integer
+          description: ID субъекта отношений
+          format: int32
+        statusCode:
+          type: string
+          description: Код статуса
+          enum:
+            - FRIEND
+            - REQUEST_TO
+            - REQUEST_FROM
+            - BLOCKED
+            - DECLINED
+            - SUBSCRIBED
+            - NONE
+            - WATCHING
+            - REJECTING
+            - RECOMMENDATION
+        idTo:
+          type: integer
+          description: ID объекта отношений
+          format: int32
+        firstName:
+          type: string
+          description: Имя
+        birthDateFrom:
+          type: string
+          description: Дата рождения от
+          format: date
+        birthDateTo:
+          type: string
+          description: Дата рождения до
+          format: date
+        city:
+          type: string
+          description: Город
+        country:
+          type: string
+          description: Страна
+        ageFrom:
+          type: integer
+          description: Возраст от
+          format: int32
+        ageTo:
+          type: integer
+          description: Возраст до
+          format: int32
+        previousStatusCode:
+          type: string
+          description: Код статуса
+          enum:
+            - FRIEND
+            - REQUEST_TO
+            - REQUEST_FROM
+            - BLOCKED
+            - DECLINED
+            - SUBSCRIBED
+            - NONE
+            - WATCHING
+            - REJECTING
+            - RECOMMENDATION
+      description: Форма поиска друзей
+    PageDto:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Страница (номер)
+          format: int32
+        size:
+          type: integer
+          description: Размер
+          format: int32
+        sort:
+          type: array
+          description: Сортировка
+          items:
+            type: string
+            description: Сортировка
+      description: Данные страницы
+    PageResponseDtoObject:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int32
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+        number:
+          type: integer
+          description: Номер страницы
+          format: int32
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+        first:
+          type: boolean
+          description: Первая страница
+        last:
+          type: boolean
+          description: Последняя страница
+        numberOfElements:
+          type: integer
+          description: Количество элементов на странице
+          format: int32
+        empty:
+          type: boolean
+          description: Пустая страница
+        sort:
+          $ref: '#/components/schemas/SortDto'
+        pageable:
+          $ref: '#/components/schemas/PageableDto'
+        content:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: Содержимое страницы
+          items:
+            type: object
+      description: Ответ с данными страницы
+    CountDto:
+      type: object
+      properties:
+        count:
+          type: integer
+          description: Количество
+          format: int32
+      description: Счетчик
+    DialogDto:
+      type: object
+      properties:
+        unreadCount:
+          type: integer
+          description: Количество непрочитанных сообщений
+          format: int32
+        conversationPartner1:
+          type: string
+          description: ID первого собеседника
+          format: uuid
+        conversationPartner2:
+          type: string
+          description: ID второго собеседника
+          format: uuid
+        lastMessage:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageDto'
+      description: Данные диалога
+    MessageDto:
+      type: object
+      properties:
+        time:
+          type: string
+          description: Время сообщения
+          format: date-time
+        conversationPartner1:
+          type: string
+          description: ID первого собеседника
+          format: uuid
+        conversationPartner2:
+          type: string
+          description: ID второго собеседника
+          format: uuid
+        messageText:
+          type: string
+          description: Текст сообщения
+        readStatus:
+          type: string
+          description: Статус сообщения
+          enum:
+            - SENT
+            - READ
+        dialogId:
+          type: string
+          description: ID диалога
+          format: uuid
+      description: Данные сообщения
+    PageDialogDto:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/DialogDto'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+        paged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    MessageShortDto:
+      type: object
+      properties:
+        time:
+          type: string
+          format: date-time
+        conversationPartner1:
+          type: string
+          format: uuid
+        conversationPartner2:
+          type: string
+          format: uuid
+        messageText:
+          type: string
+    PageMessageShortDto:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          format: int32
+        totalElements:
+          type: integer
+          format: int64
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/MessageShortDto'
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: '#/components/schemas/SortObject'
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: '#/components/schemas/PageableObject'
+        empty:
+          type: boolean
+    CaptchaDto:
+      type: object
+      properties:
+        secret:
+          type: string
+          description: Секретный ключ капчи
+        image:
+          type: string
+          description: Изображение капчи с заголовком
+      description: Информация о капче
+    AccountSearchDto:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID аккаунта
+          format: uuid
+        ids:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: Список ID аккаунтов
+          example:
+            - 00000000-0000-0000-0000-000000000000
+            - 11111111-1111-1111-1111-111111111111
+          items:
+            type: string
+        blockedByIds:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: ID заблокировавших аккаунтов
+          example:
+            - 00000000-0000-0000-0000-000000000000
+            - 11111111-1111-1111-1111-111111111111
+          items:
+            type: string
+        author:
+          type: string
+          description: Автор аккаунта
+        firstName:
+          type: string
+          description: Имя аккаунта
+        lastName:
+          type: string
+          description: Фамилия аккаунта
+        maxBirthDate:
+          type: string
+          description: Максимальная дата рождения
+          format: date
+        minBirthDate:
+          type: string
+          description: Минимальная дата рождения
+          format: date
+        city:
+          type: string
+          description: Город
+        country:
+          type: string
+          description: Страна
+        statusCode:
+          type: string
+          description: Код статуса
+          enum:
+            - FRIEND
+            - REQUEST_TO
+            - REQUEST_FROM
+            - BLOCKED
+            - DECLINED
+            - SUBSCRIBED
+            - NONE
+            - WATCHING
+            - REJECTING
+            - RECOMMENDATION
+        ageTo:
+          type: integer
+          description: Максимальный возраст
+          format: int32
+        ageFrom:
+          type: integer
+          description: Минимальный возраст
+          format: int32
+        deleted:
+          type: boolean
+        blocked:
+          type: boolean
+      description: Форма поиска аккаунта
+    PageResponseDtoAccountDto:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          description: Общее количество элементов
+          format: int32
+        totalPages:
+          type: integer
+          description: Общее количество страниц
+          format: int32
+        number:
+          type: integer
+          description: Номер страницы
+          format: int32
+        size:
+          type: integer
+          description: Размер страницы
+          format: int32
+        first:
+          type: boolean
+          description: Первая страница
+        last:
+          type: boolean
+          description: Последняя страница
+        numberOfElements:
+          type: integer
+          description: Количество элементов на странице
+          format: int32
+        empty:
+          type: boolean
+          description: Пустая страница
+        sort:
+          $ref: '#/components/schemas/SortDto'
+        pageable:
+          $ref: '#/components/schemas/PageableDto'
+        content:
+          minItems: 0
+          uniqueItems: true
+          type: array
+          description: Содержимое страницы
+          items:
+            $ref: '#/components/schemas/AccountDto'
+      description: Ответ с данными страницы

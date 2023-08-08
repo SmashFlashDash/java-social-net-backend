@@ -115,7 +115,7 @@ public interface UserServiceClient {
                                                             @RequestParam List<String> sort);
 
     @GetMapping("/api/v1/account/search/statusCode")
-    ResponseEntity<PageResponseDto> findAccountByStatusCode(@RequestParam String firstName,
+    ResponseEntity<PageResponseDto<AccountDto>> findAccountByStatusCode(@RequestParam String firstName,
                                                            @RequestParam StatusCode statusCode,
                                                            @RequestParam Integer page,
                                                            @RequestParam Integer size,

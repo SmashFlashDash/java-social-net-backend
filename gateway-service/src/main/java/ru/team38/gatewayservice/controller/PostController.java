@@ -16,38 +16,48 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/post")
 @RequiredArgsConstructor
-public class PostController {
+public class PostController implements PostControllerInterface {
+
     private final PostService postService;
+
+    @Override
     @GetMapping()
     public PageResponseDto<PostDto> getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
-                                   @RequestParam(value = "sort", required = false) List<String> sort,
-                                   @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
-                                   @RequestParam(value = "accountIds", required = false) UUID accountIds,
-                                   @RequestParam(value = "tags", required = false) List<String> tags,
-                                   @RequestParam(value = "dateForm", required = false) String dateFrom,
-                                   @RequestParam(value = "dateTo", required = false) String dateTo,
-                                   @RequestParam(value = "author", required = false) String author,
-                                   @RequestParam(value = "text", required = false) String text,
-                                   Pageable pageable) {
+                                            @RequestParam(value = "sort", required = false) List<String> sort,
+                                            @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
+                                            @RequestParam(value = "accountIds", required = false) UUID accountIds,
+                                            @RequestParam(value = "tags", required = false) List<String> tags,
+                                            @RequestParam(value = "dateForm", required = false) String dateFrom,
+                                            @RequestParam(value = "dateTo", required = false) String dateTo,
+                                            @RequestParam(value = "author", required = false) String author,
+                                            @RequestParam(value = "text", required = false) String text,
+                                            Pageable pageable) {
         log.info("Executing getPost request");
         return postService.getPost(withFriends, sort, isDeleted, accountIds, tags, dateFrom, dateTo, author, text, pageable);
     }
 
+    @Override
     @GetMapping("/{id}")
     public PostDto getPostById(@PathVariable UUID id) {
         log.info("Executing getPostById request");
         return postService.getPostById(id);
     }
+
+    @Override
     @PostMapping()
     public PostDto getCreatePost(@RequestBody CreatePostDto createPostDto){
         log.info("Executing getCreatePost request");
         return postService.getCreatePost(createPostDto);
     }
+
+    @Override
     @PutMapping()
     public PostDto getUpdatePost(@RequestBody CreatePostDto createPostDto){
         log.info("Executing getUpdatePost request");
         return postService.getUpdatePost(createPostDto);
     }
+
+    @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deletePost(@PathVariable UUID id) {
         log.info("Executing deletePost request");

@@ -107,8 +107,8 @@ public class AccountRepository {
         return pageResponseDto;
     }
 
-    public PageResponseDto findAccountByStatusCode(UUID userId, AccountSearchDto accountSearchDto) {
-        PageResponseDto pageAccountDto = new PageResponseDto();
+    public PageResponseDto<AccountDto> findAccountByStatusCode(UUID userId, AccountSearchDto accountSearchDto) {
+        PageResponseDto<AccountDto> pageAccountDto = new PageResponseDto<>();
         Condition condition = ACCOUNT.IS_DELETED.eq(accountSearchDto.isDeleted());
 
         condition = condition.and(getConditionToNames(userId, accountSearchDto.getFirstName(),

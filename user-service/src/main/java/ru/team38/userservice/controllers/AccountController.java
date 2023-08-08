@@ -44,7 +44,7 @@ public class AccountController {
     }
 
     @GetMapping("/search/statusCode")
-    public ResponseEntity<PageResponseDto> findAccountByStatusCode(AccountSearchDto accountSearchDto,
+    public ResponseEntity<PageResponseDto<AccountDto>> findAccountByStatusCode(AccountSearchDto accountSearchDto,
                                                                   PageDto pageDto) {
         return ResponseEntity.ok(accountService.findAccountByStatusCode(accountSearchDto, pageDto));
     }
