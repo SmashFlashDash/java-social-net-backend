@@ -2,6 +2,7 @@ package ru.team38.userservice.controllers;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.*;
@@ -34,12 +35,34 @@ public class FriendController {
     }
 
     @PutMapping("/block/{id}")
-    public ResponseEntity<FriendShortDto> blockAccount(HttpServletRequest request, @PathVariable UUID id) {
-        return ResponseEntity.ok(friendService.blockAccount(request, id));
+    public ResponseEntity<FriendShortDto> blockAccount(@PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.blockAccount(id));
     }
 
     @PutMapping("/unblock/{id}")
-    public ResponseEntity<FriendShortDto> unblockAccount(HttpServletRequest request, @PathVariable UUID id) {
-        return ResponseEntity.ok(friendService.unblockAccount(request, id));
+    public ResponseEntity<FriendShortDto> unblockAccount(@PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.unblockAccount(id));
     }
+
+    @PostMapping("/{id}/request")
+    public ResponseEntity<FriendShortDto> makeFriendRequest(@PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.makeFriendRequest(id));
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<FriendShortDto> approveFriendRequest(@PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.approveFriendRequest(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRelationship(@PathVariable UUID id) {
+        friendService.deleteRelationship(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/subscribe/{id}")
+    public ResponseEntity<FriendShortDto> getSubscription(@PathVariable UUID id) {
+        return ResponseEntity.ok(friendService.getSubscription(id));
+    }
+
 }

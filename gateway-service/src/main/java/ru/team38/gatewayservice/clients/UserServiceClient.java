@@ -116,4 +116,16 @@ public interface UserServiceClient {
     @PostMapping("/api/v1/auth/password/recovery/{linkId}")
     ResponseEntity<String> setNewPassword(@PathVariable String linkId,
                                                @RequestBody NewPasswordDto newPasswordDto);
+
+    @PostMapping("/api/v1/friends/{id}/request")
+    ResponseEntity<FriendShortDto> makeFriendRequest(@PathVariable UUID id);
+
+    @PutMapping("/api/v1/friends/{id}/approve")
+    ResponseEntity<FriendShortDto> approveFriendRequest(@PathVariable UUID id);
+
+    @DeleteMapping("/api/v1/friends/{id}")
+    void deleteRelationship(@PathVariable UUID id);
+
+    @PostMapping("/api/v1/friends/subscribe/{id}")
+    ResponseEntity<FriendShortDto> getSubscription(@PathVariable UUID id);
 }

@@ -87,6 +87,27 @@ public class UserController {
         return ResponseEntity.ok(userService.unblockAccount(id));
     }
 
+    @PostMapping("/api/v1/friends/{id}/request")
+    public ResponseEntity<FriendShortDto> makeFriendRequest(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.makeFriendRequest(id));
+    }
+
+    @PutMapping("/api/v1/friends/{id}/approve")
+    public ResponseEntity<FriendShortDto> approveFriendRequest(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.approveFriendRequest(id));
+    }
+
+    @DeleteMapping("/api/v1/friends/{id}")
+    public ResponseEntity<Void> deleteRelationship(@PathVariable UUID id) {
+        userService.deleteRelationship(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PostMapping("/api/v1/friends/subscribe/{id}")
+    public ResponseEntity<FriendShortDto> getSubscription(@PathVariable UUID id) {
+        return ResponseEntity.ok(userService.getSubscription(id));
+    }
+
     @GetMapping("/api/v1/geo/country")
     public ResponseEntity<List<CountryDto>> getCountries() {
         List<CountryDto> countries = userService.getCountries().getBody();
