@@ -6,8 +6,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import ru.team38.userservice.exceptions.*;
-import ru.team38.userservice.exceptions.status.*;
+import ru.team38.userservice.exceptions.CaptchaCreationException;
+import ru.team38.userservice.exceptions.FriendsServiceException;
+import ru.team38.userservice.exceptions.InvalidCaptchaException;
+import ru.team38.userservice.exceptions.LogoutFailedException;
+import ru.team38.userservice.exceptions.status.BadRequestException;
+import ru.team38.userservice.exceptions.status.UnauthorizedException;
 
 @ControllerAdvice
 public class GlobalExceptionAdvice {
@@ -57,6 +61,6 @@ public class GlobalExceptionAdvice {
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<String> badRequestHandler(BadRequestException ex) {
         ex.printStackTrace();
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }
