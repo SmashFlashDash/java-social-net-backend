@@ -168,4 +168,12 @@ public class UserService {
     public ResponseEntity<String> setNewPassword(String linkId, NewPasswordDto newPasswordDto) {
         return userServiceClient.setNewPassword(linkId, newPasswordDto);
     }
+
+    public FriendShortDto makeFriendRequest(UUID id) { return userServiceClient.makeFriendRequest(id).getBody(); }
+
+    public FriendShortDto approveFriendRequest(UUID id) { return userServiceClient.approveFriendRequest(id).getBody(); }
+
+    public void deleteRelationship(UUID id) { userServiceClient.deleteRelationship(id); }
+
+    public FriendShortDto getSubscription(UUID id) { return userServiceClient.getSubscription(id).getBody(); }
 }

@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.*;
+import ru.team38.common.jooq.tables.Friends;
+import ru.team38.common.jooq.tables.records.AccountRecord;
+import ru.team38.common.jooq.tables.records.FriendsRecord;
 import ru.team38.userservice.data.repositories.FriendRepository;
 import ru.team38.userservice.exceptions.DatabaseQueryException;
 import ru.team38.userservice.exceptions.FriendsServiceException;
@@ -168,7 +171,7 @@ public class FriendService {
         Condition condition = getCondition(friendSearchDto);
         List<UUID> recommendationsIds;
         try {
-            recommendationsIds = friendRepository.getRecommendationsIds(friendsIds, friendsFriendsIds, condition);
+            recommendationsIds = friendRepository.getRecommendationsIds(accountDto.getId(), friendsIds, friendsFriendsIds, condition);
         } catch (DatabaseQueryException e) {
             log.error("Error executing getRecommendationsIds request from account ID {}", accountDto.getId(), e);
             throw new FriendsServiceException("Error getting friendship recommendation IDs", e);
@@ -208,20 +211,153 @@ public class FriendService {
 
     @LoggingMethod
     @Transactional
-    public FriendShortDto blockAccount(HttpServletRequest request, UUID accountToBlockId) {
-        String initiatorUsername = getInitiatorUsername(request);
-        return friendRepository.blockAccount(initiatorUsername, accountToBlockId);
+    public FriendShortDto blockAccount(UUID accountToBlockId) {
+        UUID initiatorId = accountService.getAuthenticatedAccount().getId();
+        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+
+        for (int i = 0; i <= 1; i++) {
+            UUID firstParam = (i == 0) ? accountToBlockId : initiatorId;
+            UUID secondParam = (i == 0) ? initiatorId : accountToBlockId;
+            StatusCode statusCode = (i == 0) ? StatusCode.NONE : StatusCode.BLOCKED;
+
+            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
+            if (friendRecord != null) {
+                if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 0) {
+                    friendShortDtoList.add(new FriendShortDto());
+                    continue;
+                } else if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 1) {
+                    throw new IllegalArgumentException("User is already blocked " + accountToBlockId);
+                }
+                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
+            } else {
+                friendShortDtoList.add(friendRepository.insertRecord(firstParam, secondParam, statusCode));
+            }
+        }
+        FriendShortDto resultDto = friendShortDtoList.get(1);
+        resultDto.setId(resultDto.getFriendId());
+        return resultDto;
     }
 
     @LoggingMethod
     @Transactional
-    public FriendShortDto unblockAccount(HttpServletRequest request, UUID accountToUnblockId) {
-        String initiatorUsername = getInitiatorUsername(request);
-        return friendRepository.unblockAccount(initiatorUsername, accountToUnblockId);
+    public FriendShortDto unblockAccount(UUID accountToUnblockId) {
+        UUID initiatorId = accountService.getAuthenticatedAccount().getId();
+        FriendShortDto resultDto;
+
+        FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(initiatorId, accountToUnblockId);
+        if (friendRecord != null) {
+            if (!friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name())) {
+                throw new IllegalArgumentException("The specified account is not blocked " + accountToUnblockId);
+            }
+            resultDto = friendRepository.updateRecord(initiatorId, accountToUnblockId, StatusCode.NONE);
+        } else {
+            throw new IllegalArgumentException("The specified account is not blocked or does not exist " + accountToUnblockId);
+        }
+        resultDto.setId(resultDto.getFriendId());
+        return resultDto;
     }
 
-    private String getInitiatorUsername(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        return jwtService.getUsername(bearerToken.substring(7));
+    @LoggingMethod
+    @Transactional
+    public FriendShortDto makeFriendRequest(UUID friendRequestId) {
+        UUID initiatorId = accountService.getAuthenticatedAccount().getId();
+        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+
+        for (int i = 0; i <= 1; i++) {
+            UUID firstParam = (i == 0) ? friendRequestId : initiatorId;
+            UUID secondParam = (i == 0) ? initiatorId : friendRequestId;
+            StatusCode statusCode = (i == 0) ? StatusCode.REQUEST_FROM : StatusCode.REQUEST_TO;
+
+            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
+            if (friendRecord != null) {
+                if (friendRecord.getStatusCode().equals(statusCode.name())) {
+                    throw new IllegalArgumentException("Friend request for user has already been made " + friendRequestId);
+                }
+                if (friendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
+                    throw new IllegalArgumentException("Users are already friends " + initiatorId + ", " + friendRequestId);
+                }
+                if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 0) {
+                    throw new IllegalArgumentException("Impossible to make friend request to user that blocked current user " + friendRequestId);
+                }
+                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
+            } else {
+                friendShortDtoList.add(friendRepository.insertRecord(firstParam, secondParam, statusCode));
+            }
+        }
+        FriendShortDto resultDto = friendShortDtoList.get(1);
+        resultDto.setId(resultDto.getFriendId());
+        return resultDto;
+    }
+
+    @LoggingMethod
+    @Transactional
+    public FriendShortDto approveFriendRequest(UUID friendApproveId) {
+        UUID initiatorId = accountService.getAuthenticatedAccount().getId();
+        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+
+        for (int i = 0; i <= 1; i++) {
+            UUID firstParam = (i == 0) ? friendApproveId : initiatorId;
+            UUID secondParam = (i == 0) ? initiatorId : friendApproveId;
+            StatusCode statusCode = StatusCode.FRIEND;
+
+            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
+            if (friendRecord != null) {
+                if (friendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
+                    throw new IllegalArgumentException("Users are already friends " + initiatorId + ", " + friendApproveId);
+                }
+                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
+            } else {
+                throw new IllegalArgumentException("No entry in the 'Friends' table for users " + initiatorId + ", " + friendApproveId);
+            }
+        }
+        FriendShortDto resultDto = friendShortDtoList.get(1);
+        resultDto.setId(resultDto.getFriendId());
+        return resultDto;
+    }
+
+    public void deleteRelationship(UUID deleteId) {
+        UUID initiatorId = accountService.getAuthenticatedAccount().getId();
+        for (int i = 0; i <= 1; i++) {
+            UUID firstParam = (i == 0) ? deleteId : initiatorId;
+            UUID secondParam = (i == 0) ? initiatorId : deleteId;
+            StatusCode statusCode = StatusCode.NONE;
+
+            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
+            if (friendRecord != null) {
+                if (friendRecord.getStatusCode().equals(StatusCode.NONE.name())) {
+                    throw new IllegalArgumentException("Relationship between users doesn't exist " + initiatorId + ", " + deleteId);
+                }
+                friendRepository.updateRecord(firstParam, secondParam, statusCode);
+            } else {
+                throw new IllegalArgumentException("No entry in the 'Friends' table for users " + initiatorId + ", " + deleteId);
+            }
+        }
+    }
+
+    public FriendShortDto getSubscription(UUID subscribedId) {
+        UUID initiatorId = accountService.getAuthenticatedAccount().getId();
+        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+
+        for (int i = 0; i <= 1; i++) {
+            UUID firstParam = (i == 0) ? subscribedId : initiatorId;
+            UUID secondParam = (i == 0) ? initiatorId : subscribedId;
+            StatusCode statusCode = (i == 0) ? StatusCode.SUBSCRIBED : StatusCode.WATCHING;
+
+            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
+            if (friendRecord != null) {
+                if (friendRecord.getStatusCode().equals(statusCode.name())) {
+                    throw new IllegalArgumentException("Subscription already exists " + initiatorId + ", " + subscribedId);
+                }
+                if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 0) {
+                    throw new IllegalArgumentException("Impossible to subscribe to user that blocked current user " + subscribedId);
+                }
+                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
+            } else {
+                friendShortDtoList.add(friendRepository.insertRecord(firstParam, secondParam, statusCode));
+            }
+        }
+        FriendShortDto resultDto = friendShortDtoList.get(1);
+        resultDto.setId(resultDto.getFriendId());
+        return resultDto;
     }
 }

@@ -16,6 +16,7 @@ import ru.team38.common.mappers.AccountMapper;
 import ru.team38.common.mappers.FriendDtoMapper;
 import ru.team38.userservice.exceptions.AccountNotFoundException;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,6 +28,14 @@ public class FriendRepository {
     private final FriendDtoMapper friendDtoMapper = Mappers.getMapper(FriendDtoMapper.class);
     private static final Account ACCOUNT = Account.ACCOUNT;
     private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
+    private static final List<String> STATUSES_TO_EXCLUDE = List.of(
+            StatusCode.BLOCKED.name(),
+            StatusCode.REJECTING.name(),
+            StatusCode.DECLINED.name(),
+            StatusCode.REQUEST_FROM.name(),
+            StatusCode.REQUEST_TO.name(),
+            StatusCode.WATCHING.name()
+    );
 
     public int countIncomingFriendRequests(UUID accountId) {
         return dsl.fetchCount(Friends.FRIENDS, Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId)
@@ -54,8 +63,8 @@ public class FriendRepository {
         return dsl.select()
                 .from(Account.ACCOUNT)
                 .join(Friends.FRIENDS)
-                .on(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(ACCOUNT.ID).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID)))
-                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
+                .on(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID))
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId))
                 .and(Friends.FRIENDS.STATUS_CODE.eq(statusCode.name()))
                 .and(condition)
                 .fetch()
@@ -66,8 +75,8 @@ public class FriendRepository {
         return dsl.select()
                 .from(Friends.FRIENDS)
                 .join(Account.ACCOUNT)
-                .on(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(ACCOUNT.ID).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID)))
-                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId).or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
+                .on(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID))
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId))
                 .and(Friends.FRIENDS.STATUS_CODE.eq(statusCode.name()))
                 .and(condition)
                 .fetch()
@@ -82,52 +91,51 @@ public class FriendRepository {
         return friendShortDto;
     }
 
-    public List<UUID> getFriendsIds(UUID accountId) {
-        return dsl.select(Friends.FRIENDS.ACCOUNT_FROM_ID.as("value"))
+    public List<UUID> getFriendsIds(UUID id) {
+        return dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID)
                 .from(Friends.FRIENDS)
-                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId)
-                        .or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(id))
                 .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.FRIEND.name()))
-                .union(
-                        dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.as("value"))
-                                .from(Friends.FRIENDS)
-                                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId)
-                                        .or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountId)))
-                                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.FRIEND.name()))
-                )
                 .fetch()
                 .into(UUID.class);
     }
 
-    public List<UUID> getFriendsFriendsIds(UUID accountId, List<UUID> friendsIds) {
-        return dsl.select(Friends.FRIENDS.ACCOUNT_FROM_ID.as("value"))
+    public List<UUID> getFriendsFriendsIds(UUID id, List<UUID> friendsIds) {
+        return dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID)
                 .from(Friends.FRIENDS)
                 .where(Friends.FRIENDS.ACCOUNT_FROM_ID.in(friendsIds)
-                        .or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.in(friendsIds)))
-                .and(Friends.FRIENDS.ACCOUNT_FROM_ID.ne(accountId))
-                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.ne(accountId))
-                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.FRIEND.name()))
-                .and(Friends.FRIENDS.ACCOUNT_FROM_ID.notIn(friendsIds))
-                .union(
-                        dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.as("value"))
+                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.ne(id))
+                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.FRIEND.name())))
+                .except(
+                        dsl.select(Friends.FRIENDS.ACCOUNT_FROM_ID.as("value"))
                                 .from(Friends.FRIENDS)
-                                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.in(friendsIds)
-                                        .or(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.in(friendsIds)))
-                                .and(Friends.FRIENDS.ACCOUNT_FROM_ID.ne(accountId))
-                                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.ne(accountId))
-                                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.FRIEND.name()))
-                                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.notIn(friendsIds))
-                )
+                                .where(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(id))
+                                .and(Friends.FRIENDS.STATUS_CODE.in(STATUSES_TO_EXCLUDE))
+                                .union(
+                                        dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.as("value"))
+                                                .from(Friends.FRIENDS)
+                                                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(id))
+                                                .and(Friends.FRIENDS.STATUS_CODE.in(STATUSES_TO_EXCLUDE))))
                 .fetch()
                 .into(UUID.class);
     }
 
-    public List<UUID> getRecommendationsIds(List<UUID> friendsIds, List<UUID> friendsFriendsIds, Condition condition) {
+    public List<UUID> getRecommendationsIds(UUID id, List<UUID> friendsIds, List<UUID> friendsFriendsIds, Condition condition) {
         return dsl.select(Account.ACCOUNT.ID)
                 .from(Account.ACCOUNT)
                 .where(Account.ACCOUNT.ID.notIn(friendsIds))
                 .and(Account.ACCOUNT.ID.notIn(friendsFriendsIds))
                 .and(condition)
+                .except(
+                        dsl.select(Friends.FRIENDS.ACCOUNT_FROM_ID.as("value"))
+                                .from(Friends.FRIENDS)
+                                .where(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(id))
+                                .and(Friends.FRIENDS.STATUS_CODE.in(STATUSES_TO_EXCLUDE))
+                                .union(
+                                        dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.as("value"))
+                                                .from(Friends.FRIENDS)
+                                                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(id))
+                                                .and(Friends.FRIENDS.STATUS_CODE.in(STATUSES_TO_EXCLUDE))))
                 .fetchInto(UUID.class);
     }
 
@@ -139,72 +147,51 @@ public class FriendRepository {
                 .map(this::mapToFriendShortDto);
     }
 
-    public FriendShortDto blockAccount(String initiatorUsername, UUID accountToBlockId) {
-        AccountRecord initiatorAccountRecord = getAccountRecordByUsername(initiatorUsername);
+    public FriendShortDto updateRecord(UUID sourceId, UUID targetId, StatusCode statusCode) {
+        AccountRecord sourceAccountRecord = getAccountRecordById(sourceId);
+        FriendsRecord sourceFriendRecord = getFriendRecordByIds(sourceId, targetId);
 
-        FriendsRecord friendsRecord = dsl.selectFrom(Friends.FRIENDS)
-                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(initiatorAccountRecord.getId()))
-                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountToBlockId))
-                .fetchOne();
+        FriendDto initiatorFriendDto;
+        initiatorFriendDto = friendDtoMapper.mapToFriendDto(sourceFriendRecord, sourceAccountRecord);
+        initiatorFriendDto.setPreviousStatus(initiatorFriendDto.getStatusCode());
+        initiatorFriendDto.setStatusCode(statusCode);
+        sourceFriendRecord = friendDtoMapper.friendDtoToFriendsRecord(initiatorFriendDto);
 
-        FriendDto friendDto;
-        if (friendsRecord != null) {
-            if (friendsRecord.getStatusCode().equals(StatusCode.BLOCKED.name())) {
-                throw new IllegalArgumentException("User is already blocked " + friendsRecord.getRequestedAccountId());
-            }
-            friendDto = friendDtoMapper.mapToFriendDto(friendsRecord, initiatorAccountRecord);
-            friendDto.setPreviousStatus(friendDto.getStatusCode());
-            friendDto.setStatusCode(StatusCode.BLOCKED);
-        } else {
-            friendDto = FriendDto.builder()
-                    .accountFrom(initiatorAccountRecord.getId())
-                    .accountTo(accountToBlockId)
-                    .previousStatus(StatusCode.NONE)
-                    .statusCode(StatusCode.BLOCKED)
-                    .build();
-        }
-        friendsRecord = friendDtoMapper.friendDtoToFriendsRecord(friendDto);
-        dsl.attach(friendsRecord);
-        upsert(dsl, friendsRecord);
+        dsl.attach(sourceFriendRecord);
+        upsert(dsl, sourceFriendRecord);
 
-        AccountRecord blockedAccountRecord = dsl.selectFrom(ACCOUNT)
-                .where(ACCOUNT.ID.eq(accountToBlockId))
-                .fetchOne();
-
-        return friendDtoMapper.mapToFriendShortDto(friendsRecord, blockedAccountRecord);
+        AccountRecord targetAccountRecord = getAccountRecordById(targetId);
+        FriendsRecord targetFriendRecord = getFriendRecordByIds(targetId, sourceId);
+        return friendDtoMapper.mapToFriendShortDto(targetFriendRecord, targetAccountRecord);
     }
 
-    public FriendShortDto unblockAccount(String initiatorUsername, UUID accountToUnblockId) {
-        AccountRecord initiatorAccountRecord = getAccountRecordByUsername(initiatorUsername);
+    public FriendShortDto insertRecord(UUID sourceId, UUID targetId, StatusCode statusCode) {
+        FriendsRecord sourceFriendRecord = new FriendsRecord();
+        sourceFriendRecord.setStatusCode(statusCode.name());
+        sourceFriendRecord.setAccountFromId(sourceId);
+        sourceFriendRecord.setRequestedAccountId(targetId);
+        sourceFriendRecord.setPreviousStatus(StatusCode.NONE.name());
 
-        FriendsRecord friendsRecord = dsl.selectFrom(Friends.FRIENDS)
-                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(initiatorAccountRecord.getId()))
-                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(accountToUnblockId))
-                .fetchOne();
+        dsl.attach(sourceFriendRecord);
+        upsert(dsl, sourceFriendRecord);
 
-        if (friendsRecord != null && StatusCode.BLOCKED.name().equals(friendsRecord.getStatusCode())) {
-            FriendDto friendDto = friendDtoMapper.mapToFriendDto(friendsRecord, initiatorAccountRecord);
-            friendDto.setStatusCode(friendDto.getPreviousStatus());
-            friendDto.setPreviousStatus(StatusCode.BLOCKED);
-            friendsRecord = friendDtoMapper.friendDtoToFriendsRecord(friendDto);
-            dsl.attach(friendsRecord);
-            friendsRecord.update();
-        } else {
-            throw new IllegalArgumentException("The specified account is not blocked or does not exist.");
-        }
-
-        AccountRecord unblockedAccountRecord = dsl.selectFrom(ACCOUNT)
-                .where(ACCOUNT.ID.eq(accountToUnblockId))
-                .fetchOne();
-
-        return friendDtoMapper.mapToFriendShortDto(friendsRecord, unblockedAccountRecord);
+        AccountRecord targetAccountRecord = getAccountRecordById(targetId);
+        FriendsRecord targetFriendRecord = getFriendRecordByIds(targetId, sourceId);
+        return friendDtoMapper.mapToFriendShortDto(targetFriendRecord, targetAccountRecord);
     }
 
-    private AccountRecord getAccountRecordByUsername(String initiatorUsername) {
+    public AccountRecord getAccountRecordById(UUID id) {
         return dsl.selectFrom(ACCOUNT)
-                .where(ACCOUNT.EMAIL.eq(initiatorUsername))
+                .where(ACCOUNT.ID.eq(id))
                 .fetchOptional()
-                .orElseThrow(() -> new AccountNotFoundException("Account not found with username " + initiatorUsername));
+                .orElseThrow(() -> new AccountNotFoundException("Account not found with ID " + id));
+    }
+
+    public FriendsRecord getFriendRecordByIds(UUID sourceId, UUID targetId) {
+        return dsl.selectFrom(Friends.FRIENDS)
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(sourceId))
+                .and(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(targetId))
+                .fetchOne();
     }
 
     private <R extends UpdatableRecord<R>> void upsert(final DSLContext dslContext, final UpdatableRecord<R> rec) {
