@@ -5,10 +5,11 @@ import org.jooq.DSLContext;
 import org.jooq.SortOrder;
 import org.jooq.impl.DSL;
 import org.mapstruct.factory.Mappers;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.other.PageDto;
 import ru.team38.common.dto.dialog.DialogDto;
 import ru.team38.common.dto.dialog.MessageDto;
+import ru.team38.common.dto.dialog.MessageShortDto;
 import ru.team38.common.dto.dialog.ReadStatusDto;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.Message;
@@ -31,21 +32,22 @@ public class DialogRepository {
     private static final Message message = Message.MESSAGE;
     private final DialogMapper dialogMapper = Mappers.getMapper(DialogMapper.class);
 
-    public List<DialogDto> getListDialogs(PageDto pageDto, String emailUser) throws AccountNotFoundExceptions {
+    public List<DialogDto> getDialogs(Pageable pageable, String emailUser) throws AccountNotFoundExceptions {
         UUID accountId = emailUser2idUser(emailUser);
         List<DialogDto> dialogDtoList = new ArrayList<>();
         List<MessageDto> lastMessagesDto = getLastMessagesDto(accountId);
-        if (lastMessagesDto.size() != 0) {
-            lastMessagesDto.forEach(messageDto -> dialogDtoList.add(new DialogDto(messageDto.getDialogId(),
-                    false, getDialogUnreadMessagesCount(accountId, messageDto.getDialogId()),
-                    messageDto.getConversationPartner1(), messageDto.getConversationPartner2(),
-                    new ArrayList<>(List.of(messageDto)))));
+        if (!lastMessagesDto.isEmpty()) {
+            lastMessagesDto.forEach(messageDto ->
+                    dialogDtoList.add(new DialogDto(
+                            getDialogUnreadMessagesCount(accountId, messageDto.getDialogId()),
+                            messageDto.getConversationPartner1(), messageDto.getConversationPartner2(),
+                            new ArrayList<>(List.of(messageDto)))));
         }
-        if (pageDto.getSize() == null) {
+        if (pageable.getPageSize() == 0) {
             return dialogDtoList;
         }
-        String sortField = pageDto.getSort().get(0);
-        String sortType = pageDto.getSort().get(1);
+        String sortField = pageable.getSort().get().toList().get(0).getProperty();
+        String sortType = pageable.getSort().get().toList().get(0).getDirection().name();
         if (sortField.equals("unreadCount") && (sortType.equalsIgnoreCase("desc"))) {
             dialogDtoList.sort(Comparator.comparingInt(DialogDto::getUnreadCount).reversed());
         }
@@ -57,8 +59,7 @@ public class DialogRepository {
                 .distinctOn(message.DIALOG_ID)
                 .from(message)
                 .where(message.CONVERSATION_PARTNER1.eq(accountId)
-                        .or(message.CONVERSATION_PARTNER2.eq(accountId))
-                        .and(message.IS_DELETED.eq(false)))
+                        .or(message.CONVERSATION_PARTNER2.eq(accountId)))
                 .orderBy(message.DIALOG_ID, DSL.field(message.TIME).sort(SortOrder.DESC))
                 .fetch()
                 .into(MessageRecord.class);
@@ -75,13 +76,12 @@ public class DialogRepository {
         return accountRecord.getId();
     }
 
-    public Integer getAllUnreadMessagesCount(String emailUser) throws AccountNotFoundExceptions, UnreadMessagesCountNotFoundExceptions {
+    public Integer getUnreadMessagesCount(String emailUser) throws AccountNotFoundExceptions, UnreadMessagesCountNotFoundExceptions {
         UUID accountId = emailUser2idUser(emailUser);
         Integer unreadMessagesCount = dsl.selectCount()
                 .from(message)
                 .where(message.CONVERSATION_PARTNER2.eq(accountId))
                 .and(message.READ_STATUS.ne(ReadStatusDto.READ.toString()))
-                .and(message.IS_DELETED.eq(false))
                 .fetchOne(0, Integer.class);
         if (unreadMessagesCount == null) {
             throw new UnreadMessagesCountNotFoundExceptions();
@@ -94,8 +94,49 @@ public class DialogRepository {
                 .from(message)
                 .where(message.CONVERSATION_PARTNER2.eq(accountId))
                 .and(message.READ_STATUS.ne(ReadStatusDto.READ.toString()))
-                .and(message.IS_DELETED.eq(false))
                 .and(message.DIALOG_ID.eq(dialogId))
                 .fetchOne(0, Integer.class);
+    }
+
+    public DialogDto getDialogDtoByRecipientId(UUID recipientId, String emailUser) throws AccountNotFoundExceptions {
+        UUID accountId = emailUser2idUser(emailUser);
+        MessageRecord lastMessageRecord = dsl.selectFrom(message)
+                .where(message.CONVERSATION_PARTNER1.eq(accountId).and(message.CONVERSATION_PARTNER2.eq(recipientId))
+                        .or(message.CONVERSATION_PARTNER1.eq(recipientId).and(message.CONVERSATION_PARTNER2.eq(accountId))))
+                .orderBy(DSL.field(message.TIME).sort(SortOrder.DESC))
+                .limit(1)
+                .fetchSingle()
+                .into(MessageRecord.class);
+        UUID dialogId = lastMessageRecord.getDialogId();
+        return new DialogDto(
+                getDialogUnreadMessagesCount(accountId, dialogId),
+                lastMessageRecord.getConversationPartner1(),
+                lastMessageRecord.getConversationPartner2(),
+                new ArrayList<>(List.of(dialogMapper.messageRecordToMessageDto(lastMessageRecord))));
+    }
+
+    public List<MessageShortDto> getMessages(UUID recipientId, Pageable pageable, String emailUser)
+            throws AccountNotFoundExceptions {
+        UUID accountId = emailUser2idUser(emailUser);
+        List<MessageShortDto> messageShortDtoList = getMessagesShortDto(accountId, recipientId);
+        if (pageable.getPageSize() == 0 || messageShortDtoList.isEmpty()) {
+            return messageShortDtoList;
+        }
+        String sortField = pageable.getSort().get().toList().get(0).getProperty();
+        String sortType = pageable.getSort().get().toList().get(0).getDirection().name();
+        if (sortField.equals("time") && (sortType.equalsIgnoreCase("asc"))) {
+            messageShortDtoList.sort(Comparator.comparing(MessageShortDto::getTime));
+        }
+        return messageShortDtoList;
+    }
+
+    private List<MessageShortDto> getMessagesShortDto(UUID accountId, UUID recipientId) {
+        List<MessageRecord> messageRecords = dsl.selectFrom(message)
+                .where(message.CONVERSATION_PARTNER1.eq(accountId).and(message.CONVERSATION_PARTNER2.eq(recipientId))
+                        .or(message.CONVERSATION_PARTNER1.eq(recipientId)
+                                .and(message.CONVERSATION_PARTNER2.eq(accountId))))
+                .fetch()
+                .into(MessageRecord.class);
+        return dialogMapper.messageRecordsToMessagesShortDto(messageRecords);
     }
 }
