@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
+import ru.team38.common.dto.FriendShortDto;
 import ru.team38.common.dto.comment.CommentDto;
 import ru.team38.common.dto.comment.CommentType;
 import ru.team38.common.dto.like.LikeDto;
@@ -38,7 +39,7 @@ public class NotificationAddService {
     public void addNotification(UUID authorID, Object referenceDto, NotificationTypeEnum ntfType) {
         List<NotificationDto> notifications = switch (ntfType) {
             case POST -> makeNotificationPOST(authorID, (PostDto) referenceDto);
-            case FRIEND_REQUEST -> Collections.emptyList();     //TODO:
+            case FRIEND_REQUEST -> makeNotificationFRIEND(authorID, (FriendShortDto) referenceDto);     //TODO:
             case LIKE -> makeNotificationLIKE(authorID, (LikeDto) referenceDto);
             case MESSAGE -> Collections.emptyList();           // TODO:
             case POST_COMMENT, COMMENT_COMMENT -> makeNotificationCOMMENT(authorID, (CommentDto) referenceDto, ntfType);
@@ -77,6 +78,19 @@ public class NotificationAddService {
                 .filter(AccountRecord::getEnablePost)
                 .map(friend -> buildNotification(authorID, friend.getId(), post.getTitle(), NotificationTypeEnum.POST))
                 .collect(Collectors.toList());
+    }
+
+    private List<NotificationDto> makeNotificationFRIEND(UUID authorID, FriendShortDto referenceDto) {
+        return switch (referenceDto.getStatusCode()) {
+            case FRIEND -> List.of(buildNotification(authorID, referenceDto.getIdFriend(),
+                    "Принято предложение дружбы", NotificationTypeEnum.FRIEND_REQUEST));
+            case REQUEST_FROM -> List.of(buildNotification(authorID, referenceDto.getIdFriend(),
+                    "Предлагает дружбу", NotificationTypeEnum.FRIEND_REQUEST));
+            default -> {
+                log.error("Disabled add notification with NotificationTypeEnum: " + NotificationTypeEnum.FRIEND_REQUEST + "with status" + referenceDto.getStatusCode());
+                yield Collections.emptyList();
+            }
+        };
     }
 
     private List<NotificationDto> makeNotificationCOMMENT(UUID authorID, CommentDto comment, NotificationTypeEnum type) {
