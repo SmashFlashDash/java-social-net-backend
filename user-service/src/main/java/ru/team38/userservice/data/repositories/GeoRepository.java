@@ -1,5 +1,6 @@
 package ru.team38.userservice.data.repositories;
 
+import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Repository
+@RequiredArgsConstructor
 public class GeoRepository {
     private final DSLContext dslContext;
     private static final Cities cities = Cities.CITIES;
@@ -25,8 +27,10 @@ public class GeoRepository {
     private final CitiesMapper citiesMapper = Mappers.getMapper(CitiesMapper.class);
     private final CountryMapper countryMapper = Mappers.getMapper(CountryMapper.class);
 
-    public GeoRepository(DSLContext dslContext) {
-        this.dslContext = dslContext;
+    public boolean areTablesEmpty() {
+        int countCountries = dslContext.fetchCount(countries);
+        int countCities = dslContext.fetchCount(cities);
+        return countCountries == 0 || countCities == 0;
     }
 
     public void saveCity(List<CityDto> cities) {

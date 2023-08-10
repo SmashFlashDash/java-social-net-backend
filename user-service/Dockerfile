@@ -5,13 +5,12 @@ FROM openjdk:17-jdk
 ARG JAR_FILE=target/*.jar
 
 
-# Создаем папку для хранения файла
-RUN mkdir -p geoService_folderPath
+
 # Копируем JAR-файл приложения в контейнер
 COPY ${JAR_FILE}  user-service.jar
 
 # Указываем команду для запуска приложения
-ENTRYPOINT ["java","-Dspring.datasource.url=jdbc:postgresql://${postgres_host}:${postgres_internal_port}/${postgres_db}","-Dspring.datasource.username=${postgres_user}","-Dspring.datasource.password=${postgres_password}","-Dspring.mail.username=${app_mail_username}","-Dspring.mail.password=${app_mail_password}","-Dapplication.base_url=${application_base_url}","-DgeoService.urlData=${geoService_urlData}","-DgeoService.archivePath=${geoService_archivePath}","-DgeoService.excelPath=${geoService_excelPath}","-DgeoService.folderPath=${geoService_folderPath}","-jar","user-service.jar"]
+ENTRYPOINT ["java","-Dspring.datasource.url=jdbc:postgresql://${postgres_host}:${postgres_internal_port}/${postgres_db}","-Dspring.datasource.username=${postgres_user}","-Dspring.datasource.password=${postgres_password}","-Dspring.mail.username=${app_mail_username}","-Dspring.mail.password=${app_mail_password}","-Dapplication.base_url=${application_base_url}","-DgeoService.urlData=${geoService_urlData}","-jar","user-service.jar"]
 
 # Сообщаем Docker, что контейнер прослушивает трафик на указанном порту
 EXPOSE 8081
