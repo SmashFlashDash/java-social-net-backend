@@ -16,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.account.*;
 import ru.team38.userservice.data.repositories.AccountRepository;
 import ru.team38.userservice.data.repositories.TokenRepository;
@@ -35,10 +36,10 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-
     private final JwtService jwtService;
     private final PasswordEncoder encoder;
     private final AccountRepository accountRepository;
+    private final AccountService accountService;
     private final UserDetailsService userDetailsService;
     private final TokenBlacklistService tokenBlacklistService;
     private final TokenRepository tokenRepository;
@@ -98,6 +99,10 @@ public class AuthService {
     }
 
     public void logout(HttpServletRequest request) {
+        AccountDto account = accountService.getAuthenticatedAccount();
+        account.setLastOnlineTime(ZonedDateTime.now());
+        account.setIsOnline(false);
+        accountRepository.updateAccount(account);
         String token = request.getHeader("Authorization");
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -131,8 +136,8 @@ public class AuthService {
     @Async
     @Transactional
     public CompletableFuture<Void> recoverPassword(HttpServletRequest request,
-                                                   PasswordRecoveryDto passwordRecoveryDto) {
-        String email = passwordRecoveryDto.getEmail();
+                                                   EmailDto emailDto) {
+        String email = emailDto.getEmail();
         String resetToken = UUID.randomUUID().toString();
         ZonedDateTime tokenExpiration = ZonedDateTime.now().plusMinutes(15);
         UUID accountId = accountRepository.getIdByEmail(email);
@@ -146,8 +151,8 @@ public class AuthService {
         return CompletableFuture.completedFuture(null);
     }
 
-    public void checkAccountExisting(PasswordRecoveryDto passwordRecoveryDto) {
-        if (accountRepository.getAccountByEmail(passwordRecoveryDto.getEmail()).isEmpty()) {
+    public void checkAccountExisting(EmailDto emailDto) {
+        if (accountRepository.getAccountByEmail(emailDto.getEmail()).isEmpty()) {
             throw new UsernameNotFoundException("Account doesn't exist");
         }
     }
@@ -168,4 +173,25 @@ public class AuthService {
         accountRepository.updateAccount(accountDto);
     }
 
+    @LoggingMethod
+    @Transactional
+    public void changeEmail(HttpServletRequest request, String email) {
+        AccountDto account = accountService.getAuthenticatedAccount();
+        account.setEmail(email);
+        accountRepository.updateAccount(account);
+        logout(request);
+    }
+
+    @LoggingMethod
+    @Transactional
+    public void changePassword(ChangePasswordDto passwordDto) throws UsernameNotFoundException, BadCredentialsException {
+        AccountDto account = accountService.getAuthenticatedAccount();
+        try {
+            authenticateUser(new LoginForm(account.getEmail(), passwordDto.getPasswordOld()));
+        } catch (BadCredentialsException ex) {
+            throw new BadRequestException("Текущий пароль введен не верно");
+        }
+        account.setPassword(encoder.encode(passwordDto.getPasswordNew()));
+        accountRepository.updateAccount(account);
+    }
 }

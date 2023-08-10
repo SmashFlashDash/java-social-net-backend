@@ -116,7 +116,7 @@ public interface UserServiceClient {
     ResponseEntity<FriendShortDto> unblockAccount(@PathVariable UUID id);
 
     @PostMapping("/api/v1/auth/password/recovery")
-    ResponseEntity<String> recoverPassword(@RequestBody PasswordRecoveryDto passwordRecoveryDto);
+    ResponseEntity<String> recoverPassword(@RequestBody EmailDto emailDto);
 
     @PostMapping("/api/v1/auth/password/recovery/{linkId}")
     ResponseEntity<String> setNewPassword(@PathVariable String linkId,
@@ -133,4 +133,10 @@ public interface UserServiceClient {
 
     @PostMapping("/api/v1/friends/subscribe/{id}")
     ResponseEntity<FriendShortDto> getSubscription(@PathVariable UUID id);
+
+    @PostMapping("/api/v1/auth/change-password-link")
+    ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto passwordDto);
+
+    @PostMapping("/api/v1/auth/change-email-link")
+    ResponseEntity<String> changeEmail(@RequestBody EmailDto emailDto);
 }

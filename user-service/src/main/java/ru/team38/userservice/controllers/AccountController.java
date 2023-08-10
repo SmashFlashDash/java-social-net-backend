@@ -24,7 +24,7 @@ public class AccountController {
 
     @GetMapping("/me")
     public ResponseEntity<AccountDto> getAccount() {
-        return ResponseEntity.ok(accountService.getAuthenticatedAccount());
+        return ResponseEntity.ok(accountService.getAuthenticatedAccountWithUpdateOnline());
     }
 
     @PutMapping("/me")
