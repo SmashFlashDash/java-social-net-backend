@@ -55,9 +55,6 @@ services:
       app_mail_username: ${app_mail_username}
       app_mail_password: ${app_mail_password}
       geoService_urlData: ${geoService_urlData}
-      geoService_archivePath: ${geoService_archivePath}
-      geoService_excelPath: ${geoService_excelPath}
-      geoService_folderPath: ${geoService_folderPath}
 
     networks:
       - socialnet_network
