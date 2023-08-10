@@ -9,7 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CountryDto {
-    private String id;
+    private Long id;
     private boolean isDeleted;
     private String title;
     private List<String> cities;

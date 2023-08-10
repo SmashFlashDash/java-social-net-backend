@@ -62,6 +62,11 @@ preferences:
   friendship-recommendations:
     age-limit-top: 5
     age-limit-bottom: 5
+geoService:
+  urlData:
+  archivePath:
+  excelPath:
+  folderPath:
 
 jobs:
   addNotificationBirthday.cron: '0 0 0 * * *'

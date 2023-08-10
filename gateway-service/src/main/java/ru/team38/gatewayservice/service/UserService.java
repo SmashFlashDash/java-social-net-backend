@@ -138,6 +138,7 @@ public class UserService {
 
     public ResponseEntity<List<CityDto>> getCitiesByCountryId(String countryId) {
         return userServiceClient.getCitiesByCountryId(countryId);
+
     }
 
     public PageAccountDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
