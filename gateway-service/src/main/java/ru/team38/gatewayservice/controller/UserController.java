@@ -6,7 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.account.*;
+import ru.team38.common.dto.friend.FriendSearchDto;
+import ru.team38.common.dto.friend.FriendShortDto;
+import ru.team38.common.dto.geography.CityDto;
+import ru.team38.common.dto.geography.CountryDto;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.gatewayservice.service.UserService;
 
 import java.util.List;
@@ -66,7 +73,7 @@ public class UserController {
     }
 
     @GetMapping("/api/v1/friends")
-    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
+    public PageResponseDto<Object> getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
         log.info("Executing getFriends request");
         return userService.getFriendsByParameters(friendSearchDto, pageDto);
     }

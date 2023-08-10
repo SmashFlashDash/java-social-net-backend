@@ -3,11 +3,16 @@ package ru.team38.gatewayservice.clients;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.account.*;
+import ru.team38.common.dto.friend.FriendShortDto;
+import ru.team38.common.dto.geography.CityDto;
+import ru.team38.common.dto.geography.CountryDto;
 import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
-import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageResponseDto;
+import ru.team38.common.dto.other.StatusCode;
 
 import java.util.List;
 import java.util.UUID;
@@ -53,7 +58,7 @@ public interface UserServiceClient {
     ResponseEntity<DataTimestampDto> getNotificationsCount();
 
     @GetMapping("/api/v1/notifications")
-    ResponseEntity<NotificationsPageDto> getNotificationsPage();
+    ResponseEntity<PageResponseDto<DataTimestampDto>> getNotificationsPage();
 
     @PutMapping("/api/v1/notifications/readed")
     ResponseEntity<String> readAllNotifications();
@@ -68,7 +73,7 @@ public interface UserServiceClient {
     ResponseEntity<NotificationSettingDto> setNotificationSetting(@PathVariable UUID id);
 
     @GetMapping("/api/v1/friends")
-    ResponseEntity<PageFriendShortDto> getFriendsByParameters(
+    ResponseEntity<PageResponseDto<Object>> getFriendsByParameters(
             @RequestParam("statusCode") StatusCode statusCode,
             @RequestParam("firstName") String firstName,
             @RequestParam("city") String city,
@@ -96,13 +101,13 @@ public interface UserServiceClient {
     ResponseEntity<List<CityDto>> getCitiesByCountryId(@PathVariable("countryId") String countryId);
 
     @GetMapping("/api/v1/account/search")
-    ResponseEntity<PageAccountDto> findAccount(@RequestParam String firstName,
-                                               @RequestParam String lastName,
-                                               @RequestParam Integer ageFrom,
-                                               @RequestParam Integer ageTo,
-                                               @RequestParam String author,
-                                               @RequestParam List<String> ids,
-                                               @RequestParam Boolean isDeleted);
+    ResponseEntity<PageResponseDto<AccountDto>> findAccount(@RequestParam String firstName,
+                                                            @RequestParam String lastName,
+                                                            @RequestParam Integer ageFrom,
+                                                            @RequestParam Integer ageTo,
+                                                            @RequestParam String author,
+                                                            @RequestParam List<String> ids,
+                                                            @RequestParam Boolean isDeleted);
 
     @PutMapping("/api/v1/friends/block/{id}")
     ResponseEntity<FriendShortDto> blockAccount(@PathVariable UUID id);
@@ -115,7 +120,7 @@ public interface UserServiceClient {
 
     @PostMapping("/api/v1/auth/password/recovery/{linkId}")
     ResponseEntity<String> setNewPassword(@PathVariable String linkId,
-                                               @RequestBody NewPasswordDto newPasswordDto);
+                                          @RequestBody NewPasswordDto newPasswordDto);
 
     @PostMapping("/api/v1/friends/{id}/request")
     ResponseEntity<FriendShortDto> makeFriendRequest(@PathVariable UUID id);

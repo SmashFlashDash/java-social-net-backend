@@ -2,11 +2,10 @@ package ru.team38.common.mappers;
 
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
-import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.StatusCode;
+import ru.team38.common.dto.account.AccountDto;
+import ru.team38.common.dto.other.StatusCode;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 
 import java.time.LocalDateTime;

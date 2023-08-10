@@ -1,4 +1,4 @@
-package ru.team38.common.dto.comment;
+package ru.team38.common.dto.other;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

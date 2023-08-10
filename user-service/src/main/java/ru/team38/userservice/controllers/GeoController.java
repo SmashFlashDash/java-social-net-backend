@@ -3,8 +3,8 @@ package ru.team38.userservice.controllers;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.CityDto;
-import ru.team38.common.dto.CountryDto;
+import ru.team38.common.dto.geography.CityDto;
+import ru.team38.common.dto.geography.CountryDto;
 import ru.team38.userservice.services.GeoService;
 
 import java.util.List;

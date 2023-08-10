@@ -1,29 +1,27 @@
 package ru.team38.userservice.data.repositories;
 
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
+import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.CityDto;
-import ru.team38.common.dto.CountryDto;
+import ru.team38.common.dto.geography.CityDto;
+import ru.team38.common.dto.geography.CountryDto;
 import ru.team38.common.jooq.tables.Cities;
 import ru.team38.common.jooq.tables.Countries;
 import ru.team38.common.jooq.tables.records.CitiesRecord;
 import ru.team38.common.jooq.tables.records.CountriesRecord;
 import ru.team38.common.mappers.CitiesMapper;
 import ru.team38.common.mappers.CountryMapper;
-import org.mapstruct.factory.Mappers;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Repository
 public class GeoRepository {
     private final DSLContext dslContext;
-    private final Cities cities = Cities.CITIES;
-    private final Countries countries = Countries.COUNTRIES;
+    private static final Cities cities = Cities.CITIES;
+    private static final Countries countries = Countries.COUNTRIES;
     private final CitiesMapper citiesMapper = Mappers.getMapper(CitiesMapper.class);
     private final CountryMapper countryMapper = Mappers.getMapper(CountryMapper.class);
 
@@ -71,12 +69,12 @@ public class GeoRepository {
         if (countriesRecord == null) {
             return new CountryDto();
         }
-        List<String> cities = dslContext.select(Cities.CITIES.CITY_NAME)
+        List<String> citiesList = dslContext.select(Cities.CITIES.CITY_NAME)
                 .from(Cities.CITIES)
                 .where(Cities.CITIES.COUNTRY_ID.eq(id))
                 .fetchInto(String.class);
         CountryDto countryDto = countryMapper.mapToCountryDto(countriesRecord);
-        countryDto.setCities(cities);
+        countryDto.setCities(citiesList);
         return countryDto;
     }
 
@@ -84,10 +82,9 @@ public class GeoRepository {
         Result<CountriesRecord> result = dslContext.selectFrom(countries)
                 .where(countries.IS_DELETED.eq(false))
                 .fetch();
-        List<CountryDto> countryDtos = result.stream()
+        return result.stream()
                 .map(countryMapper::mapToCountryDto)
-                .collect(Collectors.toList());
-        return countryDtos;
+                .toList();
     }
     public void clearCountriesTable() {
         dslContext.deleteFrom(countries).where(DSL.trueCondition()).execute();

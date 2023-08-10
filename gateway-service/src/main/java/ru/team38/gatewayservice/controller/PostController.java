@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.dto.post.*;
 import ru.team38.gatewayservice.service.PostService;
 
@@ -18,16 +19,16 @@ import java.util.UUID;
 public class PostController {
     private final PostService postService;
     @GetMapping()
-    public ContentPostDto getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
-                                  @RequestParam(value = "sort", required = false) List<String> sort,
-                                  @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
-                                  @RequestParam(value = "accountIds", required = false) UUID accountIds,
-                                  @RequestParam(value = "tags", required = false) List<String> tags,
-                                  @RequestParam(value = "dateForm", required = false) String dateFrom,
-                                  @RequestParam(value = "dateTo", required = false) String dateTo,
-                                  @RequestParam(value = "author", required = false) String author,
-                                  @RequestParam(value = "text", required = false) String text,
-                                  Pageable pageable) {
+    public PageResponseDto<PostDto> getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
+                                   @RequestParam(value = "sort", required = false) List<String> sort,
+                                   @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
+                                   @RequestParam(value = "accountIds", required = false) UUID accountIds,
+                                   @RequestParam(value = "tags", required = false) List<String> tags,
+                                   @RequestParam(value = "dateForm", required = false) String dateFrom,
+                                   @RequestParam(value = "dateTo", required = false) String dateTo,
+                                   @RequestParam(value = "author", required = false) String author,
+                                   @RequestParam(value = "text", required = false) String text,
+                                   Pageable pageable) {
         log.info("Executing getPost request");
         return postService.getPost(withFriends, sort, isDeleted, accountIds, tags, dateFrom, dateTo, author, text, pageable);
     }

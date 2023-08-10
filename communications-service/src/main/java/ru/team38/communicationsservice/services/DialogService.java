@@ -5,17 +5,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.team38.common.dto.PageDto;
-import ru.team38.common.dto.PageableObject;
-import ru.team38.common.dto.Sort;
 import ru.team38.common.dto.dialog.DialogDto;
-import ru.team38.common.dto.dialog.PageDialogDto;
-import ru.team38.common.dto.dialog.UnreadCountDto;
+import ru.team38.common.dto.other.*;
 import ru.team38.communicationsservice.data.repositories.DialogRepository;
 import ru.team38.communicationsservice.exceptions.AccountNotFoundExceptions;
 import ru.team38.communicationsservice.exceptions.UnreadMessagesCountNotFoundExceptions;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -26,36 +23,47 @@ public class DialogService {
     @Autowired
     private final HttpServletRequest request;
 
-    public PageDialogDto getDialogs(PageDto pageDto) throws AccountNotFoundExceptions {
+    public PageResponseDto<DialogDto> getDialogs(PageDto pageDto) throws AccountNotFoundExceptions {
         try {
             String emailUser = jwtService.getUsernameFromToken(request);
             List<DialogDto> listDialogs = dialogRepository.getListDialogs(pageDto, emailUser);
             int pageSize = pageDto.getSize();
-            Integer pageNumber = pageDto.getPage();
-            int offset = (pageNumber != null) ? pageNumber * pageSize : 0;
+            int pageNumber = Optional.ofNullable(pageDto.getPage()).orElse(0);
+            int offset = pageNumber * pageSize;
             int totalDialogCount = listDialogs.size();
             int totalPages = totalDialogCount / pageSize;
             if (totalDialogCount % pageSize > 0) {
                 totalPages += 1;
             }
-            Sort sort = new Sort(false, true, false);
-            PageableObject pageableObject = new PageableObject(offset, sort, pageSize, true, false, pageNumber);
-            return new PageDialogDto(totalPages, listDialogs.size(), sort, listDialogs.size(),
-                    pageableObject, true, true, pageDto.getSize(), listDialogs, totalDialogCount, false);
+            SortDto sort = new SortDto(false, true, false);
+            PageableDto pageableDto = new PageableDto(sort, pageNumber, pageSize, offset, false, true);
+            return PageResponseDto.<DialogDto>builder()
+                    .totalPages(totalPages)
+                    .totalElements(listDialogs.size())
+                    .sort(sort)
+                    .numberOfElements(listDialogs.size())
+                    .pageable(pageableDto)
+                    .first(true)
+                    .last(true)
+                    .size(pageDto.getSize())
+                    .content(listDialogs)
+                    .number(totalDialogCount)
+                    .empty(false)
+                    .build();
         } catch (Exception e) {
             log.error("Error occurred while retrieving dialogs: {}", e.getMessage());
             throw e;
         }
     }
 
-    public UnreadCountDto getUnreadMessagesCount() throws UnreadMessagesCountNotFoundExceptions, AccountNotFoundExceptions {
+    public CountDto getUnreadMessagesCount() throws UnreadMessagesCountNotFoundExceptions, AccountNotFoundExceptions {
         try {
             String emailUser = jwtService.getUsernameFromToken(request);
             if (emailUser.trim().length() == 0) {
-                return new UnreadCountDto(0);
+                return new CountDto(0);
             }
             Integer unreadMessagesCount = dialogRepository.getAllUnreadMessagesCount(emailUser);
-            return new UnreadCountDto(unreadMessagesCount);
+            return new CountDto(unreadMessagesCount);
         } catch (Exception e) {
             log.error("Error occurred while retrieving count of unread messages: {}", e.getMessage());
             throw e;

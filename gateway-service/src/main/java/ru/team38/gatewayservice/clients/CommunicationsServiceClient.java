@@ -5,18 +5,19 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.dialog.PageDialogDto;
-import ru.team38.common.dto.dialog.UnreadCountDto;
-import ru.team38.common.dto.comment.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.team38.common.dto.post.ContentPostDto;
+import ru.team38.common.dto.comment.CommentDto;
+import ru.team38.common.dto.comment.CommentUpdateDto;
+import ru.team38.common.dto.dialog.DialogDto;
+import ru.team38.common.dto.like.CreateLikeDto;
+import ru.team38.common.dto.like.LikeDto;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.TagDto;
 import ru.team38.common.dto.storage.FileType;
 import ru.team38.common.dto.storage.FileUriResponse;
-import ru.team38.common.dto.like.CreateLikeDto;
-import ru.team38.common.dto.like.LikeDto;
 
 import java.util.List;
 import java.util.Map;
@@ -26,23 +27,23 @@ import java.util.UUID;
 public interface CommunicationsServiceClient {
 
     @GetMapping("/api/v1/post")
-    ResponseEntity<ContentPostDto> getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
-                                           @RequestParam(value = "sort", required = false) List<String> sort,
-                                           @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
-                                           @RequestParam(value = "accountIds", required = false) UUID accountIds,
-                                           @RequestParam(value = "tags", required = false) List<String> tags,
-                                           @RequestParam(value = "dateForm", required = false) String dateFrom,
-                                           @RequestParam(value = "dateTo", required = false) String dateTo,
-                                           @RequestParam(value = "author", required = false) String author,
-                                           @RequestParam(value = "text", required = false) String text,
-                                           Pageable pageable);
+    ResponseEntity<PageResponseDto<PostDto>> getPost(@RequestParam(value = "withFriends", required = false) Boolean withFriends,
+                                                    @RequestParam(value = "sort", required = false) List<String> sort,
+                                                    @RequestParam(value = "isDeleted", required = false) Boolean isDeleted,
+                                                    @RequestParam(value = "accountIds", required = false) UUID accountIds,
+                                                    @RequestParam(value = "tags", required = false) List<String> tags,
+                                                    @RequestParam(value = "dateForm", required = false) String dateFrom,
+                                                    @RequestParam(value = "dateTo", required = false) String dateTo,
+                                                    @RequestParam(value = "author", required = false) String author,
+                                                    @RequestParam(value = "text", required = false) String text,
+                                                    Pageable pageable);
     @GetMapping("/api/v1/dialogs")
-    ResponseEntity<PageDialogDto> getDialogs(@RequestParam(value = "page") Integer page,
-                                             @RequestParam(value = "size", required = false, defaultValue = "20")
-                                             Integer size,
-                                             @RequestParam(value = "sort", required = false) List<String> sort);
+    ResponseEntity<PageResponseDto<DialogDto>> getDialogs(@RequestParam(value = "page") Integer page,
+                                                          @RequestParam(value = "size", required = false,
+                                                                  defaultValue = "20") Integer size,
+                                                          @RequestParam(value = "sort", required = false) List<String> sort);
     @GetMapping("/api/v1/dialogs/unread")
-    ResponseEntity<UnreadCountDto> getUnreadMessagesCount();
+    ResponseEntity<CountDto> getUnreadMessagesCount();
     @GetMapping("/api/v1/post/{id}")
     ResponseEntity<PostDto> getPostById(@PathVariable UUID id);
     @PostMapping("/api/v1/post")
@@ -62,9 +63,9 @@ public interface CommunicationsServiceClient {
     ResponseEntity<String> deleteComment(@PathVariable UUID postId,
                                          @PathVariable UUID commentId);
     @GetMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentSearchDto> getComments(@PathVariable UUID postId, Pageable pageable);
+    ResponseEntity<PageResponseDto<CommentDto>> getComments(@PathVariable UUID postId, Pageable pageable);
     @GetMapping("/api/v1/post/{postId}/comment/{commentId}/subcomment")
-    ResponseEntity<CommentSearchDto> getSubComments(@PathVariable UUID postId,
+    ResponseEntity<PageResponseDto<CommentDto>> getSubComments(@PathVariable UUID postId,
                                                     @PathVariable UUID commentId,
                                                     Pageable pageable);
     @GetMapping("/api/v1/tag")

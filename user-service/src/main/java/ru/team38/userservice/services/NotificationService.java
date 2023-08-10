@@ -2,19 +2,16 @@ package ru.team38.userservice.services;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.team38.common.aspects.LoggingMethod;
-import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.CountDto;
-import ru.team38.common.dto.comment.PageableDto;
-import ru.team38.common.dto.comment.SortDto;
+import ru.team38.common.dto.account.AccountDto;
 import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
-import ru.team38.common.dto.notification.NotificationsPageDto;
-import ru.team38.common.jooq.tables.records.AccountRecord;
-import ru.team38.common.jooq.tables.records.FriendsRecord;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageResponseDto;
+import ru.team38.common.dto.other.PageableDto;
+import ru.team38.common.dto.other.SortDto;
 import ru.team38.userservice.data.repositories.AccountRepository;
 import ru.team38.userservice.data.repositories.NotificationRepository;
 import ru.team38.userservice.security.jwt.JwtService;
@@ -39,7 +36,7 @@ public class NotificationService {
     }
 
     @LoggingMethod
-    public NotificationsPageDto getNotificationsPage(Integer size) {
+    public PageResponseDto<DataTimestampDto> getNotificationsPage(Integer size) {
         AccountDto accountDto = accountService.getAuthenticatedAccount();
         Integer count = notificationRepository.getNotificationsCountByAccountId(accountDto.getId());
         List<DataTimestampDto> notifications = notificationRepository.getNotificationsByAccountId(accountDto.getId(), size);
@@ -52,11 +49,11 @@ public class NotificationService {
         notificationRepository.updateNotificationsReadByAccountId(accountDto.getId(), size);
     }
 
-    private NotificationsPageDto makePageDto(List<DataTimestampDto> notifications, Integer count, Integer size) {
+    private PageResponseDto<DataTimestampDto> makePageDto(List<DataTimestampDto> notifications, Integer count, Integer size) {
         int number= 0;
         int offset = 0;
         SortDto sortDto = new SortDto(false, true, notifications.isEmpty());
-        return NotificationsPageDto.builder()
+        return PageResponseDto.<DataTimestampDto>builder()
                 .content(notifications)
                 .totalElements(count)
                 .totalPages((int) Math.ceil(count / (float) size))

@@ -1,4 +1,4 @@
-package ru.team38.common.dto;
+package ru.team38.common.dto.other;
 
 public enum StatusCode {
     FRIEND,

@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
-import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.userservice.services.NotificationService;
 
 import java.util.UUID;
@@ -21,7 +21,7 @@ public class NotificationController {
     private static final Integer SIZE = 20;
 
     @GetMapping
-    public ResponseEntity<NotificationsPageDto> getNotificationsPage() {
+    public ResponseEntity<PageResponseDto<DataTimestampDto>> getNotificationsPage() {
         return ResponseEntity.ok(notificationService.getNotificationsPage(SIZE));
     }
 

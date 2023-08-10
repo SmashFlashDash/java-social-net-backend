@@ -1,11 +1,11 @@
-package ru.team38.common.dto;
+package ru.team38.common.dto.account;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.team38.common.dto.StatusCode;
+import ru.team38.common.dto.other.StatusCode;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;

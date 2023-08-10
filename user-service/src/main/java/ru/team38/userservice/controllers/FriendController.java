@@ -4,7 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.friend.FriendSearchDto;
+import ru.team38.common.dto.friend.FriendShortDto;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.userservice.exceptions.FriendsServiceException;
 import ru.team38.userservice.services.FriendService;
 
@@ -24,7 +28,7 @@ public class FriendController {
     }
 
     @GetMapping("")
-    public ResponseEntity<PageFriendShortDto> getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
+    public ResponseEntity<PageResponseDto<Object>> getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
         return ResponseEntity.ok(friendService.getFriendsByParameters(friendSearchDto, pageDto));
     }
 

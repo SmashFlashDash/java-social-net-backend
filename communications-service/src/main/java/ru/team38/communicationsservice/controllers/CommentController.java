@@ -5,7 +5,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.comment.*;
+import ru.team38.common.dto.comment.CommentDto;
+import ru.team38.common.dto.comment.CommentUpdateDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.communicationsservice.services.CommentService;
 
 import java.util.Map;
@@ -40,12 +42,12 @@ public class CommentController {
     }
 
     @GetMapping("/{postId}/comment")
-    public ResponseEntity<CommentSearchDto> getComments(@PathVariable UUID postId, Pageable pageable) {
+    public ResponseEntity<PageResponseDto<CommentDto>> getComments(@PathVariable UUID postId, Pageable pageable) {
         return ResponseEntity.ok(commentService.getComments(postId, pageable));
     }
 
     @GetMapping("/{postId}/comment/{commentId}/subcomment")
-    public ResponseEntity<CommentSearchDto> getSubComments(@PathVariable UUID postId,
+    public ResponseEntity<PageResponseDto<CommentDto>> getSubComments(@PathVariable UUID postId,
                                                            @PathVariable UUID commentId,
                                                            Pageable pageable) {
         return ResponseEntity.ok(commentService.getSubComments(commentId, pageable));

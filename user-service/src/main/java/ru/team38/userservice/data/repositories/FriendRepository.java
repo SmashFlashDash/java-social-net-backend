@@ -1,13 +1,15 @@
 package ru.team38.userservice.data.repositories;
 
 import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
 import org.jooq.Record;
-import org.jooq.*;
+import org.jooq.UpdatableRecord;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.FriendDto;
-import ru.team38.common.dto.FriendShortDto;
-import ru.team38.common.dto.StatusCode;
+import ru.team38.common.dto.friend.FriendDto;
+import ru.team38.common.dto.friend.FriendShortDto;
+import ru.team38.common.dto.other.StatusCode;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.Friends;
 import ru.team38.common.jooq.tables.records.AccountRecord;
@@ -16,7 +18,6 @@ import ru.team38.common.mappers.AccountMapper;
 import ru.team38.common.mappers.FriendDtoMapper;
 import ru.team38.userservice.exceptions.AccountNotFoundException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,23 +41,6 @@ public class FriendRepository {
     public int countIncomingFriendRequests(UUID accountId) {
         return dsl.fetchCount(Friends.FRIENDS, Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId)
                 .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.REQUEST_FROM.name())));
-    }
-
-    public List<FriendDto> getIncomingFriendRequests(UUID accountId) {
-        return dsl.select()
-                .from(Friends.FRIENDS)
-                .join(Account.ACCOUNT)
-                .on(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID))
-                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(accountId))
-                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.REQUEST_FROM.name()))
-                .fetch()
-                .map(this::mapToFriendDto);
-    }
-
-    private FriendDto mapToFriendDto(Record rec) {
-        FriendsRecord friendsRecord = rec.into(Friends.FRIENDS);
-        AccountRecord accountRecord = rec.into(Account.ACCOUNT);
-        return friendDtoMapper.mapToFriendDto(friendsRecord, accountRecord);
     }
 
     public List<Object> getFriendsByParameters(UUID accountId, Condition condition, StatusCode statusCode) {
@@ -96,6 +80,30 @@ public class FriendRepository {
                 .from(Friends.FRIENDS)
                 .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(id))
                 .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.FRIEND.name()))
+                .fetch()
+                .into(UUID.class);
+    }
+
+    public List<UUID> getFriendshipRequestedIds(UUID userId) {
+        return dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID)
+                .from(Friends.FRIENDS)
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(userId))
+                .and(Friends.FRIENDS.STATUS_CODE.in(StatusCode.REQUEST_TO.name(), StatusCode.REQUEST_FROM.name()))
+                .fetch()
+                .into(UUID.class);
+    }
+
+    public List<UUID> getBlockedAccountIds(UUID userId) {
+        return dsl.select(Friends.FRIENDS.REQUESTED_ACCOUNT_ID)
+                .from(Friends.FRIENDS)
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(userId))
+                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.BLOCKED.name()))
+                .union(
+                        dsl.select(Friends.FRIENDS.ACCOUNT_FROM_ID)
+                                .from(Friends.FRIENDS)
+                                .where(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(userId))
+                                .and(Friends.FRIENDS.STATUS_CODE.eq(StatusCode.BLOCKED.name()))
+                )
                 .fetch()
                 .into(UUID.class);
     }

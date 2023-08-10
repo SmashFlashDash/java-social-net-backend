@@ -1,4 +1,4 @@
-package ru.team38.common.dto;
+package ru.team38.common.dto.account;
 
 import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;

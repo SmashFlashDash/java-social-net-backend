@@ -8,7 +8,7 @@ import org.jooq.impl.DSL;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
 import ru.team38.common.dto.like.LikeDto;
-import ru.team38.common.dto.like.LikeType;
+import ru.team38.common.dto.other.PublicationType;
 import ru.team38.common.dto.like.ReactionDto;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.Comment;
@@ -30,18 +30,18 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LikeRepository {
     private final DSLContext dsl;
-    private final Post post = Post.POST;
-    private final Account account = Account.ACCOUNT;
-    private final Like like = Like.LIKE;
-    private final Comment comment = Comment.COMMENT;
+    private static final Post post = Post.POST;
+    private static final Account account = Account.ACCOUNT;
+    private static final Like like = Like.LIKE;
+    private static final Comment comment = Comment.COMMENT;
     private final LikeMapper likeMapper = Mappers.getMapper(LikeMapper.class);
     public LikeDto getLikeByReactionTypeAndEmail(String reactionType, String email, UUID itemId){
         UUID authorId = emailUser2idUser(email);
-        LikeType likeType;
+        PublicationType likeType;
         if (reactionType != null) {
-            likeType = LikeType.POST;
+            likeType = PublicationType.POST;
         } else {
-            likeType = LikeType.COMMENT;
+            likeType = PublicationType.COMMENT;
         }
         LikeRecord likeRecord = likeMapper.map2LikeRecord(reactionType, likeType.toString(), authorId, itemId);
 
@@ -50,7 +50,7 @@ public class LikeRepository {
         }
         dsl.executeInsert(likeRecord);
 
-        if (likeType == LikeType.POST) {
+        if (likeType == PublicationType.POST) {
             updatePostByLike(itemId, isAuthorOfPost(authorId, itemId), reactionType);
         } else {
             updateCommentByLike(itemId, authorId, isAuthorOfComment(authorId, itemId));
@@ -103,7 +103,7 @@ public class LikeRepository {
     }
 
     private void updatePostByLike(UUID itemId, Boolean isMyPost, String reaction) {
-        List<LikeRecord> likeRecords = getLikeRecords(itemId, LikeType.POST.toString());
+        List<LikeRecord> likeRecords = getLikeRecords(itemId, PublicationType.POST.toString());
         List<ReactionDto> reactions = getReactions(likeRecords);
         int likeAmount = likeRecords.size();
         UpdateSetMoreStep<PostRecord> updateQuery = dsl.update(post)
@@ -122,7 +122,7 @@ public class LikeRepository {
 
 
     private void updateCommentByLike(UUID itemId, UUID author, Boolean isMyComment){
-        int likeAmount = getLikeRecords(itemId, LikeType.COMMENT.toString()).size();
+        int likeAmount = getLikeRecords(itemId, PublicationType.COMMENT.toString()).size();
         UpdateSetMoreStep<CommentRecord> updateQuery = dsl.update(comment)
                 .set(comment.LIKE_AMOUNT, likeAmount);
         Condition condition = comment.ID.eq(itemId);
@@ -152,7 +152,7 @@ public class LikeRepository {
     private Boolean isPost(UUID itemId){
         return dsl.fetchExists(DSL.selectFrom(like)
                 .where(like.ITEM_ID.eq(itemId))
-                .and(like.TYPE.eq(LikeType.POST.toString())));
+                .and(like.TYPE.eq(PublicationType.POST.toString())));
     }
 
     private Boolean isMyLike(UUID authorId, UUID itemId){

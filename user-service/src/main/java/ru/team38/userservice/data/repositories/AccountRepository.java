@@ -5,11 +5,11 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.AccountSearchDto;
-import ru.team38.common.dto.PageAccountDto;
+import ru.team38.common.dto.account.AccountDto;
+import ru.team38.common.dto.account.AccountSearchDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationTypeEnum;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.jooq.Tables;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
@@ -29,6 +29,8 @@ public class AccountRepository {
     private static final Account ACCOUNT = Account.ACCOUNT;
     private final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
     private final NotificationSettingMapper notificationSettingMapper = Mappers.getMapper(NotificationSettingMapper.class);
+
+    private final FriendRepository friendRepository;
 
     public AccountDto save(AccountDto accountDto) {
         AccountRecord rec = dslContext.newRecord(ACCOUNT, accountMapper.accountDtoToAccountRecord(accountDto));
@@ -67,15 +69,15 @@ public class AccountRepository {
                 .map(accountMapper::accountRecordToAccountDto);
     }
 
-    public PageAccountDto findAccount(UUID userId, AccountSearchDto accountSearchDto) {
-        PageAccountDto pageAccountDto = new PageAccountDto();
+    public PageResponseDto<AccountDto> findAccount(UUID userId, AccountSearchDto accountSearchDto) {
+        PageResponseDto<AccountDto> pageAccountDto = new PageResponseDto<>();
 
         if (accountSearchDto.getFirstName() != null || accountSearchDto.getLastName() != null) {
             Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto));
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
-                    .forEach(pageAccountDto::setAccount);
+                    .forEach(pageAccountDto::addToContent);
         }
 
         if (!pageAccountDto.getContent().isEmpty()) {
@@ -97,7 +99,7 @@ public class AccountRepository {
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
-                    .forEach(pageAccountDto::setAccount);
+                    .forEach(pageAccountDto::addToContent);
             pageAccountDto.setTotalElements(pageAccountDto.getContent().size());
         }
 
@@ -113,7 +115,13 @@ public class AccountRepository {
         List<String> ids = accountSearchDto.getIds();
         boolean isDeleted = accountSearchDto.isDeleted();
 
-        Condition condition = ACCOUNT.ID.ne(userId);
+        List<UUID> friendsIds = friendRepository.getFriendsIds(userId);
+        List<UUID> friendshipRequestedIds = friendRepository.getFriendshipRequestedIds(userId);
+        List<UUID> blockedIds = friendRepository.getBlockedAccountIds(userId);
+        Condition condition = ACCOUNT.ID.ne(userId)
+                .and(ACCOUNT.ID.notIn(friendsIds))
+                .and(ACCOUNT.ID.notIn(friendshipRequestedIds))
+                .and(ACCOUNT.ID.notIn(blockedIds));
         char ch = '%';
 
         if (ids != null && !ids.isEmpty()) {
