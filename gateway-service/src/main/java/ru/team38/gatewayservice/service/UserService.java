@@ -176,11 +176,19 @@ public class UserService {
         return userServiceClient.setNewPassword(linkId, newPasswordDto);
     }
 
-    public FriendShortDto makeFriendRequest(UUID id) { return userServiceClient.makeFriendRequest(id).getBody(); }
+    public FriendShortDto makeFriendRequest(UUID id) {
+        return userServiceClient.makeFriendRequest(id).getBody();
+    }
 
-    public FriendShortDto approveFriendRequest(UUID id) { return userServiceClient.approveFriendRequest(id).getBody(); }
+    public FriendShortDto approveFriendRequest(UUID id) {
+        return userServiceClient.approveFriendRequest(id).getBody();
+    }
 
-    public void deleteRelationship(UUID id) { userServiceClient.deleteRelationship(id); }
+    public void deleteRelationship(UUID id) {
+        userServiceClient.deleteRelationship(id);
+    }
 
-    public FriendShortDto getSubscription(UUID id) { return userServiceClient.getSubscription(id).getBody(); }
+    public FriendShortDto getSubscription(UUID id) {
+        return userServiceClient.getSubscription(id).getBody();
+    }
 }

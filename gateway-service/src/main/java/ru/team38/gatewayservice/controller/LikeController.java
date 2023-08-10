@@ -16,23 +16,27 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class LikeController {
     private final LikeService likeService;
+
     @PostMapping("/{postId}/like")
-    public LikeDto getLike(@RequestBody CreateLikeDto createLikeDto, @PathVariable UUID postId){
+    public LikeDto getLike(@RequestBody CreateLikeDto createLikeDto, @PathVariable UUID postId) {
         log.info("Executing getLike request");
         return likeService.getLikeByPost(createLikeDto, postId);
     }
+
     @DeleteMapping("/{postId}/like")
     public ResponseEntity<String> deleteLike(@PathVariable UUID postId) {
         log.info("Executing deleteLike request");
         return likeService.deleteLikeByPost(postId);
     }
+
     @PostMapping("/{postId}/comment/{commentId}/like")
-    public LikeDto getLikeByComment(@PathVariable UUID postId, @PathVariable UUID commentId){
+    public LikeDto getLikeByComment(@PathVariable UUID postId, @PathVariable UUID commentId) {
         log.info("Executing getLike request");
         return likeService.getLikeByComment(postId, commentId);
     }
+
     @DeleteMapping("/{postId}/comment/{commentId}/like")
-    public ResponseEntity<String> deleteLikeByComment(@PathVariable UUID postId, @PathVariable UUID commentId){
+    public ResponseEntity<String> deleteLikeByComment(@PathVariable UUID postId, @PathVariable UUID commentId) {
         log.info("Executing deleteLike request");
         return likeService.deleteLikeByComment(postId, commentId);
     }
