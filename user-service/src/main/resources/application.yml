@@ -9,9 +9,6 @@ captcha:
   clearCacheRate: 45 #min
 
 spring:
-  task:
-    scheduling:
-      timezone=Europe/Moscow
   datasource:
     url:
     username:
@@ -67,4 +64,7 @@ geoService:
   urlData:
 
 jobs:
-  addNotificationBirthday.cron: '0 0 0 * * *'
+  addNotificationBirthday.cron: '0 0 * * * *'
+
+geonames:
+  userName: oconner

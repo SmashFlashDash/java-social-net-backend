@@ -20,8 +20,8 @@ public class NotificationController implements NotificationControllerInterface {
 
     @Override
     @GetMapping
-    public ResponseEntity<PageResponseDto<DataTimestampDto>> getNotifications() {
-        return ResponseEntity.ok(userService.getNotificationsPage());
+    public ResponseEntity<PageResponseDto<DataTimestampDto>> getNotifications(@RequestHeader("x-lang") String lang) {
+        return ResponseEntity.ok(userService.getNotificationsPage(lang));
     }
 
     @Override

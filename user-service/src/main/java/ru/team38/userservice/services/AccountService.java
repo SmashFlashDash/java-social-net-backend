@@ -17,12 +17,16 @@ import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
 import ru.team38.userservice.data.repositories.AccountRepository;
+import ru.team38.userservice.data.repositories.GeoRepository;
 import ru.team38.userservice.exceptions.status.BadRequestException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Service
 @Transactional
@@ -32,6 +36,7 @@ public class AccountService {
     private final Account ACCOUNT = Account.ACCOUNT;
     private final AccountMapper mapper = Mappers.getMapper(AccountMapper.class);
     private final AccountRepository accountRepository;
+    private final GeoRepository geoRepository;
 
     @LoggingMethod
     public AccountDto getAuthenticatedAccount() {
@@ -59,6 +64,8 @@ public class AccountService {
     @SneakyThrows
     public AccountDto updateAccount(AccountDto accountDto) {
         AccountDto updateDto = getAuthenticatedAccount();
+        String city = accountDto.getCity();
+        String country = accountDto.getCountry();
         for (Field field : AccountDto.class.getDeclaredFields()) {
             field.setAccessible(true);
             if (field.get(accountDto) != null) {
@@ -66,6 +73,13 @@ public class AccountService {
             }
         }
         updateDto.setUpdatedOn(ZonedDateTime.now());
+        if (city != null) {
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            executor.execute(() -> {
+                geoRepository.addZoneIdInCitiesTable(city, country);
+            });
+            executor.shutdown();
+        }
         return accountRepository.updateAccount(updateDto);
     }
 

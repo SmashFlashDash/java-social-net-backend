@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.team38.common.aspects.LoggingMethod;
+import ru.team38.common.dto.notification.*;
 import ru.team38.common.dto.account.AccountDto;
 import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
@@ -17,9 +18,7 @@ import ru.team38.userservice.data.repositories.NotificationRepository;
 import ru.team38.userservice.security.jwt.JwtService;
 
 import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.UUID;
-
+import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
@@ -34,13 +33,22 @@ public class NotificationService {
         Integer count = notificationRepository.getNotificationsCountByAccountId(accountDto.getId());
         return new DataTimestampDto(ZonedDateTime.now(), new CountDto(count));
     }
-
     @LoggingMethod
-    public PageResponseDto<DataTimestampDto> getNotificationsPage(Integer size) {
+    public PageResponseDto<DataTimestampDto> getNotificationsPage(String lang, Integer size) {
         AccountDto accountDto = accountService.getAuthenticatedAccount();
         Integer count = notificationRepository.getNotificationsCountByAccountId(accountDto.getId());
-        List<DataTimestampDto> notifications = notificationRepository.getNotificationsByAccountId(accountDto.getId(), size);
-        return makePageDto(notifications, count, size);
+        List<NotificationDto> notifications = notificationRepository.getNotificationsByAccountId(accountDto.getId(), size);
+        List<DataTimestampDto> notificationsByTimestamp = notifications.stream().map(record -> {
+             if(record.getNotificationType().equals(NotificationTypeEnum.FRIEND_BIRTHDAY)){
+                String birthdayMessage = getBirthdayMessageByLanguage(lang);
+                record.setContent("\uD83C\uDF89\uD83C\uDF82 " + birthdayMessage + " \uD83C\uDF88\uD83C\uDF1F");
+            }
+            DataTimestampDto data = new DataTimestampDto();
+            data.setTimestamp(ZonedDateTime.now());
+            data.setData(record);
+            return data;
+        }).toList();
+        return makePageDto(notificationsByTimestamp, count, size);
     }
 
     @LoggingMethod
@@ -90,5 +98,13 @@ public class NotificationService {
     private String getUsernameFromRequest(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         return jwtService.getUsername(bearerToken.substring(7));
+    }
+
+    private String getBirthdayMessageByLanguage(String languageCode) {
+        if (languageCode.equalsIgnoreCase("RU")) {
+            return BirthdayMessage.RU.name();
+        } else {
+            return BirthdayMessage.EN.name();
+        }
     }
 }

@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
@@ -27,7 +29,7 @@ public interface NotificationControllerInterface {
             @ApiResponse(responseCode = "401", description = "Unauthorized",
                     content = @Content(schema = @Schema(hidden = true)))
     })
-    ResponseEntity<PageResponseDto<DataTimestampDto>> getNotifications();
+    ResponseEntity<PageResponseDto<DataTimestampDto>> getNotifications(@RequestHeader("x-lang") String lang);
 
     @Operation(summary = "Отметить все уведомления как прочитанные")
     @ApiResponses(value = {

@@ -38,7 +38,7 @@
 
 - В поле ввода введите необходимые переменные в формате:
 ```
--Dspring.datasource.url=jdbc:postgresql://localhost:5433/socialnet  -Dspring.datasource.username=postgres  -Dspring.datasource.password=postgres -Dspring.mail.username=code_lounge@mail.ru -Dspring.mail.password=rBLLBxQs6U1DqHdxtpC5 -Dapplication.base-url=http://localhost:8088 -DgeoService.urlData=https://simplemaps.com/static/data/world-cities/basic/simplemaps_worldcities_basicv1.76.zip
+-Dspring.datasource.url=jdbc:postgresql://localhost:5433/socialnet  -Dspring.datasource.username=postgres  -Dspring.datasource.password=postgres -Dspring.mail.username=code_lounge@mail.ru -Dspring.mail.password=rBLLBxQs6U1DqHdxtpC5 -Dapplication.base-url=http://localhost:8088 -DgeoService.urlData=https://simplemaps.com/static/data/world-cities/basic/simplemaps_worldcities_basicv1.76.zip -Dgeonames.userName=oconner
 
 ```
 3. Запустить сервис.

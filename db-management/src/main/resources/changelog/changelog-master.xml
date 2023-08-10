@@ -21,4 +21,5 @@
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-post-pk-to-uuid.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-Country.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-Cities.xml"/>
+    <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-modify-cites.xml"/>
 </databaseChangeLog>

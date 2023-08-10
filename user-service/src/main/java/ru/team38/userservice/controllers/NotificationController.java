@@ -21,8 +21,8 @@ public class NotificationController {
     private static final Integer SIZE = 20;
 
     @GetMapping
-    public ResponseEntity<PageResponseDto<DataTimestampDto>> getNotificationsPage() {
-        return ResponseEntity.ok(notificationService.getNotificationsPage(SIZE));
+    public ResponseEntity<PageResponseDto<DataTimestampDto>> getNotificationsPage(@RequestHeader("x-lang") String lang) {
+        return ResponseEntity.ok(notificationService.getNotificationsPage(lang, SIZE));
     }
 
     @PutMapping("/readed")

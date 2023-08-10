@@ -15,6 +15,8 @@ import ru.team38.common.jooq.tables.records.CountriesRecord;
 import ru.team38.common.mappers.CitiesMapper;
 import ru.team38.common.mappers.CountryMapper;
 
+import ru.team38.userservice.services.task.LocationBasedUtilities;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +24,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GeoRepository {
     private final DSLContext dslContext;
+    private final LocationBasedUtilities locationBasedUtilities;
     private static final Cities cities = Cities.CITIES;
     private static final Countries countries = Countries.COUNTRIES;
     private final CitiesMapper citiesMapper = Mappers.getMapper(CitiesMapper.class);
@@ -96,5 +99,29 @@ public class GeoRepository {
 
     public void clearCitiesTable() {
         dslContext.deleteFrom(cities).where(DSL.trueCondition()).execute();
+    }
+    public void addZoneIdInCitiesTable(String city, String country){
+        CitiesRecord citiesRecord = citiesRecordByCityAndCountry(city, country);
+        if(citiesRecord != null) {
+            double latitude = citiesRecord.getLatitude();
+            double longitude = citiesRecord.getLongitude();
+            Long citiesId = citiesRecord.getId();
+            String zoneId = locationBasedUtilities.getTimeZoneByCoordinates(latitude, longitude);
+            dslContext.update(cities)
+                    .set(cities.ZONE_ID, zoneId)
+                    .where(cities.ID.eq(citiesId))
+                    .returning()
+                    .fetchOne();
+        }
+    }
+    private CitiesRecord citiesRecordByCityAndCountry(String city, String country){
+        return dslContext.select()
+                .from(cities)
+                .join(countries)
+                .on(cities.COUNTRY_ID.eq(countries.COUNTRY_ID))
+                .where(countries.COUNTRY_NAME.eq(country))
+                .and(cities.CITY_NAME.eq(city))
+                .and(cities.ZONE_ID.isNull())
+                .fetchOneInto(CitiesRecord.class);
     }
 }

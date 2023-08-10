@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.ZoneId;
+
 @Schema(description = "Данные города")
 @Data
 @Builder
@@ -23,6 +25,12 @@ public class CityDto {
     @Schema(description = "Название города")
     private String title;
 
+    @Schema(description = "Тайм зона страны")
+    private String zoneId;
     @Schema(description = "ID страны")
     private Long countryId;
+    @Schema(description = "Широта")
+    private double latitude;
+    @Schema(description = "Долгота")
+    private double longitude;
 }
