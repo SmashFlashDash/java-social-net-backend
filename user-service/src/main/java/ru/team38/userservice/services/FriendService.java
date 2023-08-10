@@ -10,8 +10,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.account.AccountDto;
+import ru.team38.common.dto.friend.FriendSearchDto;
+import ru.team38.common.dto.friend.FriendShortDto;
 import ru.team38.common.dto.notification.NotificationTypeEnum;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageDto;
+import ru.team38.common.dto.other.PageResponseDto;
+import ru.team38.common.dto.other.SortDto;
+import ru.team38.common.dto.other.StatusCode;
 import ru.team38.common.jooq.tables.records.FriendsRecord;
 import ru.team38.common.services.NotificationAddService;
 import ru.team38.userservice.data.repositories.FriendRepository;
@@ -31,6 +38,7 @@ import static ru.team38.common.jooq.Tables.ACCOUNT;
 @Service
 @RequiredArgsConstructor
 public class FriendService {
+
     private final FriendRepository friendRepository;
     private final AccountService accountService;
     private final NotificationAddService notificationAddService;
@@ -38,22 +46,6 @@ public class FriendService {
     private int ageLimitBottom;
     @Value("${preferences.friendship-recommendations.age-limit-top:5}")
     private int ageLimitTop;
-
-    public List<FriendDto> getIncomingFriendRequests() throws FriendsServiceException {
-        log.info("Executing getIncomingFriendRequests request");
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (!(authentication.getPrincipal() instanceof UserDetails)) {
-            throw new UnauthorizedException("User is not authenticated");
-        }
-        AccountDto accountDto = accountService.getAuthenticatedAccount();
-        UUID userId = accountDto.getId();
-        try {
-            return friendRepository.getIncomingFriendRequests(userId);
-        } catch (DatabaseQueryException e) {
-            log.error("Error executing getIncomingFriendRequests request from account ID {}", userId, e);
-            throw new FriendsServiceException("Error getting incoming friend requests", e);
-        }
-    }
 
     public CountDto getIncomingFriendRequestsCount() throws FriendsServiceException {
         log.info("Executing getIncomingFriendRequests request");
@@ -70,7 +62,7 @@ public class FriendService {
         }
     }
 
-    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
+    public PageResponseDto<Object> getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
         log.info("Executing getFriends request");
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (!(authentication.getPrincipal() instanceof UserDetails)) {
@@ -98,33 +90,21 @@ public class FriendService {
         return getPageFriendShortDto(friendsList, pageDto);
     }
 
-    public PageFriendShortDto getPageFriendShortDto(List<Object> friendsList, PageDto pageDto) {
-        Sort sort = new Sort(
-                true,
-                false,
-                true
-        );
-        PageableObject pageableObject = new PageableObject(
-                0,
-                sort,
-                pageDto.getSize(),
-                true,
-                false,
-                0
-        );
-        return new PageFriendShortDto(
-                friendsList.size(),
-                1,
-                0,
-                pageDto.getSize(),
-                friendsList,
-                sort,
-                true,
-                true,
-                friendsList.size(),
-                pageableObject,
-                false
-        );
+    public PageResponseDto<Object> getPageFriendShortDto(List<Object> friendsList, PageDto pageDto) {
+        SortDto sort = new SortDto(true, false, true);
+
+        return PageResponseDto.builder()
+                .totalElements(friendsList.size())
+                .totalPages(1)
+                .number(0)
+                .size(pageDto.getSize())
+                .content(friendsList)
+                .sort(sort)
+                .first(true)
+                .last(true)
+                .numberOfElements(friendsList.size())
+                .empty(false)
+                .build();
     }
 
     public List<FriendShortDto> getFriendsRecommendations(FriendSearchDto friendSearchDto) {
@@ -157,6 +137,7 @@ public class FriendService {
 
     public List<UUID> getRecommendationsIds(FriendSearchDto friendSearchDto, List<UUID> friendsIds, List<UUID> friendsFriendsIds) {
         AccountDto accountDto = accountService.getAuthenticatedAccount();
+        UUID accountId = accountDto.getId();
         if (friendSearchDto.allNull()) {
             friendSearchDto.setCity(accountDto.getCity());
             friendSearchDto.setBirthDateFrom(accountDto.getBirthDate().minusYears(ageLimitBottom));
@@ -164,11 +145,11 @@ public class FriendService {
         } else {
             friendSearchDto = ageToBirthDate(friendSearchDto);
         }
-        friendSearchDto.setId(accountDto.getId());
+        friendSearchDto.setId(accountId);
         Condition condition = getCondition(friendSearchDto);
         List<UUID> recommendationsIds;
         try {
-            recommendationsIds = friendRepository.getRecommendationsIds(accountDto.getId(), friendsIds, friendsFriendsIds, condition);
+            recommendationsIds = friendRepository.getRecommendationsIds(accountId, friendsIds, friendsFriendsIds, condition);
         } catch (DatabaseQueryException e) {
             log.error("Error executing getRecommendationsIds request from account ID {}", accountDto.getId(), e);
             throw new FriendsServiceException("Error getting friendship recommendation IDs", e);

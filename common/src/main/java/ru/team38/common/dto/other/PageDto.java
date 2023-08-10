@@ -1,4 +1,4 @@
-package ru.team38.common.dto;
+package ru.team38.common.dto.other;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

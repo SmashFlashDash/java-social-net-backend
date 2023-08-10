@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.team38.common.dto.comment.*;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.gatewayservice.service.CommentService;
 
 import java.util.Map;
@@ -36,12 +37,12 @@ public class CommentController {
     }
 
     @GetMapping("/api/v1/post/{postId}/comment")
-    ResponseEntity<CommentSearchDto> getComments(@PathVariable UUID postId, Pageable pageable) {
+    ResponseEntity<PageResponseDto<CommentDto>> getComments(@PathVariable UUID postId, Pageable pageable) {
         return ResponseEntity.ok(commentService.getComments(postId, pageable));
     }
 
     @GetMapping("/api/v1/post/{postId}/comment/{commentId}/subcomment")
-    ResponseEntity<CommentSearchDto> getSubComments(@PathVariable UUID postId,
+    ResponseEntity<PageResponseDto<CommentDto>> getSubComments(@PathVariable UUID postId,
                                                     @PathVariable UUID commentId,
                                                     Pageable pageable) {
         return ResponseEntity.ok(commentService.getSubComments(postId, commentId, pageable));

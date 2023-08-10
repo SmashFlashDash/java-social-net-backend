@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
 import ru.team38.common.dto.notification.NotificationTypeEnum;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.dto.post.*;
 import ru.team38.common.services.NotificationAddService;
 import ru.team38.communicationsservice.data.repositories.PostRepository;
@@ -28,7 +29,7 @@ public class PostService {
     private final NotificationAddService notificationService;
 
     @LoggingMethod
-    public ContentPostDto getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable) {
+    public PageResponseDto<PostDto> getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable) {
         ConditionPostDto conditionPostDto = conditionUtil.createConditionPostDto(postSearchDto);
         String emailUser = jwtService.getUsernameFromToken(request);
         List<PostDto> listPosts = postRepository.getPostDtosByEmail(conditionPostDto, emailUser);

@@ -13,7 +13,6 @@ import ru.team38.common.mappers.NotificationMapper;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -28,12 +27,12 @@ public class NotificationRepository {
 
     public List<DataTimestampDto> getNotificationsByAccountId(UUID accountId, Integer limit) {
         Result<NotificationRecord> records = getLastNotifications(accountId, limit);
-        return records.stream().map(record -> {
+        return records.stream().map(rec -> {
             DataTimestampDto data = new DataTimestampDto();
             data.setTimestamp(ZonedDateTime.now());
-            data.setData(mapper.notificationRecordToNotificationDto(record));
+            data.setData(mapper.notificationRecordToNotificationDto(rec));
             return data;
-        }).collect(Collectors.toList());
+        }).toList();
     }
 
     public void updateNotificationsReadByAccountId(UUID accountId, Integer limit) {

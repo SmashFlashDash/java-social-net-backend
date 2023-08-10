@@ -16,7 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.account.*;
 import ru.team38.userservice.data.repositories.AccountRepository;
 import ru.team38.userservice.data.repositories.TokenRepository;
 import ru.team38.userservice.exceptions.InvalidTokenException;

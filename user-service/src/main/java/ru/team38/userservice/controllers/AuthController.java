@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.account.*;
 import ru.team38.userservice.exceptions.CaptchaCreationException;
 import ru.team38.userservice.exceptions.InvalidCaptchaException;
 import ru.team38.userservice.services.AuthService;

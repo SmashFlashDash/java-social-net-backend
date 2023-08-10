@@ -1,14 +1,12 @@
-package ru.team38.common.dto.dialog;
+package ru.team38.common.dto.other;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnreadCountDto {
+public class CountDto {
     private Integer count;
 }

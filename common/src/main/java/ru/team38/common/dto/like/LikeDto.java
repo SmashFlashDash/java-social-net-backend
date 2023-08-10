@@ -3,6 +3,7 @@ package ru.team38.common.dto.like;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.team38.common.dto.other.PublicationType;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -17,5 +18,5 @@ public class LikeDto {
     private UUID itemId;
     private String reactionType;
     private ZonedDateTime time;
-    private LikeType type;
+    private PublicationType type;
 }

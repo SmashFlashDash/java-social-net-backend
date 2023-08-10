@@ -8,10 +8,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
-import ru.team38.common.dto.AccountDto;
-import ru.team38.common.dto.AccountSearchDto;
-import ru.team38.common.dto.PageAccountDto;
-import ru.team38.common.dto.PageDto;
+import ru.team38.common.dto.account.AccountDto;
+import ru.team38.common.dto.account.AccountSearchDto;
+import ru.team38.common.dto.other.PageDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
@@ -36,7 +36,7 @@ public class AccountService {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
         return accountRepository.getAccountByEmail(name)
                 .orElseThrow(() -> new BadRequestException("User not found"))
-                .map(record -> mapper.accountRecordToAccountDto((AccountRecord) record));
+                .map(rec -> mapper.accountRecordToAccountDto((AccountRecord) rec));
     }
 
     @LoggingMethod
@@ -73,7 +73,7 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public PageAccountDto findAccount(AccountSearchDto accountSearchDto, PageDto page) {
+    public PageResponseDto<AccountDto> findAccount(AccountSearchDto accountSearchDto, PageDto page) {
         UUID userId = getAuthenticatedAccount().getId();
         return accountRepository.findAccount(userId, checkDataToFindAccount(accountSearchDto));
     }

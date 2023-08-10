@@ -1,9 +1,10 @@
-package ru.team38.common.dto;
+package ru.team38.common.dto.friend;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.team38.common.dto.other.StatusCode;
 
 import java.time.LocalDate;
 import java.util.UUID;

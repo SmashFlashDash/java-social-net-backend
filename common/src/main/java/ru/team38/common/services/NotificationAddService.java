@@ -6,12 +6,12 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
-import ru.team38.common.dto.FriendShortDto;
 import ru.team38.common.dto.comment.CommentDto;
-import ru.team38.common.dto.comment.CommentType;
+import ru.team38.common.dto.friend.FriendShortDto;
 import ru.team38.common.dto.like.LikeDto;
 import ru.team38.common.dto.notification.NotificationDto;
 import ru.team38.common.dto.notification.NotificationTypeEnum;
+import ru.team38.common.dto.other.PublicationType;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.jooq.tables.records.NotificationRecord;
@@ -22,7 +22,6 @@ import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -77,7 +76,7 @@ public class NotificationAddService {
         return friendAccounts.stream()
                 .filter(AccountRecord::getEnablePost)
                 .map(friend -> buildNotification(authorID, friend.getId(), post.getTitle(), NotificationTypeEnum.POST))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<NotificationDto> makeNotificationFRIEND(UUID authorID, FriendShortDto referenceDto) {
@@ -94,8 +93,8 @@ public class NotificationAddService {
     }
 
     private List<NotificationDto> makeNotificationCOMMENT(UUID authorID, CommentDto comment, NotificationTypeEnum type) {
-        CommentType commentType = comment.getCommentType();
-        UUID commentItemAuthorId = commentType == CommentType.POST ?
+        PublicationType commentType = comment.getCommentType();
+        UUID commentItemAuthorId = commentType == PublicationType.POST ?
                 postRepository.getPostDtoById(comment.getPostId()).getAuthorId() :
                 commentRepository.getCommentById(comment.getParentId()).getAuthorId();
         if (authorID.equals(commentItemAuthorId)) {

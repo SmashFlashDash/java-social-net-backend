@@ -10,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 import ru.team38.common.dto.comment.CommentDto;
-import ru.team38.common.dto.comment.CommentType;
+import ru.team38.common.dto.other.PublicationType;
 import ru.team38.common.jooq.Tables;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
@@ -113,7 +113,7 @@ public class CommentRepository {
     private Boolean isPostComment(UUID commentId){
         return dsl.fetchExists(DSL.selectFrom(Tables.COMMENT)
                 .where(Tables.COMMENT.ID.eq(commentId))
-                .and(Tables.COMMENT.COMMENT_TYPE.eq(CommentType.POST.toString())));
+                .and(Tables.COMMENT.COMMENT_TYPE.eq(PublicationType.POST.toString())));
     }
 
     private void updatePost(UUID postId) {

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.TokensDto;
+import ru.team38.common.dto.account.TokensDto;
 import ru.team38.common.jooq.tables.Tokens;
 import ru.team38.common.jooq.tables.records.TokensRecord;
 import ru.team38.common.mappers.TokensMapper;
@@ -18,7 +18,7 @@ import java.util.List;
 public class TokenRepository {
 
     private final DSLContext dslContext;
-    private final Tokens tokens = Tokens.TOKENS;
+    private static final Tokens tokens = Tokens.TOKENS;
     private final TokensMapper mapper = Mappers.getMapper(TokensMapper.class);
 
     public void save(TokensDto tokenDto) {

@@ -13,7 +13,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.team38.common.aspects.LoggingMethod;
-import ru.team38.common.dto.CaptchaDto;
+import ru.team38.common.dto.account.CaptchaDto;
 import ru.team38.userservice.exceptions.CaptchaCreationException;
 
 import javax.imageio.ImageIO;

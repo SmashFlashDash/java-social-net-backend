@@ -6,11 +6,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.team38.common.dto.*;
+import ru.team38.common.dto.account.*;
+import ru.team38.common.dto.friend.FriendSearchDto;
+import ru.team38.common.dto.friend.FriendShortDto;
+import ru.team38.common.dto.geography.CityDto;
+import ru.team38.common.dto.geography.CountryDto;
 import ru.team38.common.dto.notification.DataTimestampDto;
 import ru.team38.common.dto.notification.NotificationSettingDto;
 import ru.team38.common.dto.notification.NotificationUpdateDto;
-import ru.team38.common.dto.notification.NotificationsPageDto;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.gatewayservice.clients.UserServiceClient;
 
 import java.util.List;
@@ -83,7 +89,7 @@ public class UserService {
         return userServiceClient.getNotificationsCount().getBody();
     }
 
-    public NotificationsPageDto getNotificationsPage() {
+    public PageResponseDto<DataTimestampDto> getNotificationsPage() {
         return userServiceClient.getNotificationsPage().getBody();
     }
 
@@ -107,8 +113,8 @@ public class UserService {
         return userServiceClient.deleteAccount();
     }
 
-    public PageFriendShortDto getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
-        ResponseEntity<PageFriendShortDto> responseEntity = userServiceClient.getFriendsByParameters(
+    public PageResponseDto<Object> getFriendsByParameters(FriendSearchDto friendSearchDto, PageDto pageDto) {
+        ResponseEntity<PageResponseDto<Object>> responseEntity = userServiceClient.getFriendsByParameters(
                 friendSearchDto.getStatusCode(),
                 friendSearchDto.getFirstName(),
                 friendSearchDto.getCity(),
@@ -141,8 +147,8 @@ public class UserService {
 
     }
 
-    public PageAccountDto findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
-        ResponseEntity<PageAccountDto> responseEntity = userServiceClient
+    public PageResponseDto<AccountDto> findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        ResponseEntity<PageResponseDto<AccountDto>> responseEntity = userServiceClient
                 .findAccount(accountSearchDto.getFirstName(),
                         accountSearchDto.getLastName(),
                         accountSearchDto.getAgeFrom(),

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.team38.common.dto.TokensDto;
+import ru.team38.common.dto.account.TokensDto;
 import ru.team38.userservice.data.repositories.TokenRepository;
 
 import java.util.List;

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.team38.common.dto.other.PublicationType;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -15,7 +16,7 @@ import java.util.UUID;
 public class CommentDto {
     private UUID id;
     private Boolean isDeleted;
-    private CommentType commentType;
+    private PublicationType commentType;
     private ZonedDateTime time;
     private ZonedDateTime timeChanged;
     private UUID authorId;

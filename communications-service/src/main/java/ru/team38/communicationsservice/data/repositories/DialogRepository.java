@@ -6,7 +6,7 @@ import org.jooq.SortOrder;
 import org.jooq.impl.DSL;
 import org.mapstruct.factory.Mappers;
 import org.springframework.stereotype.Repository;
-import ru.team38.common.dto.PageDto;
+import ru.team38.common.dto.other.PageDto;
 import ru.team38.common.dto.dialog.DialogDto;
 import ru.team38.common.dto.dialog.MessageDto;
 import ru.team38.common.dto.dialog.ReadStatusDto;
@@ -27,8 +27,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DialogRepository {
     private final DSLContext dsl;
-    private final Account account = Account.ACCOUNT;
-    private final Message message = Message.MESSAGE;
+    private static final Account account = Account.ACCOUNT;
+    private static final Message message = Message.MESSAGE;
     private final DialogMapper dialogMapper = Mappers.getMapper(DialogMapper.class);
 
     public List<DialogDto> getListDialogs(PageDto pageDto, String emailUser) throws AccountNotFoundExceptions {

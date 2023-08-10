@@ -3,8 +3,8 @@ package ru.team38.common.mappers;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
-import ru.team38.common.dto.FriendDto;
-import ru.team38.common.dto.FriendShortDto;
+import ru.team38.common.dto.friend.FriendDto;
+import ru.team38.common.dto.friend.FriendShortDto;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.jooq.tables.records.FriendsRecord;
 

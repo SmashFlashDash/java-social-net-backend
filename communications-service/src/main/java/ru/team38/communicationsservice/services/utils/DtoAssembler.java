@@ -2,8 +2,9 @@ package ru.team38.communicationsservice.services.utils;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
-import ru.team38.common.dto.comment.PageableDto;
-import ru.team38.common.dto.comment.SortDto;
+import ru.team38.common.dto.other.PageResponseDto;
+import ru.team38.common.dto.other.PageableDto;
+import ru.team38.common.dto.other.SortDto;
 import ru.team38.common.dto.post.*;
 
 import java.time.Instant;
@@ -36,7 +37,8 @@ public class DtoAssembler {
                 .tags(tags)
                 .build();
     }
-    public ContentPostDto createContentPostDto(List<PostDto> posts, Pageable pageable) {
+
+    public PageResponseDto<PostDto> createContentPostDto(List<PostDto> posts, Pageable pageable) {
         boolean isLast = posts.size() <= pageable.getPageSize();
         int totalElements = posts.size();
 
@@ -56,7 +58,7 @@ public class DtoAssembler {
         PageableDto pageableDto = new PageableDto(sortDto, pageable.getPageNumber(), pageable.getPageSize(),
                 (int) pageable.getOffset(), pageable.isUnpaged(), pageable.isPaged());
 
-        return ContentPostDto.builder()
+        return PageResponseDto.<PostDto>builder()
                 .number(pageable.getPageNumber())
                 .numberOfElements(posts.size())
                 .totalElements(totalElements)

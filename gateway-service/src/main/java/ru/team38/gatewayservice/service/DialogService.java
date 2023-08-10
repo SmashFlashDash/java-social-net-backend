@@ -5,8 +5,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import ru.team38.common.dto.dialog.PageDialogDto;
-import ru.team38.common.dto.dialog.UnreadCountDto;
+import ru.team38.common.dto.dialog.DialogDto;
+import ru.team38.common.dto.other.CountDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.gatewayservice.clients.CommunicationsServiceClient;
 
 import java.util.List;
@@ -16,9 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DialogService {
     private final CommunicationsServiceClient communicationsServiceClient;
-    public PageDialogDto getDialogs(Integer page, Integer size, List<String> sort) {
+    public PageResponseDto<DialogDto> getDialogs(Integer page, Integer size, List<String> sort) {
         try {
-            ResponseEntity<PageDialogDto> responseEntity = communicationsServiceClient.getDialogs(page, size, sort);
+            ResponseEntity<PageResponseDto<DialogDto>> responseEntity = communicationsServiceClient.getDialogs(page, size, sort);
             return responseEntity.getBody();
         } catch (FeignException e) {
             log.error(e.contentUTF8());
@@ -26,9 +27,9 @@ public class DialogService {
         }
     }
 
-    public UnreadCountDto getUnreadMessagesCount() {
+    public CountDto getUnreadMessagesCount() {
         try {
-            ResponseEntity<UnreadCountDto> responseEntity = communicationsServiceClient.getUnreadMessagesCount();
+            ResponseEntity<CountDto> responseEntity = communicationsServiceClient.getUnreadMessagesCount();
             return responseEntity.getBody();
         } catch (FeignException e) {
             log.error(e.contentUTF8());

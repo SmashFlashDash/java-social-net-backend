@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.team38.common.dto.post.ContentPostDto;
+import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.dto.post.CreatePostDto;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.dto.post.PostSearchDto;
@@ -21,7 +21,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping()
-    public ResponseEntity<ContentPostDto> getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable){
+    public ResponseEntity<PageResponseDto<PostDto>> getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable){
         return ResponseEntity.ok(postService.getPost(request, postSearchDto, pageable));
     }
 
