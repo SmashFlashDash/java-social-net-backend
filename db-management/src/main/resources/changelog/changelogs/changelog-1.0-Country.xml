@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+<changeSet id="create-countries-table" author="Владислав Видин">
+    <createTable tableName="countries" schemaName="socialnet" remarks="Таблица для хранения стран">
+        <column name="id" type="BIGINT" remarks="Уникальный идентификатор страны">
+            <constraints nullable="false" primaryKey="true"/>
+        </column>
+        <column name="country_id" type="BIGINT" remarks="ID страны">
+        </column>
+        <column name="country_name" type="VARCHAR(255)" remarks="Название страны">
+        </column>
+        <column name="is_deleted" type="BOOLEAN" remarks="Флаг, указывающий, удалена ли страна">
+            <constraints nullable="false"/>
+        </column>
+    </createTable>
+</changeSet>
+</databaseChangeLog>

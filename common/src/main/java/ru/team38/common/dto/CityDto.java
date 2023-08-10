@@ -8,8 +8,8 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CityDto {
-    private String id;
+    private Long id;
     private boolean isDeleted;
     private String title;
-    private String countryId;
+    private Long countryId;
 }

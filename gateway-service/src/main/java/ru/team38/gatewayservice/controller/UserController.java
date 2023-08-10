@@ -108,6 +108,12 @@ public class UserController {
         return ResponseEntity.ok(userService.getSubscription(id));
     }
 
+
+    @PutMapping("/load")
+    public ResponseEntity<String> loadGeoData() {
+        return ResponseEntity.ok("Обновление стран автоматизировано и ручной перезагрузки не требует");
+    }
+
     @GetMapping("/api/v1/geo/country")
     public ResponseEntity<List<CountryDto>> getCountries() {
         List<CountryDto> countries = userService.getCountries().getBody();

@@ -16,6 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 public class GeoController {
     private final GeoService geoService;
+    @PutMapping("/load")
+    public ResponseEntity<String> loadGeoData() {
+        return ResponseEntity.ok("Обновление стран автоматизировано и ручной перезагрузки не требует");
+    }
     @GetMapping("/country")
     public ResponseEntity<List<CountryDto>> getCountries() {
         return geoService.getCountries();
@@ -26,4 +30,5 @@ public class GeoController {
     public ResponseEntity<List<CityDto>> getCitiesByCountryId(@PathVariable String countryId) {
         return ResponseEntity.ok(geoService.getCitiesByCountryId(countryId));
     }
+
 }
