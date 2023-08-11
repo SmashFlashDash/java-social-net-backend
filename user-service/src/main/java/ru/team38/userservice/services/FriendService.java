@@ -191,27 +191,25 @@ public class FriendService {
     @Transactional
     public FriendShortDto blockAccount(UUID accountToBlockId) {
         UUID initiatorId = accountService.getAuthenticatedAccount().getId();
-        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+        FriendShortDto resultDto;
 
-        for (int i = 0; i <= 1; i++) {
-            UUID firstParam = (i == 0) ? accountToBlockId : initiatorId;
-            UUID secondParam = (i == 0) ? initiatorId : accountToBlockId;
-            StatusCode statusCode = (i == 0) ? StatusCode.NONE : StatusCode.BLOCKED;
-
-            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
-            if (friendRecord != null) {
-                if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 0) {
-                    friendShortDtoList.add(new FriendShortDto());
-                    continue;
-                } else if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 1) {
-                    throw new BadRequestException("User is already blocked " + accountToBlockId);
-                }
-                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
-            } else {
-                friendShortDtoList.add(friendRepository.insertRecord(firstParam, secondParam, statusCode));
+        FriendsRecord requestedFriendRecord = friendRepository.getFriendRecordByIds(accountToBlockId, initiatorId);
+        if (requestedFriendRecord != null) {
+            if (!requestedFriendRecord.getStatusCode().equals(StatusCode.BLOCKED.name())) {
+                friendRepository.updateRecord(accountToBlockId, initiatorId, StatusCode.NONE);
             }
+        } else {
+            friendRepository.insertRecord(accountToBlockId, initiatorId, StatusCode.NONE);
         }
-        FriendShortDto resultDto = friendShortDtoList.get(1);
+        FriendsRecord initiatorFriendRecord = friendRepository.getFriendRecordByIds(initiatorId, accountToBlockId);
+        if (initiatorFriendRecord != null) {
+            if (initiatorFriendRecord.getStatusCode().equals(StatusCode.BLOCKED.name())) {
+                throw new BadRequestException("User is already blocked " + accountToBlockId);
+            }
+            resultDto = friendRepository.updateRecord(initiatorId, accountToBlockId, StatusCode.BLOCKED);
+        } else {
+            resultDto = friendRepository.insertRecord(initiatorId, accountToBlockId, StatusCode.BLOCKED);
+        }
         resultDto.setId(resultDto.getFriendId());
         return resultDto;
     }
@@ -239,32 +237,37 @@ public class FriendService {
     @Transactional
     public FriendShortDto makeFriendRequest(UUID friendRequestId) {
         UUID initiatorId = accountService.getAuthenticatedAccount().getId();
-        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+        FriendShortDto resultDto;
 
-        for (int i = 0; i <= 1; i++) {
-            UUID firstParam = (i == 0) ? friendRequestId : initiatorId;
-            UUID secondParam = (i == 0) ? initiatorId : friendRequestId;
-            StatusCode statusCode = (i == 0) ? StatusCode.REQUEST_FROM : StatusCode.REQUEST_TO;
-
-            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
-            if (friendRecord != null) {
-                if (friendRecord.getStatusCode().equals(statusCode.name())) {
-                    throw new BadRequestException("Friend request for user has already been made " + friendRequestId);
-                }
-                if (friendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
-                    throw new BadRequestException("Users are already friends " + initiatorId + ", " + friendRequestId);
-                }
-                if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 0) {
-                    throw new BadRequestException("Impossible to make friend request to user that blocked current user " + friendRequestId);
-                }
-                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
-            } else {
-                friendShortDtoList.add(friendRepository.insertRecord(firstParam, secondParam, statusCode));
+        FriendsRecord requestedFriendRecord = friendRepository.getFriendRecordByIds(friendRequestId, initiatorId);
+        if (requestedFriendRecord != null) {
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.REQUEST_FROM.name())) {
+                throw new BadRequestException("Friend request for user has already been made " + friendRequestId);
             }
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
+                throw new BadRequestException("Users are already friends " + initiatorId + ", " + friendRequestId);
+            }
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.BLOCKED.name())) {
+                throw new BadRequestException("Impossible to make friend request to user that blocked current user " + friendRequestId);
+            }
+            friendRepository.updateRecord(friendRequestId, initiatorId, StatusCode.REQUEST_FROM);
+        } else {
+            friendRepository.insertRecord(friendRequestId, initiatorId, StatusCode.REQUEST_FROM);
         }
-        FriendShortDto resultDto = friendShortDtoList.get(1);
-        notificationAddService.addNotification(initiatorId, resultDto, NotificationTypeEnum.FRIEND_REQUEST);
+        FriendsRecord initiatorFriendRecord = friendRepository.getFriendRecordByIds(initiatorId, friendRequestId);
+        if (initiatorFriendRecord != null) {
+            if (initiatorFriendRecord.getStatusCode().equals(StatusCode.REQUEST_TO.name())) {
+                throw new BadRequestException("Friend request for user has already been made " + friendRequestId);
+            }
+            if (initiatorFriendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
+                throw new BadRequestException("Users are already friends " + initiatorId + ", " + friendRequestId);
+            }
+            resultDto = friendRepository.updateRecord(initiatorId, friendRequestId, StatusCode.REQUEST_TO);
+        } else {
+            resultDto = friendRepository.insertRecord(initiatorId, friendRequestId, StatusCode.REQUEST_TO);
+        }
         resultDto.setId(resultDto.getFriendId());
+        notificationAddService.addNotification(initiatorId, resultDto, NotificationTypeEnum.FRIEND_REQUEST);
         return resultDto;
     }
 
@@ -272,71 +275,83 @@ public class FriendService {
     @Transactional
     public FriendShortDto approveFriendRequest(UUID friendApproveId) {
         UUID initiatorId = accountService.getAuthenticatedAccount().getId();
-        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+        FriendShortDto resultDto;
 
-        for (int i = 0; i <= 1; i++) {
-            UUID firstParam = (i == 0) ? friendApproveId : initiatorId;
-            UUID secondParam = (i == 0) ? initiatorId : friendApproveId;
-            StatusCode statusCode = StatusCode.FRIEND;
-
-            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
-            if (friendRecord != null) {
-                if (friendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
-                    throw new BadRequestException("Users are already friends " + initiatorId + ", " + friendApproveId);
-                }
-                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
-            } else {
-                throw new BadRequestException("No entry in the 'Friends' table for users " + initiatorId + ", " + friendApproveId);
+        FriendsRecord requestedFriendRecord = friendRepository.getFriendRecordByIds(friendApproveId, initiatorId);
+        if (requestedFriendRecord != null) {
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
+                throw new BadRequestException("Users are already friends " + initiatorId + ", " + friendApproveId);
             }
+            friendRepository.updateRecord(friendApproveId, initiatorId, StatusCode.FRIEND);
+        } else {
+            throw new BadRequestException("No entry in the 'Friends' table for users " + initiatorId + ", " + friendApproveId);
         }
-        FriendShortDto resultDto = friendShortDtoList.get(1);
-        notificationAddService.addNotification(initiatorId, resultDto, NotificationTypeEnum.FRIEND_REQUEST);
+        FriendsRecord initiatorFriendRecord = friendRepository.getFriendRecordByIds(initiatorId, friendApproveId);
+        if (initiatorFriendRecord != null) {
+            if (initiatorFriendRecord.getStatusCode().equals(StatusCode.FRIEND.name())) {
+                throw new BadRequestException("Users are already friends " + initiatorId + ", " + friendApproveId);
+            }
+            resultDto = friendRepository.updateRecord(initiatorId, friendApproveId, StatusCode.FRIEND);
+        } else {
+            throw new BadRequestException("No entry in the 'Friends' table for users " + initiatorId + ", " + friendApproveId);
+        }
         resultDto.setId(resultDto.getFriendId());
+        notificationAddService.addNotification(initiatorId, resultDto, NotificationTypeEnum.FRIEND_REQUEST);
         return resultDto;
     }
 
+    @LoggingMethod
+    @Transactional
     public void deleteRelationship(UUID deleteId) {
         UUID initiatorId = accountService.getAuthenticatedAccount().getId();
-        for (int i = 0; i <= 1; i++) {
-            UUID firstParam = (i == 0) ? deleteId : initiatorId;
-            UUID secondParam = (i == 0) ? initiatorId : deleteId;
-            StatusCode statusCode = StatusCode.NONE;
 
-            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
-            if (friendRecord != null) {
-                if (friendRecord.getStatusCode().equals(StatusCode.NONE.name())) {
-                    throw new BadRequestException("Relationship between users doesn't exist " + initiatorId + ", " + deleteId);
-                }
-                friendRepository.updateRecord(firstParam, secondParam, statusCode);
-            } else {
-                throw new BadRequestException("No entry in the 'Friends' table for users " + initiatorId + ", " + deleteId);
+        FriendsRecord requestedFriendRecord = friendRepository.getFriendRecordByIds(deleteId, initiatorId);
+        if (requestedFriendRecord != null) {
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.NONE.name())) {
+                throw new BadRequestException("Relationship between users doesn't exist " + initiatorId + ", " + deleteId);
             }
+            friendRepository.updateRecord(deleteId, initiatorId, StatusCode.NONE);
+        } else {
+            throw new BadRequestException("No entry in the 'Friends' table for users " + initiatorId + ", " + deleteId);
+        }
+        FriendsRecord initiatorFriendRecord = friendRepository.getFriendRecordByIds(initiatorId, deleteId);
+        if (initiatorFriendRecord != null) {
+            if (initiatorFriendRecord.getStatusCode().equals(StatusCode.NONE.name())) {
+                throw new BadRequestException("Relationship between users doesn't exist " + initiatorId + ", " + deleteId);
+            }
+            friendRepository.updateRecord(initiatorId, deleteId, StatusCode.NONE);
+        } else {
+            throw new BadRequestException("No entry in the 'Friends' table for users " + initiatorId + ", " + deleteId);
         }
     }
 
+    @LoggingMethod
+    @Transactional
     public FriendShortDto getSubscription(UUID subscribedId) {
         UUID initiatorId = accountService.getAuthenticatedAccount().getId();
-        List<FriendShortDto> friendShortDtoList = new ArrayList<>();
+        FriendShortDto resultDto;
 
-        for (int i = 0; i <= 1; i++) {
-            UUID firstParam = (i == 0) ? subscribedId : initiatorId;
-            UUID secondParam = (i == 0) ? initiatorId : subscribedId;
-            StatusCode statusCode = (i == 0) ? StatusCode.SUBSCRIBED : StatusCode.WATCHING;
-
-            FriendsRecord friendRecord = friendRepository.getFriendRecordByIds(firstParam, secondParam);
-            if (friendRecord != null) {
-                if (friendRecord.getStatusCode().equals(statusCode.name())) {
-                    throw new BadRequestException("Subscription already exists " + initiatorId + ", " + subscribedId);
-                }
-                if (friendRecord.getStatusCode().equals(StatusCode.BLOCKED.name()) && i == 0) {
-                    throw new BadRequestException("Impossible to subscribe to user that blocked current user " + subscribedId);
-                }
-                friendShortDtoList.add(friendRepository.updateRecord(firstParam, secondParam, statusCode));
-            } else {
-                friendShortDtoList.add(friendRepository.insertRecord(firstParam, secondParam, statusCode));
+        FriendsRecord requestedFriendRecord = friendRepository.getFriendRecordByIds(subscribedId, initiatorId);
+        if (requestedFriendRecord != null) {
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.SUBSCRIBED.name())) {
+                throw new BadRequestException("Subscription already exists " + initiatorId + ", " + subscribedId);
             }
+            if (requestedFriendRecord.getStatusCode().equals(StatusCode.BLOCKED.name())) {
+                throw new BadRequestException("Impossible to subscribe to user that blocked current user " + subscribedId);
+            }
+            friendRepository.updateRecord(subscribedId, initiatorId, StatusCode.SUBSCRIBED);
+        } else {
+            friendRepository.insertRecord(subscribedId, initiatorId, StatusCode.SUBSCRIBED);
         }
-        FriendShortDto resultDto = friendShortDtoList.get(1);
+        FriendsRecord initiatorFriendRecord = friendRepository.getFriendRecordByIds(initiatorId, subscribedId);
+        if (initiatorFriendRecord != null) {
+            if (initiatorFriendRecord.getStatusCode().equals(StatusCode.WATCHING.name())) {
+                throw new BadRequestException("Subscription already exists " + initiatorId + ", " + subscribedId);
+            }
+            resultDto = friendRepository.updateRecord(initiatorId, subscribedId, StatusCode.WATCHING);
+        } else {
+            resultDto = friendRepository.insertRecord(initiatorId, subscribedId, StatusCode.WATCHING);
+        }
         resultDto.setId(resultDto.getFriendId());
         return resultDto;
     }
