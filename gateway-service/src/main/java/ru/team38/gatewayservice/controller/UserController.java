@@ -43,6 +43,18 @@ public class UserController {
         return userService.logout();
     }
 
+    @PostMapping("/api/v1/auth/change-email-link")
+    public ResponseEntity<String> changeEmail(@RequestBody EmailDto emailDto) {
+        log.info("Executing changeEmail request");
+        return userService.changeEmail(emailDto);
+    }
+
+    @PostMapping("/api/v1/auth/change-password-link")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto passwordDto) {
+        log.info("Executing changePassword request");
+        return userService.changePassword(passwordDto);
+    }
+
     @PostMapping("/api/v1/auth/refresh")
     public LoginResponse refresh(@RequestBody @Valid RefreshTokenRequest refreshTokenRequest) {
         log.info("Executing refresh request");
@@ -56,8 +68,8 @@ public class UserController {
     }
 
     @PostMapping("/api/v1/auth/password/recovery/")
-    public ResponseEntity<String> recoverPassword(@RequestBody PasswordRecoveryDto passwordRecoveryDto) {
-        return userService.recoverPassword(passwordRecoveryDto);
+    public ResponseEntity<String> recoverPassword(@RequestBody EmailDto emailDto) {
+        return userService.recoverPassword(emailDto);
     }
 
     @PostMapping("/api/v1/auth/password/recovery/{linkId}")

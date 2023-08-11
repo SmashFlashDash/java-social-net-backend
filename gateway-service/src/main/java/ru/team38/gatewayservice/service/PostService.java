@@ -1,6 +1,5 @@
 package ru.team38.gatewayservice.service;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
@@ -28,54 +27,33 @@ public class PostService {
     public PageResponseDto<PostDto> getPost(Boolean withFriends, List<String> sort, Boolean isDeleted, UUID accountIds,
                                             List<String> tags, String dateFrom, String dateTo, String author, String text,
                                             Pageable pageable) {
-        try {
-            ResponseEntity<PageResponseDto<PostDto>> responseEntity = communicationsServiceClient.getPost(withFriends,
-                    sort, isDeleted, accountIds, tags, dateFrom, dateTo, author, text, pageable);
-            return responseEntity.getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8());
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+        ResponseEntity<PageResponseDto<PostDto>> responseEntity = communicationsServiceClient.getPost(withFriends,
+                sort, isDeleted, accountIds, tags, dateFrom, dateTo, author, text, pageable);
+        return responseEntity.getBody();
     }
+
     public PostDto getCreatePost(@RequestBody CreatePostDto createPostDto) {
-        try {
-            ResponseEntity<PostDto> responseEntity = communicationsServiceClient.getCreatePost(createPostDto);
-            return responseEntity.getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8());
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+        ResponseEntity<PostDto> responseEntity = communicationsServiceClient.getCreatePost(createPostDto);
+        return responseEntity.getBody();
     }
+
     public PostDto getUpdatePost(@RequestBody CreatePostDto createPostDto) {
-        try {
-            ResponseEntity<PostDto> responseEntity = communicationsServiceClient.getUpdatePost(createPostDto);
-            return responseEntity.getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8());
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+        ResponseEntity<PostDto> responseEntity = communicationsServiceClient.getUpdatePost(createPostDto);
+        return responseEntity.getBody();
     }
+
     public PostDto getPostById(UUID id) {
-        try {
-            ResponseEntity<PostDto> responseEntity = communicationsServiceClient.getPostById(id);
-            return responseEntity.getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8());
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+        ResponseEntity<PostDto> responseEntity = communicationsServiceClient.getPostById(id);
+        return responseEntity.getBody();
     }
+
     public ResponseEntity<String> deletePost(UUID id) {
         return communicationsServiceClient.deletePost(id);
     }
 
-    public List<TagDto> getTag(String tag){
-        try {
-            ResponseEntity<List<TagDto>> responseEntity = communicationsServiceClient.getTag(tag);
-            return responseEntity.getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8());
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+    public List<TagDto> getTag(String tag) {
+        ResponseEntity<List<TagDto>> responseEntity = communicationsServiceClient.getTag(tag);
+        return responseEntity.getBody();
     }
 
     public FileUriResponse getUploadedFileUri(FileType type, MultipartFile file) {

@@ -51,16 +51,28 @@ public class AuthController {
 
     @PostMapping("/password/recovery")
     public ResponseEntity<String> recoverPassword(HttpServletRequest request,
-                                                       @RequestBody PasswordRecoveryDto passwordRecoveryDto) {
-        authService.checkAccountExisting(passwordRecoveryDto);
-        authService.recoverPassword(request, passwordRecoveryDto);
+                                                  @RequestBody EmailDto emailDto) {
+        authService.checkAccountExisting(emailDto);
+        authService.recoverPassword(request, emailDto);
         return ResponseEntity.ok("Ссылка для изменения пароля направлена на указанную почту");
     }
 
     @PostMapping("/password/recovery/{linkId}")
     public ResponseEntity<String> setNewPassword(@PathVariable String linkId,
-                                                      @RequestBody NewPasswordDto newPasswordDto) {
+                                                 @RequestBody NewPasswordDto newPasswordDto) {
         authService.setNewPassword(linkId, newPasswordDto);
+        return ResponseEntity.ok("Пароль успешно изменен");
+    }
+
+    @PostMapping("/change-email-link")
+    public ResponseEntity<String> changeEmail(HttpServletRequest request, @RequestBody EmailDto emailDto) {
+        authService.changeEmail(request, emailDto.getEmail());
+        return ResponseEntity.ok("Email успешно изменен");
+    }
+
+    @PostMapping("/change-password-link")
+    public ResponseEntity<String> changePassword(@RequestBody ChangePasswordDto passwordDto) {
+        authService.changePassword(passwordDto);
         return ResponseEntity.ok("Пароль успешно изменен");
     }
 }

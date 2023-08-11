@@ -1,9 +1,7 @@
 package ru.team38.gatewayservice.service;
 
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.team38.common.dto.account.*;
@@ -46,22 +44,11 @@ public class UserService {
     }
 
     public CaptchaDto getCaptcha() {
-        ResponseEntity<CaptchaDto> responseEntity = userServiceClient.getCaptcha();
-        if (responseEntity.getStatusCode() == HttpStatus.OK) {
-            return responseEntity.getBody();
-        } else {
-            throw new RuntimeException("Failed to get captcha");
-        }
+        return userServiceClient.getCaptcha().getBody();
     }
 
     public CountDto getIncomingFriendRequestsCount() {
-        try {
-            ResponseEntity<CountDto> responseEntity = userServiceClient.getIncomingFriendRequestsCount();
-            return responseEntity.getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8(), e);
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+        return userServiceClient.getIncomingFriendRequestsCount().getBody();
     }
 
     public AccountDto createAccount(AccountDto accountDto) {
@@ -77,12 +64,7 @@ public class UserService {
     }
 
     public AccountDto getAccountById(UUID id) {
-        try {
-            return userServiceClient.getAccountById(id).getBody();
-        } catch (FeignException e) {
-            log.error(e.contentUTF8());
-            throw new RuntimeException(e.contentUTF8(), e);
-        }
+        return userServiceClient.getAccountById(id).getBody();
     }
 
     public DataTimestampDto getNotificationsCount() {
@@ -168,8 +150,8 @@ public class UserService {
         return userServiceClient.unblockAccount(id).getBody();
     }
 
-    public ResponseEntity<String> recoverPassword(PasswordRecoveryDto passwordRecoveryDto) {
-        return userServiceClient.recoverPassword(passwordRecoveryDto);
+    public ResponseEntity<String> recoverPassword(EmailDto emailDto) {
+        return userServiceClient.recoverPassword(emailDto);
     }
 
     public ResponseEntity<String> setNewPassword(String linkId, NewPasswordDto newPasswordDto) {
@@ -190,5 +172,13 @@ public class UserService {
 
     public FriendShortDto getSubscription(UUID id) {
         return userServiceClient.getSubscription(id).getBody();
+    }
+
+    public ResponseEntity<String> changePassword(ChangePasswordDto passwordDto) {
+        return userServiceClient.changePassword(passwordDto);
+    }
+
+    public ResponseEntity<String> changeEmail(EmailDto emailDto) {
+        return userServiceClient.changeEmail(emailDto);
     }
 }

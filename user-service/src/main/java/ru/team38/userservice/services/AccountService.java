@@ -20,6 +20,7 @@ import ru.team38.userservice.exceptions.status.BadRequestException;
 
 import java.lang.reflect.Field;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 @Service
@@ -40,6 +41,15 @@ public class AccountService {
     }
 
     @LoggingMethod
+    public AccountDto getAuthenticatedAccountWithUpdateOnline() {
+        AccountDto account = getAuthenticatedAccount();
+        account.setLastOnlineTime(ZonedDateTime.now());
+        account.setIsOnline(true);
+        accountRepository.updateAccount(account);
+        return account;
+    }
+
+    @LoggingMethod
     public AccountDto createAccount(AccountDto accountDto) {
         return accountRepository.save(accountDto);
     }
@@ -54,6 +64,7 @@ public class AccountService {
                 field.set(updateDto, field.get(accountDto));
             }
         }
+        updateDto.setUpdatedOn(ZonedDateTime.now());
         return accountRepository.updateAccount(updateDto);
     }
 
