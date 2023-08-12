@@ -105,9 +105,21 @@ public interface UserServiceClient {
                                                             @RequestParam String lastName,
                                                             @RequestParam Integer ageFrom,
                                                             @RequestParam Integer ageTo,
+                                                            @RequestParam String country,
+                                                            @RequestParam String city,
                                                             @RequestParam String author,
                                                             @RequestParam List<String> ids,
-                                                            @RequestParam Boolean isDeleted);
+                                                            @RequestParam Boolean isDeleted,
+                                                            @RequestParam Integer page,
+                                                            @RequestParam Integer size,
+                                                            @RequestParam List<String> sort);
+
+    @GetMapping("/api/v1/account/search/statusCode")
+    ResponseEntity<PageResponseDto> findAccountByStatusCode(@RequestParam String firstName,
+                                                           @RequestParam StatusCode statusCode,
+                                                           @RequestParam Integer page,
+                                                           @RequestParam Integer size,
+                                                           @RequestParam List<String> sort);
 
     @PutMapping("/api/v1/friends/block/{id}")
     ResponseEntity<FriendShortDto> blockAccount(@PathVariable UUID id);

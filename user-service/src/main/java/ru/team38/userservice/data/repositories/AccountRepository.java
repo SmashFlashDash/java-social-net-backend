@@ -12,6 +12,7 @@ import ru.team38.common.dto.notification.NotificationTypeEnum;
 import ru.team38.common.dto.other.PageResponseDto;
 import ru.team38.common.jooq.Tables;
 import ru.team38.common.jooq.tables.Account;
+import ru.team38.common.jooq.tables.Friends;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
 import ru.team38.common.mappers.NotificationSettingMapper;
@@ -70,18 +71,18 @@ public class AccountRepository {
     }
 
     public PageResponseDto<AccountDto> findAccount(UUID userId, AccountSearchDto accountSearchDto) {
-        PageResponseDto<AccountDto> pageAccountDto = new PageResponseDto<>();
+        PageResponseDto<AccountDto> pageResponseDto = new PageResponseDto<>();
 
         if (accountSearchDto.getFirstName() != null || accountSearchDto.getLastName() != null) {
-            Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto));
+            Condition condition = (getConditionToAccountSearch(userId, accountSearchDto));
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
-                    .forEach(pageAccountDto::addToContent);
+                    .forEach(pageResponseDto::addToContent);
         }
 
-        if (!pageAccountDto.getContent().isEmpty()) {
-            return pageAccountDto;
+        if (!pageResponseDto.getContent().isEmpty()) {
+            return pageResponseDto;
         }
 
         if (accountSearchDto.getFirstName() != null && accountSearchDto.getLastName() != null) {
@@ -95,52 +96,80 @@ public class AccountRepository {
             if (accountSearchDto.getIds() != null && !accountSearchDto.getIds().isEmpty()) {
                 accountSearchDto.setAuthor(null);
             }
-            Condition condition = (checkConditionToAccountSearch(userId, accountSearchDto));
+            Condition condition = (getConditionToAccountSearch(userId, accountSearchDto));
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
-                    .forEach(pageAccountDto::addToContent);
-            pageAccountDto.setTotalElements(pageAccountDto.getContent().size());
+                    .forEach(pageResponseDto::addToContent);
+            pageResponseDto.setTotalElements(pageResponseDto.getContent().size());
         }
+
+        return pageResponseDto;
+    }
+
+    public PageResponseDto findAccountByStatusCode(UUID userId, AccountSearchDto accountSearchDto) {
+        PageResponseDto pageAccountDto = new PageResponseDto();
+        Condition condition = ACCOUNT.IS_DELETED.eq(accountSearchDto.isDeleted());
+
+        condition = condition.and(getConditionToNames(userId, accountSearchDto.getFirstName(),
+                accountSearchDto.getLastName(), accountSearchDto.getAuthor()));
+
+        dslContext.select()
+                .from(Account.ACCOUNT)
+                .join(Friends.FRIENDS)
+                .on(Friends.FRIENDS.REQUESTED_ACCOUNT_ID.eq(ACCOUNT.ID))
+                .where(Friends.FRIENDS.ACCOUNT_FROM_ID.eq(userId))
+                .and(Friends.FRIENDS.STATUS_CODE.eq(accountSearchDto.getStatusCode().toString()))
+                .and(condition)
+                .fetch().map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
+                .forEach(pageAccountDto::addToContent);
+        pageAccountDto.setTotalElements(pageAccountDto.getContent().size());
 
         return pageAccountDto;
     }
 
-    private Condition checkConditionToAccountSearch(UUID userId, AccountSearchDto accountSearchDto) {
+    private Condition getConditionToAccountSearch(UUID userId, AccountSearchDto accountSearchDto) {
         LocalDate maxBirthDate = accountSearchDto.getMaxBirthDate();
         LocalDate minBirthDate = accountSearchDto.getMinBirthDate();
         String firstName = accountSearchDto.getFirstName();
         String lastName = accountSearchDto.getLastName();
+        String country = accountSearchDto.getCountry();
+        String city = accountSearchDto.getCity();
         String author = accountSearchDto.getAuthor();
         List<String> ids = accountSearchDto.getIds();
-        boolean isDeleted = accountSearchDto.isDeleted();
 
         List<UUID> friendsIds = friendRepository.getFriendsIds(userId);
         List<UUID> friendshipRequestedIds = friendRepository.getFriendshipRequestedIds(userId);
         List<UUID> blockedIds = friendRepository.getBlockedAccountIds(userId);
-        Condition condition = ACCOUNT.ID.ne(userId)
+        Condition condition = ACCOUNT.IS_DELETED.eq(accountSearchDto.isDeleted())
+                .and(getConditionToNames(userId, firstName, lastName, author))
                 .and(ACCOUNT.ID.notIn(friendsIds))
                 .and(ACCOUNT.ID.notIn(friendshipRequestedIds))
                 .and(ACCOUNT.ID.notIn(blockedIds));
-        char ch = '%';
 
         if (ids != null && !ids.isEmpty()) {
             condition = condition.and(ACCOUNT.ID.in(ids));
         }
-
-        condition = condition.and(ACCOUNT.IS_DELETED.eq(isDeleted));
-
-        if (author != null) {
-            condition = condition.and((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + author + ch))
-                    .or(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + author + ch)));
+        if (country != null) {
+            condition = condition.and(ACCOUNT.COUNTRY.equalIgnoreCase(country));
         }
-
+        if (city != null) {
+            condition = condition.and(ACCOUNT.CITY.equalIgnoreCase(city));
+        }
         if (maxBirthDate != null) {
             condition = condition.and(ACCOUNT.BIRTH_DATE.le(maxBirthDate));
         }
         if (minBirthDate != null) {
             condition = condition.and(ACCOUNT.BIRTH_DATE.ge(minBirthDate));
         }
+
+        return condition;
+    }
+
+    private Condition getConditionToNames(UUID userId, String firstName, String lastName, String author) {
+        Condition condition = ACCOUNT.ID.ne(userId);
+        char ch = '%';
+
         if (firstName != null && lastName != null) {
             condition = condition.and(((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + firstName + ch))
                     .and(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + lastName + ch)))
@@ -181,7 +210,8 @@ public class AccountRepository {
         return notificationSettingMapper.accountRecordToNotificationSettingDto(accountRecord);
     }
 
-    private void updateNotificationType(AccountRecord accountRecord, NotificationTypeEnum notificationType, Boolean enable) {
+    private void updateNotificationType(AccountRecord accountRecord, NotificationTypeEnum notificationType, Boolean
+            enable) {
         switch (notificationType) {
             case POST -> accountRecord.setEnablePost(enable);
             case POST_COMMENT -> accountRecord.setEnablePostComment(enable);

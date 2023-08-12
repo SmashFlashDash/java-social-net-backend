@@ -135,10 +135,20 @@ public class UserService {
                         accountSearchDto.getLastName(),
                         accountSearchDto.getAgeFrom(),
                         accountSearchDto.getAgeTo(),
+                        accountSearchDto.getCountry(),
+                        accountSearchDto.getCity(),
                         accountSearchDto.getAuthor(),
                         accountSearchDto.getIds(),
-                        accountSearchDto.isDeleted()
-                );
+                        accountSearchDto.isDeleted(),
+                        pageDto.getPage(), pageDto.getSize(), pageDto.getSort());
+        return responseEntity.getBody();
+    }
+
+    public PageResponseDto findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        ResponseEntity<PageResponseDto> responseEntity = userServiceClient
+                .findAccountByStatusCode(accountSearchDto.getFirstName(),
+                        accountSearchDto.getStatusCode(), pageDto.getPage(),
+                        pageDto.getSize(), pageDto.getSort());
         return responseEntity.getBody();
     }
 
