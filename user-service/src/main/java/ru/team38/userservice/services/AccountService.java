@@ -12,6 +12,7 @@ import ru.team38.common.dto.account.AccountDto;
 import ru.team38.common.dto.account.AccountSearchDto;
 import ru.team38.common.dto.other.PageDto;
 import ru.team38.common.dto.other.PageResponseDto;
+import ru.team38.common.dto.other.SortDto;
 import ru.team38.common.jooq.tables.Account;
 import ru.team38.common.jooq.tables.records.AccountRecord;
 import ru.team38.common.mappers.AccountMapper;
@@ -84,12 +85,35 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public PageResponseDto<AccountDto> findAccount(AccountSearchDto accountSearchDto, PageDto page) {
+    public PageResponseDto<AccountDto> findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
         UUID userId = getAuthenticatedAccount().getId();
-        return accountRepository.findAccount(userId, checkDataToFindAccount(accountSearchDto));
+        return getPageAccountDto(accountRepository
+                .findAccount(userId, checkDataToFindAccount(accountSearchDto)), pageDto);
+    }
+
+    @LoggingMethod
+    public PageResponseDto findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        UUID userId = getAuthenticatedAccount().getId();
+        return getPageAccountDto(accountRepository
+                .findAccountByStatusCode(userId, checkDataToFindAccount(accountSearchDto)), pageDto);
+    }
+
+    public PageResponseDto getPageAccountDto(PageResponseDto pageAccountDto, PageDto pageDto) {
+        SortDto sort = new SortDto(true, false, true);
+        pageAccountDto.setSort(sort);
+        pageAccountDto.setTotalElements(pageAccountDto.getContent().size());
+        pageAccountDto.setFirst(true);
+        pageAccountDto.setLast(true);
+        pageAccountDto.setEmpty(false);
+        return pageAccountDto;
     }
 
     private AccountSearchDto checkDataToFindAccount(AccountSearchDto accountSearchDto) {
+
+        if (accountSearchDto.getAuthor() != null) {
+            accountSearchDto.setFirstName(accountSearchDto.getAuthor());
+        }
+
         if (accountSearchDto.getFirstName() != null) {
             accountSearchDto.setFirstName(accountSearchDto.getFirstName().trim());
             String[] firstName = accountSearchDto.getFirstName().split(" ");

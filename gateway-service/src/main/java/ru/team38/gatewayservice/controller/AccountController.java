@@ -46,7 +46,11 @@ public class AccountController {
 
     @GetMapping("/search")
     public PageResponseDto<AccountDto> findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
-        log.info("Executing findAccount request");
         return userService.findAccount(accountSearchDto, pageDto);
+    }
+
+    @GetMapping("/search/statusCode")
+    public PageResponseDto findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        return userService.findAccountByStatusCode(accountSearchDto, pageDto);
     }
 }

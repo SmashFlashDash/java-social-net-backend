@@ -43,6 +43,12 @@ public class AccountController {
         return ResponseEntity.ok(accountService.findAccount(accountSearch, page));
     }
 
+    @GetMapping("/search/statusCode")
+    public ResponseEntity<PageResponseDto> findAccountByStatusCode(AccountSearchDto accountSearchDto,
+                                                                  PageDto pageDto) {
+        return ResponseEntity.ok(accountService.findAccountByStatusCode(accountSearchDto, pageDto));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AccountDto> getAccountById(@PathVariable UUID id) {
         return ResponseEntity.ok(accountService.getAccountById(id));
