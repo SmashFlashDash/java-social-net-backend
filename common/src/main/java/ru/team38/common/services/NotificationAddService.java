@@ -36,19 +36,25 @@ public class NotificationAddService {
     @LoggingMethod
     @Transactional
     public void addNotification(UUID authorID, Object referenceDto, NotificationTypeEnum ntfType) {
-        List<NotificationDto> notifications = switch (ntfType) {
-            case POST -> makeNotificationPOST(authorID, (PostDto) referenceDto);
-            case FRIEND_REQUEST -> makeNotificationFRIEND(authorID, (FriendShortDto) referenceDto);     //TODO:
-            case LIKE -> makeNotificationLIKE(authorID, (LikeDto) referenceDto);
-            case MESSAGE -> Collections.emptyList();           // TODO:
-            case POST_COMMENT, COMMENT_COMMENT -> makeNotificationCOMMENT(authorID, (CommentDto) referenceDto, ntfType);
-            case SEND_EMAIL_MESSAGE -> Collections.emptyList(); // TODO:
-            default -> {
-                log.error("Disabled add notification with NotificationTypeEnum: " + ntfType.name());
-                yield Collections.emptyList();
-            }
-        };
-        saveNotifications(notifications);
+        try {
+            List<NotificationDto> notifications = switch (ntfType) {
+                case POST -> makeNotificationPOST(authorID, (PostDto) referenceDto);
+                case FRIEND_REQUEST -> makeNotificationFRIEND(authorID, (FriendShortDto) referenceDto);     //TODO:
+                case LIKE -> makeNotificationLIKE(authorID, (LikeDto) referenceDto);
+                case MESSAGE -> Collections.emptyList();           // TODO:
+                case POST_COMMENT, COMMENT_COMMENT -> makeNotificationCOMMENT(authorID, (CommentDto) referenceDto, ntfType);
+                case SEND_EMAIL_MESSAGE -> Collections.emptyList(); // TODO:
+                default -> {
+                    log.error("Disabled add notification with NotificationTypeEnum: " + ntfType.name());
+                    yield Collections.emptyList();
+                }
+            };
+            saveNotifications(notifications);
+        } catch (RuntimeException ex) {
+            log.error("Error add notification type: " + ntfType.name());
+            ex.printStackTrace();
+        }
+
     }
 
     @LoggingMethod
@@ -147,8 +153,9 @@ public class NotificationAddService {
         if (text.length() <= TEXT_PREVIEW_LENGTH) {
             return text;
         }
-        text = text.substring(TEXT_PREVIEW_LENGTH);
+        text = text.substring(0, TEXT_PREVIEW_LENGTH);
         int pos = text.lastIndexOf(" ");
-        return text.substring(0, pos > TEXT_MIN_LENGTH ? pos : TEXT_PREVIEW_LENGTH);
+        text = text.substring(0, pos >= TEXT_MIN_LENGTH ? pos : TEXT_PREVIEW_LENGTH).trim();
+        return text.concat("...");
     }
 }
