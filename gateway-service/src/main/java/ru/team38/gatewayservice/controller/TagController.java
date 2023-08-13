@@ -13,8 +13,11 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class TagController {
+public class TagController implements TagControllerInterface {
+
     private final PostService postService;
+
+    @Override
     @GetMapping("/api/v1/tag")
     public List<TagDto> getTag(@RequestParam(value = "name", required = false) String tag){
         log.info("Executing getPost request");

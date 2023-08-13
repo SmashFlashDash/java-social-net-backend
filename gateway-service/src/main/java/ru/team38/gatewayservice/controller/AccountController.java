@@ -16,41 +16,48 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/account")
 @RequiredArgsConstructor
-public class AccountController {
+public class AccountController implements AccountControllerInterface {
     private final UserService userService;
 
+    @Override
     @PostMapping("/")
     public ResponseEntity<AccountDto> createAccount(@RequestBody AccountDto accountDto) {
         return ResponseEntity.ok(userService.createAccount(accountDto));
     }
 
+    @Override
     @GetMapping("/me")
     public AccountDto getAccount() {
         return userService.getAccount();
     }
 
+    @Override
     @PutMapping("/me")
     public AccountDto updateAccount(@RequestBody AccountDto account) {
         return userService.updateAccount(account);
     }
 
+    @Override
     @DeleteMapping("/me")
     public ResponseEntity<String> deleteAccount() {
         return userService.deleteAccount();
     }
 
+    @Override
     @GetMapping("/{id}")
     public AccountDto getAccountById(@PathVariable UUID id) {
         return userService.getAccountById(id);
     }
 
+    @Override
     @GetMapping("/search")
     public PageResponseDto<AccountDto> findAccount(AccountSearchDto accountSearchDto, PageDto pageDto) {
         return userService.findAccount(accountSearchDto, pageDto);
     }
 
+    @Override
     @GetMapping("/search/statusCode")
-    public PageResponseDto findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
+    public PageResponseDto<AccountDto> findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
         return userService.findAccountByStatusCode(accountSearchDto, pageDto);
     }
 }

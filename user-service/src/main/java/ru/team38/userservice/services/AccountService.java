@@ -92,13 +92,13 @@ public class AccountService {
     }
 
     @LoggingMethod
-    public PageResponseDto findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
+    public PageResponseDto<AccountDto> findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
         UUID userId = getAuthenticatedAccount().getId();
         return getPageAccountDto(accountRepository
                 .findAccountByStatusCode(userId, checkDataToFindAccount(accountSearchDto)), pageDto);
     }
 
-    public PageResponseDto getPageAccountDto(PageResponseDto pageAccountDto, PageDto pageDto) {
+    public PageResponseDto<AccountDto> getPageAccountDto(PageResponseDto<AccountDto> pageAccountDto, PageDto pageDto) {
         SortDto sort = new SortDto(true, false, true);
         pageAccountDto.setSort(sort);
         pageAccountDto.setTotalElements(pageAccountDto.getContent().size());

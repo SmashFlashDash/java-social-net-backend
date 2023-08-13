@@ -144,8 +144,8 @@ public class UserService {
         return responseEntity.getBody();
     }
 
-    public PageResponseDto findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
-        ResponseEntity<PageResponseDto> responseEntity = userServiceClient
+    public PageResponseDto<AccountDto> findAccountByStatusCode(AccountSearchDto accountSearchDto, PageDto pageDto) {
+        ResponseEntity<PageResponseDto<AccountDto>> responseEntity = userServiceClient
                 .findAccountByStatusCode(accountSearchDto.getFirstName(),
                         accountSearchDto.getStatusCode(), pageDto.getPage(),
                         pageDto.getSize(), pageDto.getSort());

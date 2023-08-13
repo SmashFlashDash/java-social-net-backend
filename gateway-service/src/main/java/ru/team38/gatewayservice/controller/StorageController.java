@@ -11,9 +11,10 @@ import ru.team38.gatewayservice.service.PostService;
 @RequestMapping("/api/v1/storage")
 @RestController
 @RequiredArgsConstructor
-public class StorageController {
+public class StorageController implements StorageControllerInterface {
     private final PostService postService;
 
+    @Override
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public FileUriResponse getUploadedFileUri(@RequestParam FileType type, @RequestPart MultipartFile file) {
         return postService.getUploadedFileUri(type, file);

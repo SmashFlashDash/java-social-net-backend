@@ -14,35 +14,41 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
-public class NotificationController {
+public class NotificationController implements NotificationControllerInterface {
 
     private final UserService userService;
 
+    @Override
     @GetMapping
     public ResponseEntity<PageResponseDto<DataTimestampDto>> getNotifications() {
         return ResponseEntity.ok(userService.getNotificationsPage());
     }
 
+    @Override
     @PutMapping("/readed")
     public ResponseEntity<String> readAllNotifications() {
         return ResponseEntity.ok(userService.readAllNotifications());
     }
 
+    @Override
     @GetMapping("/count")
     public DataTimestampDto getNotificationsCount() {
         return userService.getNotificationsCount();
     }
 
+    @Override
     @GetMapping("/settings")
     public ResponseEntity<NotificationSettingDto> getNotificationSetting() {
         return ResponseEntity.ok(userService.getNotificationSetting());
     }
 
+    @Override
     @PutMapping("/settings")
     public ResponseEntity<NotificationSettingDto> updateNotificationSetting(@RequestBody NotificationUpdateDto notificationUpdateDto) {
         return ResponseEntity.ok(userService.updateNotificationSetting(notificationUpdateDto));
     }
 
+    @Override
     @PostMapping("/settings/{id}")
     public ResponseEntity<NotificationSettingDto> setNotificationSetting(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.setNotificationSetting(id));
