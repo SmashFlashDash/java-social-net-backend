@@ -55,6 +55,7 @@ services:
       app_mail_username: ${app_mail_username}
       app_mail_password: ${app_mail_password}
       geoService_urlData: ${geoService_urlData}
+      geonames_userName: ${geonames_userName}
 
     networks:
       - socialnet_network

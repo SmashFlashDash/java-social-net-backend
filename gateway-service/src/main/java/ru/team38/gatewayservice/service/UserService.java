@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestHeader;
 import ru.team38.common.dto.account.*;
 import ru.team38.common.dto.friend.FriendSearchDto;
 import ru.team38.common.dto.friend.FriendShortDto;
@@ -71,8 +72,8 @@ public class UserService {
         return userServiceClient.getNotificationsCount().getBody();
     }
 
-    public PageResponseDto<DataTimestampDto> getNotificationsPage() {
-        return userServiceClient.getNotificationsPage().getBody();
+    public PageResponseDto<DataTimestampDto> getNotificationsPage(@RequestHeader("x-lang") String lang) {
+        return userServiceClient.getNotificationsPage(lang).getBody();
     }
 
     public String readAllNotifications() {

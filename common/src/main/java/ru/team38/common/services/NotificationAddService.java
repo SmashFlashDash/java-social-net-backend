@@ -3,6 +3,7 @@ package ru.team38.common.services;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.team38.common.aspects.LoggingMethod;
@@ -14,11 +15,9 @@ import ru.team38.common.dto.notification.NotificationTypeEnum;
 import ru.team38.common.dto.other.PublicationType;
 import ru.team38.common.dto.post.PostDto;
 import ru.team38.common.jooq.tables.records.AccountRecord;
-import ru.team38.common.jooq.tables.records.NotificationRecord;
 import ru.team38.common.repository.*;
 
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +31,7 @@ public class NotificationAddService {
     private final NotificationCommonRepository notificationRepository;
     private final FriendCommonRepository friendRepository;
     private final AccountCommonRepository accountRepository;
+
 
     @LoggingMethod
     @Transactional
@@ -62,17 +62,19 @@ public class NotificationAddService {
     @Scheduled(cron = "${jobs.addNotificationBirthday.cron}")
     public void addNotificationBirthday() {
         List<AccountRecord> accountsBirthday = accountRepository.findAccountsByCurrentDate();
-        List<UUID> ntfSentToday = notificationRepository.getNotificationsBirthdayForDay(LocalDate.now())
-                .stream().map(NotificationRecord::getAuthorId).toList();
-        accountsBirthday = accountsBirthday.stream().filter(account -> !ntfSentToday.contains(account.getId())).toList();
+        accountsBirthday = accountsBirthday.stream().filter(account ->
+                isStartTimeByCityAndCountry(account.getCity(), account.getCountry())).toList();
         List<NotificationDto> notifications = accountsBirthday.stream().map(account -> {
             List<AccountRecord> friends = friendRepository.getFriendAccountsListByAccountId(account.getId());
             return friends.stream().filter(AccountRecord::getEnableFriendBirthday)
                     .map(friendAccount -> NotificationDto.builder()
-                            .authorId(account.getId()).receiverId(friendAccount.getId())
+                            .authorId(account.getId())
+                            .receiverId(friendAccount.getId())
                             .notificationType(NotificationTypeEnum.FRIEND_BIRTHDAY)
-                            .content("🎉🎂 Не забудьте поздравить и пожелать счастья! 🎈🌟")
-                            .sendTime(ZonedDateTime.now()).isReaded(false).build()).toList();
+                            .sendTime(ZonedDateTime.now())
+                            .isReaded(false)
+                            .build())
+                    .toList();
         }).flatMap(List::stream).toList();
         saveNotifications(notifications);
     }
@@ -157,5 +159,14 @@ public class NotificationAddService {
         int pos = text.lastIndexOf(" ");
         text = text.substring(0, pos >= TEXT_MIN_LENGTH ? pos : TEXT_PREVIEW_LENGTH).trim();
         return text.concat("...");
+    }
+    private boolean isStartTimeByCityAndCountry(String city, String country) {
+        LocalTime startTime = LocalTime.of(0, 0);
+        LocalTime endTime = LocalTime.of(0, 59);
+
+        ZoneId zoneId = accountRepository.getZoneIdByCityAndCountry(city, country);
+        LocalTime currentTime = LocalTime.now(zoneId);
+
+        return currentTime.isAfter(startTime) && currentTime.isBefore(endTime);
     }
 }

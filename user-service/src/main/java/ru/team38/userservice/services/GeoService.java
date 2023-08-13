@@ -141,11 +141,15 @@
                     }
                 }
                 if (countryId != null) {
+                    double latitude = row.getCell(2).getNumericCellValue();
+                    double longitude = row.getCell(3).getNumericCellValue();
                     CityDto city = CityDto.builder()
                             .id(id++)
                             .title(title)
                             .isDeleted(isDeleted)
                             .countryId(countryId)
+                            .latitude(latitude)
+                            .longitude(longitude)
                             .build();
                     uniqueCities.add(city);
                 }

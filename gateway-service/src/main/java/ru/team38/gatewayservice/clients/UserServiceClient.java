@@ -58,7 +58,7 @@ public interface UserServiceClient {
     ResponseEntity<DataTimestampDto> getNotificationsCount();
 
     @GetMapping("/api/v1/notifications")
-    ResponseEntity<PageResponseDto<DataTimestampDto>> getNotificationsPage();
+    ResponseEntity<PageResponseDto<DataTimestampDto>> getNotificationsPage(@RequestHeader("x-lang") String lang);
 
     @PutMapping("/api/v1/notifications/readed")
     ResponseEntity<String> readAllNotifications();
