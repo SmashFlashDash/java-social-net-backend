@@ -74,7 +74,7 @@ public class AccountRepository {
         PageResponseDto<AccountDto> pageResponseDto = new PageResponseDto<>();
 
         if (accountSearchDto.getFirstName() != null || accountSearchDto.getLastName() != null) {
-            Condition condition = (getConditionToAccountSearch(userId, accountSearchDto));
+            Condition condition = (getConditionToAccountSearch(userId, accountSearchDto, false));
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
@@ -96,7 +96,7 @@ public class AccountRepository {
             if (accountSearchDto.getIds() != null && !accountSearchDto.getIds().isEmpty()) {
                 accountSearchDto.setAuthor(null);
             }
-            Condition condition = (getConditionToAccountSearch(userId, accountSearchDto));
+            Condition condition = (getConditionToAccountSearch(userId, accountSearchDto, true));
             dslContext.select().from(ACCOUNT)
                     .where(condition).fetch()
                     .map(rec -> accountMapper.accountRecordToAccountDto(rec.into(ACCOUNT)))
@@ -128,7 +128,7 @@ public class AccountRepository {
         return pageAccountDto;
     }
 
-    private Condition getConditionToAccountSearch(UUID userId, AccountSearchDto accountSearchDto) {
+    private Condition getConditionToAccountSearch(UUID userId, AccountSearchDto accountSearchDto, Boolean isSearchInDialogs) {
         LocalDate maxBirthDate = accountSearchDto.getMaxBirthDate();
         LocalDate minBirthDate = accountSearchDto.getMinBirthDate();
         String firstName = accountSearchDto.getFirstName();
@@ -142,10 +142,12 @@ public class AccountRepository {
         List<UUID> friendshipRequestedIds = friendRepository.getFriendshipRequestedIds(userId);
         List<UUID> blockedIds = friendRepository.getBlockedAccountIds(userId);
         Condition condition = ACCOUNT.IS_DELETED.eq(accountSearchDto.isDeleted())
-                .and(getConditionToNames(userId, firstName, lastName, author))
-                .and(ACCOUNT.ID.notIn(friendsIds))
-                .and(ACCOUNT.ID.notIn(friendshipRequestedIds))
-                .and(ACCOUNT.ID.notIn(blockedIds));
+                .and(getConditionToNames(userId, firstName, lastName, author));
+        if (!isSearchInDialogs) {
+            condition.and(ACCOUNT.ID.notIn(friendsIds))
+                    .and(ACCOUNT.ID.notIn(friendshipRequestedIds))
+                    .and(ACCOUNT.ID.notIn(blockedIds));
+        }
 
         if (ids != null && !ids.isEmpty()) {
             condition = condition.and(ACCOUNT.ID.in(ids));
@@ -184,6 +186,12 @@ public class AccountRepository {
             condition = condition.and((ACCOUNT.LAST_NAME.likeIgnoreCase(ch + lastName + ch))
                     .or(ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + lastName + ch)));
         }
+
+        if (author != null) {
+            condition = condition.and((ACCOUNT.FIRST_NAME.likeIgnoreCase(ch + author + ch))
+                    .or(ACCOUNT.LAST_NAME.likeIgnoreCase(ch + author + ch)));
+        }
+
         return condition;
     }
 
