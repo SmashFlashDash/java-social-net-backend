@@ -2,7 +2,6 @@ package ru.team38.communicationsservice.services.utils;
 
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.SortField;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Component;
 import ru.team38.common.dto.post.*;
@@ -10,23 +9,13 @@ import ru.team38.common.jooq.Tables;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import static org.jooq.impl.DSL.field;
 @Component
 public class ConditionUtil {
-    public ConditionPostDto createConditionPostDto(PostSearchDto postSearchDto){
-        Boolean withFriends = (postSearchDto.getWithFriends() != null) ? postSearchDto.getWithFriends() : false;
-        return ConditionPostDto.builder()
-                .searchConditions(searchCondition(postSearchDto))
-                .accountIds(postSearchDto.getAccountIds())
-                .sort(sort(postSearchDto))
-                .withFriends(withFriends)
-                .build();
-    }
-    private Condition searchCondition(PostSearchDto postSearchDto){
+    public Condition searchCondition(PostSearchDto postSearchDto){
         Condition condition = Tables.POST.TYPE.eq(String.valueOf(PostType.POSTED))
                 .and(Tables.POST.IS_DELETED.eq(false))
                 .and(Tables.POST.IS_BLOCKED.eq(false));
@@ -91,19 +80,5 @@ public class ConditionUtil {
             timeCondition = Tables.POST.PUBLISH_DATE.between(fromDateTime, toDateTime);
         }
         return timeCondition;
-    }
-
-    private SortField<?> sort (PostSearchDto postSearchDto){
-        List<String> querySort = new ArrayList<>(postSearchDto.getSort());
-        SortField<?> sortField = null;
-        String type = querySort.get(0);
-        String sort = querySort.get(1);
-        String DESC = "desc";
-        String TYPE = "time";
-        if(type.equals(TYPE)){
-            Field<?> field = Tables.POST.PUBLISH_DATE;
-            sortField = sort.equalsIgnoreCase(DESC) ? field.desc() : field.asc();
-        }
-        return sortField;
     }
 }

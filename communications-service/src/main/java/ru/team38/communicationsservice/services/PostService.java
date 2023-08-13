@@ -3,6 +3,7 @@ package ru.team38.communicationsservice.services;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jooq.Condition;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +31,24 @@ public class PostService {
 
     @LoggingMethod
     public PageResponseDto<PostDto> getPost(HttpServletRequest request, PostSearchDto postSearchDto, Pageable pageable) {
-        ConditionPostDto conditionPostDto = conditionUtil.createConditionPostDto(postSearchDto);
+        postRepository.updateType();
+
         String emailUser = jwtService.getUsernameFromToken(request);
-        List<PostDto> listPosts = postRepository.getPostDtosByEmail(conditionPostDto, emailUser);
-        return dtoAssembler.createContentPostDto(listPosts, pageable);
+        UUID accountId = postRepository.getUserIdByEmail(emailUser);
+
+        Condition queryCondition = conditionUtil.searchCondition(postSearchDto);
+        List<PostDto> listPosts;
+
+        if (postSearchDto.getAccountIds() != null) {
+            listPosts = postRepository.getPostsByUserId(postSearchDto.getAccountIds());
+        } else if (postSearchDto.getWithFriends() != null && postSearchDto.getWithFriends()) {
+            listPosts = postRepository.getPostsWithFriend(queryCondition, accountId);
+        } else {
+            listPosts = postRepository.getAllPosts(queryCondition);
+        }
+
+        List<String> sort = postSearchDto.getSort();
+        return dtoAssembler.createContentPostDto(listPosts, pageable, sort);
     }
 
     @LoggingMethod

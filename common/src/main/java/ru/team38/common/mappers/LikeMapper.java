@@ -13,17 +13,11 @@ import java.util.UUID;
 
 @Mapper
 public interface LikeMapper {
-    @Mapping(target = "time", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "isDeleted", constant = "false")
-    @Mapping(target = "id", expression = "java(id())")
-    LikeRecord map2LikeRecord(String reactionType, String type, UUID authorId, UUID itemId);
-    List<LikeDto> map2LikeDtoList(List<LikeRecord> likeRecord);
+
+    LikeRecord map2LikeRecord(LikeDto likeDto);
 
     LikeDto LikeRecord2likeDto(LikeRecord likeRecord);
 
-    default UUID id() {
-        return UUID.randomUUID();
-    }
     default ZonedDateTime toZonedDateTime(LocalDateTime localDateTime) {
         return localDateTime != null ? localDateTime.atZone(ZoneId.systemDefault()) : null;
     }

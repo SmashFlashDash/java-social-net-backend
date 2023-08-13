@@ -22,4 +22,5 @@
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-Country.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-Cities.xml"/>
     <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-modify-cites.xml"/>
+    <include relativeToChangelogFile="true" file="changelogs/changelog-1.0-modify-post.xml"/>
 </databaseChangeLog>
