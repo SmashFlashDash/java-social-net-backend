@@ -83,7 +83,7 @@ public class AuthService {
         return userDetails;
     }
 
-    private String generateDeviceUUID(HttpServletRequest request) {
+    public String generateDeviceUUID(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         String info = ip + userAgent;
@@ -135,14 +135,14 @@ public class AuthService {
 
     @Async
     @Transactional
-    public CompletableFuture<Void> recoverPassword(HttpServletRequest request,
-                                                   EmailDto emailDto) {
+    @LoggingMethod
+    public CompletableFuture<Void> recoverPassword(EmailDto emailDto, String deviceUUID) {
         String email = emailDto.getEmail();
         String resetToken = UUID.randomUUID().toString();
         ZonedDateTime tokenExpiration = ZonedDateTime.now().plusMinutes(15);
         UUID accountId = accountRepository.getIdByEmail(email);
         TokensDto tokenDto = new TokensDto(null, accountId, "reset", resetToken,
-                true, tokenExpiration, generateDeviceUUID(request));
+                true, tokenExpiration, deviceUUID);
         tokenRepository.save(tokenDto);
 
         String resetUrl = baseUrl + "/change-password/" + resetToken;
@@ -151,12 +151,14 @@ public class AuthService {
         return CompletableFuture.completedFuture(null);
     }
 
+    @LoggingMethod
     public void checkAccountExisting(EmailDto emailDto) {
         if (accountRepository.getAccountByEmail(emailDto.getEmail()).isEmpty()) {
             throw new UsernameNotFoundException("Account doesn't exist");
         }
     }
 
+    @LoggingMethod
     @Transactional
     public void setNewPassword(String linkId, NewPasswordDto newPasswordDto) {
         String password = newPasswordDto.getPassword();

@@ -50,10 +50,10 @@ public class AuthController {
     }
 
     @PostMapping("/password/recovery")
-    public ResponseEntity<String> recoverPassword(HttpServletRequest request,
-                                                  @RequestBody EmailDto emailDto) {
+    public ResponseEntity<String> recoverPassword(HttpServletRequest request, @RequestBody EmailDto emailDto) {
         authService.checkAccountExisting(emailDto);
-        authService.recoverPassword(request, emailDto);
+        String deviceUUID = authService.generateDeviceUUID(request);
+        authService.recoverPassword(emailDto, deviceUUID);
         return ResponseEntity.ok("Ссылка для изменения пароля направлена на указанную почту");
     }
 
