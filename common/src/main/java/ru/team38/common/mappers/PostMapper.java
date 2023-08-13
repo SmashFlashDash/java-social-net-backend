@@ -30,8 +30,6 @@ public interface PostMapper {
     @Mapping(target = "reactions", expression = "java(mapReactions(postRecord.getReactions()))")
     PostDto postRecord2PostDto(PostRecord postRecord);
 
-    List<PostDto> postRecords2PostDtos(List<PostRecord> records);
-
     @Mapping(target = "isDeleted", constant = "false")
     TagRecord tagNameToTagRecord(String name);
 

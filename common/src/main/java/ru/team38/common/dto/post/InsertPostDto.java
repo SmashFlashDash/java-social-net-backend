@@ -35,7 +35,4 @@ public class InsertPostDto {
 
     @Schema(description = "Теги")
     private String[] tags;
-
-    @Schema(description = "Время изменения")
-    private LocalDateTime timeChanged;
 }

@@ -11,7 +11,10 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class DtoAssembler {
     public InsertPostDto createInsertPostDto(CreatePostDto createPostDto){
@@ -31,43 +34,44 @@ public class DtoAssembler {
                 .postText(createPostDto.getPostText())
                 .title(createPostDto.getTitle())
                 .publishDate(publishDate)
-                .timeChanged(timeNow)
                 .time(timeNow)
                 .type(type)
                 .tags(tags)
                 .build();
     }
 
-    public PageResponseDto<PostDto> createContentPostDto(List<PostDto> posts, Pageable pageable) {
-        boolean isLast = posts.size() <= pageable.getPageSize();
-        int totalElements = posts.size();
+    public PageResponseDto<PostDto> createContentPostDto(List<PostDto> posts, Pageable pageable, List<String> sortList) {
+        List<PostDto> sortedPosts = posts.stream().sorted(comparator(sortList)).toList();
+
+        boolean isLast = sortedPosts.size() <= pageable.getPageSize();
+        int totalElements = sortedPosts.size();
 
         if (!isLast) {
             int startIndex = (int) pageable.getOffset();
             int endIndex = Math.min(startIndex + pageable.getPageSize(), totalElements);
-            posts = posts.subList(startIndex, endIndex);
+            sortedPosts = sortedPosts.subList(startIndex, endIndex);
         }
 
         SortDto sortDto = new SortDto(pageable.getSort().isUnsorted(), pageable.getSort().isSorted(),
                 pageable.getSort().isEmpty());
 
-        int totalPages = (posts.size() + pageable.getPageSize() - 1) / pageable.getPageSize();
+        int totalPages = (sortedPosts.size() + pageable.getPageSize() - 1) / pageable.getPageSize();
         boolean isFirst = pageable.getPageNumber() == 0;
-        boolean isEmpty = posts.isEmpty();
+        boolean isEmpty = sortedPosts.isEmpty();
 
         PageableDto pageableDto = new PageableDto(sortDto, pageable.getPageNumber(), pageable.getPageSize(),
                 (int) pageable.getOffset(), pageable.isUnpaged(), pageable.isPaged());
 
         return PageResponseDto.<PostDto>builder()
                 .number(pageable.getPageNumber())
-                .numberOfElements(posts.size())
+                .numberOfElements(sortedPosts.size())
                 .totalElements(totalElements)
                 .size(pageable.getPageSize())
                 .totalPages(totalPages)
                 .pageable(pageableDto)
                 .first(isFirst)
                 .empty(isEmpty)
-                .content(posts)
+                .content(sortedPosts)
                 .sort(sortDto)
                 .last(isLast)
                 .build();
@@ -86,5 +90,22 @@ public class DtoAssembler {
         } else {
             return new String[0];
         }
+    }
+    private Comparator<PostDto> comparator(List<String> sortList){
+        return (o1, o2) -> {
+            for (String sort : sortList) {
+                String[] parts = sort.split(",");
+                String fieldName = parts[0];
+                boolean isDesc = parts.length > 1 && parts[1].equalsIgnoreCase("desc");
+
+                if (fieldName.equalsIgnoreCase("time")) {
+                    int cmp = o1.getPublishDate().compareTo(o2.getPublishDate());
+                    if (cmp != 0) {
+                        return isDesc ? cmp : -cmp;
+                    }
+                }
+            }
+            return 0;
+        };
     }
 }
