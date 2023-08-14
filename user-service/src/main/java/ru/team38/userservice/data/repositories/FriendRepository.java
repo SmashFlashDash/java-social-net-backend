@@ -35,7 +35,8 @@ public class FriendRepository {
             StatusCode.DECLINED.name(),
             StatusCode.REQUEST_FROM.name(),
             StatusCode.REQUEST_TO.name(),
-            StatusCode.WATCHING.name()
+            StatusCode.WATCHING.name(),
+            StatusCode.FRIEND.name()
     );
 
     public int countIncomingFriendRequests(UUID accountId) {
