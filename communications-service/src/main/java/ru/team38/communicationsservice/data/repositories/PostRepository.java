@@ -60,10 +60,11 @@ public class PostRepository {
         return list.stream().map(postMapper::postRecord2PostDto).toList();
     }
 
-    public List<PostDto> getPostsByUserId(UUID accountId) {
+    public List<PostDto> getPostsByUserId(Condition condition, UUID accountId) {
         return dsl.select()
                 .from(post)
                 .where(post.AUTHOR_ID.eq(accountId))
+                .and(condition)
                 .fetch()
                 .map(record -> postMapper.postRecord2PostDto(record.into(post)));
     }
