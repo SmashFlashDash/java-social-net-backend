@@ -102,9 +102,9 @@ public class NotificationService {
 
     private String getBirthdayMessageByLanguage(String languageCode) {
         if (languageCode.equalsIgnoreCase("RU")) {
-            return BirthdayMessage.RU.name();
+            return BirthdayMessage.RU.getMessage();
         } else {
-            return BirthdayMessage.EN.name();
+            return BirthdayMessage.EN.getMessage();
         }
     }
 }

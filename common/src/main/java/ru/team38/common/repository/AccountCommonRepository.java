@@ -27,8 +27,12 @@ public class AccountCommonRepository {
     }
 
     public List<AccountRecord> findAccountsByCurrentDate() {
+        LocalDate currentDate = LocalDate.now();
         return DSL.selectFrom(ACCOUNT)
-                .where(conditionCurrentDateByCityAndCountry(ACCOUNT.CITY.getName(), ACCOUNT.COUNTRY.getName()))
+                .where(month(Tables.ACCOUNT.BIRTH_DATE).eq(currentDate.getMonthValue())
+                        .and(day(Tables.ACCOUNT.BIRTH_DATE).eq(currentDate.getDayOfMonth()))
+                        .or(day(Tables.ACCOUNT.BIRTH_DATE).eq(currentDate.getDayOfMonth() + 1))
+                        .or(day(Tables.ACCOUNT.BIRTH_DATE).eq(currentDate.getDayOfMonth() - 1)))
                 .fetch();
     }
 
@@ -45,10 +49,5 @@ public class AccountCommonRepository {
             return ZoneOffset.UTC;
         }
         return ZoneId.of(citiesRecord.getZoneId());
-    }
-    private Condition conditionCurrentDateByCityAndCountry(String city, String country){
-        LocalDateTime currentDate = LocalDateTime.now(getZoneIdByCityAndCountry(city, country));
-        return month(Tables.ACCOUNT.BIRTH_DATE).eq(currentDate.getMonthValue())
-                .and(day(Tables.ACCOUNT.BIRTH_DATE).eq(currentDate.getDayOfMonth()));
     }
 }

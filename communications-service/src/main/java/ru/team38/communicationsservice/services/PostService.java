@@ -40,7 +40,7 @@ public class PostService {
         List<PostDto> listPosts;
 
         if (postSearchDto.getAccountIds() != null) {
-            listPosts = postRepository.getPostsByUserId(postSearchDto.getAccountIds());
+            listPosts = postRepository.getPostsByUserId(queryCondition, postSearchDto.getAccountIds());
         } else if (postSearchDto.getWithFriends() != null && postSearchDto.getWithFriends()) {
             listPosts = postRepository.getPostsWithFriend(queryCondition, accountId);
         } else {
