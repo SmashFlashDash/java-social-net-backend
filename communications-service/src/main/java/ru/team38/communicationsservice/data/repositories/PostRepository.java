@@ -129,6 +129,7 @@ public class PostRepository {
     public void updateType(){
         dsl.update(post)
                 .set(post.TYPE, PostType.POSTED.toString())
+                .set(post.TIME, LocalDateTime.now())
                 .where(post.PUBLISH_DATE.lessThan(LocalDateTime.now()))
                 .and(post.TYPE.eq(PostType.QUEUED.toString()))
                 .execute();
