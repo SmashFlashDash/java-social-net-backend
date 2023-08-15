@@ -63,7 +63,7 @@ public class NotificationAddService {
     public void addNotificationBirthday() {
         List<AccountRecord> accountsBirthday = accountRepository.findAccountsByCurrentDate();
         accountsBirthday = accountsBirthday.stream().filter(account ->
-                isStartTimeByCityAndCountry(account.getCity(), account.getCountry())).toList();
+                isStartTimeByCityAndCountry(account.getBirthDate(), account.getCity(), account.getCountry())).toList();
         List<NotificationDto> notifications = accountsBirthday.stream().map(account -> {
             List<AccountRecord> friends = friendRepository.getFriendAccountsListByAccountId(account.getId());
             return friends.stream().filter(AccountRecord::getEnableFriendBirthday)
@@ -160,13 +160,14 @@ public class NotificationAddService {
         text = text.substring(0, pos >= TEXT_MIN_LENGTH ? pos : TEXT_PREVIEW_LENGTH).trim();
         return text.concat("...");
     }
-    private boolean isStartTimeByCityAndCountry(String city, String country) {
+    private boolean isStartTimeByCityAndCountry(LocalDate birthdayDate, String city, String country) {
         LocalTime startTime = LocalTime.of(0, 0);
         LocalTime endTime = LocalTime.of(0, 59);
 
         ZoneId zoneId = accountRepository.getZoneIdByCityAndCountry(city, country);
+        boolean isCurrentDate = LocalDate.now(zoneId).getDayOfMonth() == birthdayDate.getDayOfMonth();
         LocalTime currentTime = LocalTime.now(zoneId);
 
-        return currentTime.isAfter(startTime) && currentTime.isBefore(endTime);
+        return isCurrentDate && currentTime.isAfter(startTime) && currentTime.isBefore(endTime);
     }
 }
