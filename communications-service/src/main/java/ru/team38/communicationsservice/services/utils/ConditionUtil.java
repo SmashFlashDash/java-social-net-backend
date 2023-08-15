@@ -16,8 +16,7 @@ import static org.jooq.impl.DSL.field;
 @Component
 public class ConditionUtil {
     public Condition searchCondition(PostSearchDto postSearchDto){
-        Condition condition = Tables.POST.TYPE.eq(String.valueOf(PostType.POSTED))
-                .and(Tables.POST.IS_DELETED.eq(false))
+        Condition condition = Tables.POST.IS_DELETED.eq(false)
                 .and(Tables.POST.IS_BLOCKED.eq(false));
         if(postSearchDto.getAuthor() != null){
             condition = condition.and(authorIdCondition(postSearchDto.getAuthor()));
