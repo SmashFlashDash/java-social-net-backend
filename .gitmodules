@@ -1,0 +1,6 @@
+[submodule "cpi_framework"]
+	path = frontend
+	url = https://github.com/SmashFlashDash/java-social-net-frontend
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/SmashFlashDash/java-social-net-frontend
